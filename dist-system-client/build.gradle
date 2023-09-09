@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':dist-system-api')
+    implementation 'org.slf4j:slf4j-api:1.7.28'
+    implementation 'org.json4s:json4s-native_3:4.1.0-M2'
+    implementation 'org.json4s:json4s-jackson_3:4.1.0-M2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.6'
+    implementation 'commons-dbcp:commons-dbcp:1.4'
+}
