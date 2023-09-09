@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.distsystem'
+version = '0.0.1'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:1.7.28'
+    implementation 'org.json4s:json4s-native_3:4.1.0-M2'
+    implementation 'org.json4s:json4s-jackson_3:4.1.0-M2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.6'
+    implementation 'commons-dbcp:commons-dbcp:1.4'
+}
+
+publishing {
+    publications {
+        customLibrary(MavenPublication) {
+            groupId = 'com.distsystem'
+            artifactId = 'dist-system-api'
+            version = '0.0.1'
+        }
+    }
+    repositories {
+        maven {
+            name = 'dist-cache'
+            url = layout.buildDirectory.dir("repo")
+        }
+    }
+}

@@ -1,0 +1,5 @@
+rootProject.name = 'dist-system'
+include 'dist-system-api'
+include 'dist-system-lib'
+include 'dist-system-app'
+include 'dist-system-client'

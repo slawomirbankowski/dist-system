@@ -1,0 +1,65 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':dist-system-api')
+    implementation project(':dist-system-lib')
+    // tag::actuator[]
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // end::actuator[]
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-parent:2.4.0'
+    implementation 'org.springframework:spring-context-support:5.3.21'
+    implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.1.0.jre11-preview'
+    implementation 'org.slf4j:slf4j-api:1.7.28'
+
+    // TODO: check what versions of Swagger/SpringFor are compliant with current Spring Boot
+    //implementation 'io.swagger:swagger-annotations:2.0.0-rc2'
+    //implementation 'io.swagger:swagger-core:2.0.0-rc2'
+    //implementation 'io.swagger:swagger-models:2.0.0-rc2'
+    //implementation 'io.springfox:springfox-swagger2:3.0.0'
+    //implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    //implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    //implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+
+    // tag::tests[]
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation(platform('org.junit:junit-bom:5.9.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testImplementation 'org.mockito:mockito-core:4.8.0'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation 'ch.qos.logback:logback-classic:1.4.4'
+    testImplementation 'org.slf4j:slf4j-api:1.7.28'
+
+    // end::tests[]
+}
+
+
+def testLoggingConf = {
+    testLogging {
+        showStandardStreams = true
+        events "started", "passed", "skipped", "failed"
+        exceptionFormat "short"
+
+        info {
+            showStandardStreams = true
+            events "started", "passed", "skipped", "failed"
+            exceptionFormat "short"
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    configure testLoggingConf
+}
