@@ -91,6 +91,10 @@ public class JdbcDialect {
     public String selectAgentService() { return getQueryOrEmpty(DialectQueries.selectAgentService); }
     public String deleteAgentService() { return getQueryOrEmpty(DialectQueries.deleteAgentService); }
 
+    public String createConfigInit() { return getQueryOrEmpty(DialectQueries.createConfigInit); }
+    public String selectConfigInit() { return getQueryOrEmpty(DialectQueries.selectConfigInit); }
+
+
     /** all supported dialects for databases */
     private static final Map<String, JdbcDialect> dialects = createDialectsMap();
     /** */

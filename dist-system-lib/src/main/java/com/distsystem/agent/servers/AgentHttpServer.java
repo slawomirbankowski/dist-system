@@ -34,7 +34,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
     }
     public void initialize() {
         try {
-            httpPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_HTTP_PORT, DistConfig.AGENT_SOCKET_PORT_VALUE_SEQ.incrementAndGet());
+            httpPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet());
             httpUrl = "http://" + DistUtils.getCurrentHostName() + ":" + httpPort + "/";
             log.info("Starting new HTTP server at port:" + httpPort + ", agent: " + parentAgent.getAgentGuid());
             httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
@@ -47,6 +47,11 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
             log.info("Cannot start HTTP server, reason: " + ex.getMessage());
             parentAgent.getAgentIssues().addIssue("AgentHttpServer", ex);
         }
+    }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
     /** get type of clients to be connected to this server */
     public DistClientType getClientType() {
@@ -101,8 +106,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
         }
     }
 
-    @Override
-    public void close() {
+    protected void onClose() {
         try {
             log.info("Try to close HTTP server for Agent: " + parentAgent.getAgentGuid());
             httpServer.stop(3);

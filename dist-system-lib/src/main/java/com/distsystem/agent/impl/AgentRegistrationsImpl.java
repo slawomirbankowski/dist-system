@@ -6,17 +6,18 @@ import com.distsystem.agent.registrations.RegistrationElasticsearch;
 import com.distsystem.agent.registrations.RegistrationJdbc;
 import com.distsystem.agent.registrations.RegistrationKafka;
 import com.distsystem.api.*;
-import com.distsystem.api.enums.DistComponentType;
+import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.api.info.AgentRegistrationsInfo;
 import com.distsystem.base.RegistrationBase;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.base.dtos.DistAgentRegisterRow;
 import com.distsystem.base.dtos.DistAgentServerRow;
 import com.distsystem.base.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.Agent;
-import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.AgentRegistrations;
 import com.distsystem.utils.DistUtils;
+import com.distsystem.utils.DistWebApiProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 /** Implementation of manager to register this agent, servers and services in global repository using JDBC, Kafka, Elasticsearch or any other central storage.
  * Central registration could be used to gather information about other agents.
  *  */
-public class AgentRegistrationsImpl extends Agentable implements AgentRegistrations, AgentComponent {
+public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistrations {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentRegistrationsImpl.class);
@@ -46,30 +47,57 @@ public class AgentRegistrationsImpl extends Agentable implements AgentRegistrati
 
     public AgentRegistrationsImpl(Agent parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        parentAgent.getAgentServices().registerService(this);
     }
 
-    /** get type of this component */
-    public DistComponentType getComponentType() {
-        return DistComponentType.registrations;
+    /** get type of service: cache, measure, report, flow, space, ... */
+    public DistServiceType getServiceType() {
+        return DistServiceType.registrations;
     }
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
+    /** process message, returns message with status */
+    public DistMessage processMessage(DistMessage msg) {
+        return msg.notSupported();
     }
+
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
+    }
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerPost("registration-keys", (m, req) -> req.responseOkJsonSerialize(registrations.keySet()))
+                .addHandlerPost("registration-infos", (m, req) -> req.responseOkJsonSerialize(getRegistrationInfos()))
+                .addHandlerPost("agents-keys", (m, req) -> req.responseOkJsonSerialize(agents.keySet()))
+                .addHandlerPost("agents-now", (m, req) -> req.responseOkJsonSerialize(getAgentsNow()))
+                .addHandlerPost("servers", (m, req) -> req.responseOkJsonSerialize(registeredServers.stream().map(s -> s.copyNoPassword()).toList()))
+                .addHandlerPost("register", (m, req) -> req.responseOkJsonSerialize(register.toAgentRegisterRow()))
+                .addHandlerPost("info", (m, req) -> req.responseOkJsonSerialize(getInfo()));
+    }
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        // TODO: check what should be re-initialized
+        createRegistrations();
+        return true;
+    }
+
     /** create initial registration services
      * there are services to register agent, servers, issues, configurations */
     public void createRegistrations() {
-        if (parentAgent.getConfig().hasProperty(DistConfig.CACHE_APPLICATION_URL)) {
+
+        parentAgent.getConfig().registerConfigGroup(DistConfig.AGENT_REGISTRATION);
+
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_CACHE_APPLICATION_URL)) {
             createAndAddRegistrations(RegistrationApplication.class.getName());
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_JDBC_URL)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_URL)) {
             createAndAddRegistrations(RegistrationJdbc.class.getName());
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_KAFKA_BROKERS)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_BROKERS)) {
             createAndAddRegistrations(RegistrationKafka.class.getName());
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_ELASTICSEARCH_URL)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_URL)) {
             createAndAddRegistrations(RegistrationElasticsearch.class.getName());
         }
         log.info("Registered agent " + parentAgent.getAgentGuid() + " to all registration services, count: " + registrations.size());
@@ -77,7 +105,7 @@ public class AgentRegistrationsImpl extends Agentable implements AgentRegistrati
         removeInactiveAgents();
         checkActiveAgents();
         log.info("Set up timer to refresh registration items like agents, servers, agent: " + getParentAgentGuid());
-        parentAgent.getAgentTimers().setUpTimer("TIMER_REGISTRATION", DistConfig.TIMER_REGISTRATION_PERIOD, DistConfig.TIMER_REGISTRATION_PERIOD_DELAY_VALUE, x -> onTimeRegisterRefresh());
+        parentAgent.getAgentTimers().setUpTimer("TIMER_REGISTRATION", DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD, DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD_DELAY_VALUE, x -> onTimeRegisterRefresh());
     }
     /** get number of registration */
     public int getRegistrationsCount() {
@@ -175,7 +203,7 @@ public class AgentRegistrationsImpl extends Agentable implements AgentRegistrati
         registrations.values().stream().forEach(reg -> reg.addIssue(issue));
     }
     /** close registration services */
-    public void close() {
+    protected void onClose() {
         unregisterFromAll();
     }
 
@@ -212,9 +240,9 @@ public class AgentRegistrationsImpl extends Agentable implements AgentRegistrati
         log.info("AFTER check connected agents for agent: " + parentAgent.getAgentGuid() + ", current count: " + agents.size() + ", registrations: " + registrations.size() + ", registeredServers: " + registeredServers.size());
     }
     public void removeInactiveAgents() {
-        long inactivateBeforeSecondsAgo = getConfig().getPropertyAsLong(DistConfig.AGENT_INACTIVATE_AFTER, DistConfig.AGENT_INACTIVATE_AFTER_DEFAULT_VALUE)/1000;
+        long inactivateBeforeSecondsAgo = getConfig().getPropertyAsLong(DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER, DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER_DEFAULT_VALUE)/1000;
         LocalDateTime inactivateBeforeDate = LocalDateTime.now().minusSeconds(inactivateBeforeSecondsAgo);
-        long deleteBeforeSecondsAgo = getConfig().getPropertyAsLong(DistConfig.AGENT_DELETE_AFTER, DistConfig.AGENT_DELETE_AFTER_DEFAULT_VALUE)/1000;
+        long deleteBeforeSecondsAgo = getConfig().getPropertyAsLong(DistConfig.AGENT_CONNECTORS_DELETE_AFTER, DistConfig.AGENT_CONNECTORS_DELETE_AFTER_DEFAULT_VALUE)/1000;
         LocalDateTime deleteBeforeDate = LocalDateTime.now().minusSeconds(deleteBeforeSecondsAgo);
         log.info("Inactivate agents that have no ping for last " + (inactivateBeforeSecondsAgo) + " seconds, remove inactive agents with ping before " + deleteBeforeSecondsAgo + " seconds ago");
         registrations.entrySet().stream().forEach(e -> {

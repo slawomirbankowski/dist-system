@@ -28,6 +28,11 @@ public class InternalPriorityQueueCacheStorage extends CacheStorageBase {
         return Map.of("className", localCache.getClass().getName(),
                 "queueSize", queue.size());
     }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
+    }
     /** get type of this storage */
     public CacheStorageType getStorageType() {
         return CacheStorageType.memory;

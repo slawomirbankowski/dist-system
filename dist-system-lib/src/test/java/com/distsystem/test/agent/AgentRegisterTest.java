@@ -20,7 +20,7 @@ public class AgentRegisterTest {
         log.info("START ------ agent register test");
 
         Agent agent1 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withServerSocketPort(9901)
@@ -30,7 +30,7 @@ public class AgentRegisterTest {
                 .createAgentInstance();
 
         Agent agent2 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withServerSocketPort(9902)

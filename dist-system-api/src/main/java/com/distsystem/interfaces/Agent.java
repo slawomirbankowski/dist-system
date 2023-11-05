@@ -25,6 +25,12 @@ public interface Agent extends DistService, IssueHandler {
     String getAgentGuid();
     /** get short version ID of this agent GUID */
     String getAgentShortGuid();
+    /** get distributed group name */
+    String getDistGroup();
+    /** get distributed system name */
+    String getDistName();
+    /** get current agent name */
+    String getAgentName();
     /** get configuration for this agent */
     DistConfig getConfig();
     /** get high-level information about this agent */
@@ -39,8 +45,12 @@ public interface Agent extends DistService, IssueHandler {
     void initializeAgent();
     /** get date and time of creating this agent */
     LocalDateTime getCreateDate();
+    /** check if Agent configuration has given property by name */
+    boolean hasConfigProperty(String propName);
     /** get secret generated or set for this agent */
     String getAgentSecret();
+    /** get component to read configuration from external sources */
+    AgentConfigReader getConfigReader();
     /** get agent threads manager */
     AgentThreads getAgentThreads();
     /** get agent timers manager */
@@ -74,9 +84,13 @@ public interface Agent extends DistService, IssueHandler {
     DistMessageFull sendMessage(DistService fromService, String toAgent, DistServiceType toService, String method, Object message, DistCallbacks callbacks);
     DistMessageFull sendMessageAny(DistService fromService, DistServiceType toService, String method, Object message, DistCallbacks callbacks);
 
+    /** register new config group */
+    DistConfigGroup registerConfigGroup(String groupName);
+
     /** close all items in this agent */
     void close();
-
+    /** wait in this thread till agent would be killed by external command, WebAPI request or closed by issue */
+    void waitTillKill();
     /** set this Agent instance as default one for current JVM */
     Agent setAsDefaultAgent();
 }

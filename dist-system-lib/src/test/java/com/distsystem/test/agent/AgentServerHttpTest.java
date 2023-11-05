@@ -19,7 +19,7 @@ public class AgentServerHttpTest {
     public void agentServerHttpTest() {
         log.info("START ------ agent server HTTP test");
         Agent agent1 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withServerHttpPort(9911)
@@ -30,7 +30,7 @@ public class AgentServerHttpTest {
                 .createAgentInstance();
 
         Agent agent2 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withServerHttpPort(9912)

@@ -1,4 +1,4 @@
-package com.distsystem.util;
+package com.distsystem.agent.util;
 
 import java.util.function.Function;
 

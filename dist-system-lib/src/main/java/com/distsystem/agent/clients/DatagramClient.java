@@ -56,6 +56,11 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
         }
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: reinitialize this component
+        return true;
+    }
     /** send message to this client */
     public boolean send(DistMessage msg) {
         try {
@@ -72,7 +77,7 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
     }
 
     /** close this client */
-    public void close() {
+    protected void onClose() {
         log.info("Closing Datagram client for GUID: " + clientGuid);
         try {
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());

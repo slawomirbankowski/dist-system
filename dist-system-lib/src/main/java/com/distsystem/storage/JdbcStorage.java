@@ -26,20 +26,26 @@ public class JdbcStorage extends CacheStorageBase {
     /** initialize JDBC storage */
     public JdbcStorage(Cache cache) {
         super(cache);
-        jdbcUrl = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_JDBC_URL);
-        var jdbcDriver = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_JDBC_DRIVER);
-        var jdbcUser = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_JDBC_USER, "");
-        var jdbcPass = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_JDBC_PASS, "");
-        var jdbcDialect = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_JDBC_DIALECT, "");
+        jdbcUrl = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_URL);
+        var jdbcDriver = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_DRIVER);
+        var jdbcUser = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_USER, "");
+        var jdbcPass = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_PASS, "");
+        var jdbcDialect = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_DIALECT, "");
         // get dialect by driver class and dialect name
         dialect = JdbcDialect.getDialect(jdbcDriver, jdbcDialect);
         log.info(" ========================= Initializing JdbcStorage with URL: " + jdbcUrl + ", dialect: " + dialect);
-        var initConnections = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_JDBC_INIT_CONNECTIONS, 2);
-        var maxActiveConnections = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_JDBC_MAX_ACTIVE_CONNECTIONS, 10);
+        var initConnections = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_INIT, 2);
+        var maxActiveConnections = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_MAXCONNECTIONS, 10);
         DaoParams params = DaoParams.jdbcParams(jdbcUrl, jdbcDriver, jdbcUser, jdbcPass, initConnections, maxActiveConnections);
         dao = cache.getAgent().getAgentDao().getOrCreateDaoOrError(DaoJdbcBase.class, params);
         dao.usedByComponent(this);
         initializeConnectionAndCreateTables();
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
     }
     /** create table with cache items if not exists */
     private void initializeConnectionAndCreateTables() {

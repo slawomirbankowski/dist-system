@@ -2,6 +2,7 @@ package com.distsystem.api;
 
 import com.distsystem.base.dtos.DistAgentIssueRow;
 import com.distsystem.interfaces.AgentComponent;
+import com.distsystem.interfaces.DistService;
 import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
@@ -13,8 +14,8 @@ public class DistIssue {
     private final LocalDateTime createDate = LocalDateTime.now();
     /** globally unique ID of this issue */
     private final String guid = DistUtils.generateCustomTimeGuid("ISSUE_");
-    /** parent component that raised this issue*/
-    private final AgentComponent parent;
+    /** parent service that raised this issue*/
+    private final DistService parent;
     /** method of this issue */
     private final String methodName;
     /** Exception raised */
@@ -22,13 +23,13 @@ public class DistIssue {
     /** table of additional parameters for issue */
     private final Object[] params;
 
-    public DistIssue(AgentComponent parent, String methodName, Exception ex, Object... params) {
+    public DistIssue(DistService parent, String methodName, Exception ex, Object... params) {
         this.parent = parent;
         this.methodName = methodName;
         this.ex = ex;
         this.params = params;
     }
-    public DistIssue(AgentComponent parent, String methodName, Exception ex) {
+    public DistIssue(DistService parent, String methodName, Exception ex) {
         this.parent = parent;
         this.methodName = methodName;
         this.ex = ex;

@@ -4,7 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.api.*;
 import com.distsystem.base.CacheStorageBase;
 import com.distsystem.storage.InternalWithTtlAndPriority;
-import com.distsystem.util.measure.Stopwatch;
+import com.distsystem.agent.util.measure.Stopwatch;
 import com.distsystem.utils.DistUtils;
 import org.junit.jupiter.api.Test;
 
@@ -137,8 +137,8 @@ public class TestInternalTtlPriority {
 
   private InternalWithTtlAndPriority makeStorage(int maxObjects, int maxItems) {
     var props = new Properties();
-    props.put(DistConfig.CACHE_MAX_LOCAL_OBJECTS, "" + maxObjects);
-    props.put(DistConfig.CACHE_MAX_LOCAL_ITEMS, "" + maxItems);
+    props.put(DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS, "" + maxObjects);
+    props.put(DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS, "" + maxItems);
     var cc = new DistConfig(props);
     var cache = DistFactory.createCacheInstance(props);
     return new InternalWithTtlAndPriority(cache);

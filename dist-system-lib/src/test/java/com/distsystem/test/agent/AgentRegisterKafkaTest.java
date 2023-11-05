@@ -17,7 +17,7 @@ public class AgentRegisterKafkaTest {
         public void agentRegisterKafkaTest() {
             log.info("START ------ agent register Kafka test");
             Agent agent1 = DistFactory.buildEmptyFactory()
-                    .withName("GlobalAgent")
+                    .withUniverseName("GlobalAgent")
                     .withWebApiPort(9999)
                     .withRegistrationKafka("localhost:9092", "dist-agent-6-", 1, (short)1)
                     .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
@@ -27,7 +27,7 @@ public class AgentRegisterKafkaTest {
                     .withTimerServerPeriod(60000)
                     .createAgentInstance();
             Agent agent2 = DistFactory.buildEmptyFactory()
-                    .withName("GlobalAgent")
+                    .withUniverseName("GlobalAgent")
                     .withWebApiPort(9998)
                     .withRegistrationKafka("localhost:9092", "dist-agent-6-", 1, (short)1)
                     .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)

@@ -45,6 +45,12 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
         onInitialize();
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** returns true if DAO is connected */
     public boolean isConnected() {
         return getClusterInfo().size() == 1;
@@ -172,11 +178,12 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
                 .parseOutputTo(new TypeReference<ElasticDocumentDeleteInfo>() {});
     }
 
-
     /** close current Elasticsearch DAO */
-    public boolean close() {
-        return true;
+    protected void onClose() {
     }
 
+    public boolean closeDao() {
+        return true;
+    }
 
 }

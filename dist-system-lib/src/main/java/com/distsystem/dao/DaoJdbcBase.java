@@ -63,6 +63,13 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         testDriver();
         onInitialize();
     }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
+    }
+
     /** get URL of this DAO */
     public String getUrl() {
         return jdbcUrl;
@@ -263,15 +270,18 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             return false;
         }
     }
-    /** close current connection pool*/
-    public boolean close() {
+    public boolean closeDao() {
         try {
-            log.info("Closing DAO Base for  ");
+            log.info("Closing DAO JDBC for agent: " + parentAgent.getAgentGuid());
             connPool.close();
             return true;
         } catch (SQLException ex) {
             return false;
         }
+    }
+    /** close current connection pool*/
+    protected void onClose() {
+        closeDao();
     }
     /** try to test driver for JDBC */
     private void testDriver() {

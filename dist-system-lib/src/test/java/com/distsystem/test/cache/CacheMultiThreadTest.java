@@ -18,7 +18,7 @@ public class CacheMultiThreadTest {
     public void testMultiThread() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_HOUR)
                 .withCacheMaxObjectsAndItems(1000, 3000)

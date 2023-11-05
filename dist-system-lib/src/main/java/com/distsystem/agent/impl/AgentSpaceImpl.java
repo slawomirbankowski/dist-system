@@ -2,6 +2,7 @@ package com.distsystem.agent.impl;
 
 import com.distsystem.api.AgentWebApiRequest;
 import com.distsystem.api.AgentWebApiResponse;
+import com.distsystem.api.DistConfig;
 import com.distsystem.api.DistMessage;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.ServiceBase;
@@ -26,17 +27,18 @@ public class AgentSpaceImpl extends ServiceBase implements AgentSpace {
     public DistMessage processMessage(DistMessage msg) {
         return msg.methodNotFound();
     }
-    @Override
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        return request.responseNotImplemented();
-    }
-    @Override
-    protected String createServiceUid() {
-        return DistUtils.generateCustomGuid("FLOW");
-    }
 
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
     @Override
     protected void onClose() {
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
 }

@@ -51,7 +51,7 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
     }
     public void initialize() {
         try {
-            workingPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_SOCKET_PORT, DistConfig.AGENT_SOCKET_PORT_VALUE_SEQ.incrementAndGet());;
+            workingPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet());;
             // open socket port
             log.info("Starting socket for incoming connections from other clients on port " + workingPort + ", server UID: " + serverGuid + ", agent: " + parentAgent.getAgentGuid());
             // create SocketServer and thread for accepting sockets
@@ -66,6 +66,11 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
         } catch (Exception ex) {
             log.warn("Cannot run socket server on port: " + workingPort + ", reason: " + ex.getMessage());
         }
+    }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: reinitialize this component
+        return true;
     }
     /** run in separated thread to accept new Sockets */
     public void run() {
@@ -88,8 +93,7 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
     }
 
 
-    @Override
-    public void close() {
+    protected void onClose() {
         // close socket server and all clients
         closed = true;
         threads.stream().forEach(th -> {

@@ -20,7 +20,7 @@ public class CacheInfoTest {
     public void infoTest() {
         log.info("START------");
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheMaxObjectsAndItems(30, 100)
                 .createCacheInstance();
@@ -40,7 +40,7 @@ public class CacheInfoTest {
         });
         log.info("Cache getItemsCount: " + cache.getObjectsCount());
         cache.close();
-        assertTrue(cache.getClosed(), "Cache should be closed");
+        assertTrue(cache.isClosed(), "Cache should be closed");
         log.info("END-----");
     }
 }

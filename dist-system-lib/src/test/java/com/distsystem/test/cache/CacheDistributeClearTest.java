@@ -21,7 +21,7 @@ public class CacheDistributeClearTest {
         log.info("START ------ clean test");
 
         Cache cache1 = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withCacheStorageHashMap()
@@ -35,7 +35,7 @@ public class CacheDistributeClearTest {
                 .createCacheInstance();
 
         Cache cache2 = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withCacheStorageHashMap()
@@ -93,8 +93,8 @@ public class CacheDistributeClearTest {
 
         cache1.close();
         cache2.close();
-        assertTrue(cache1.getClosed(), "Cache1 should be closed");
-        assertTrue(cache2.getClosed(), "Cache2 should be closed");
+        assertTrue(cache1.isClosed(), "Cache1 should be closed");
+        assertTrue(cache2.isClosed(), "Cache2 should be closed");
 
         log.info("END-----");
     }

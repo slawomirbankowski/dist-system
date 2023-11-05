@@ -21,7 +21,7 @@ public class CacheStorageLocalDiskTest {
     public void storageLocalDiskTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageLocalDisk("../../")
                 .withSerializerDefault()
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")

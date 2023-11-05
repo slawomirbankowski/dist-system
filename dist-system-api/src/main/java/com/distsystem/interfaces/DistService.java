@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 public interface DistService {
 
     /** get date and time of creating service */
-    public LocalDateTime getCreateDate();
+    LocalDateTime getCreateDate();
     /** get type of service: cache, measure, report, flow, space, ... */
     DistServiceType getServiceType();
+    /** read configuration and re-initialize this service */
+    boolean reinitialize();
     /** add component to this service */
     void addComponent(AgentComponent component);
     /** get parent Agent */
@@ -23,14 +25,16 @@ public interface DistService {
     DistMessage processMessage(DistMessage msg);
     /** handle API request in this Web API for this service */
     AgentWebApiResponse handleRequest(AgentWebApiRequest request);
-    /** get unique ID of this service */
-    String getServiceUid();
+    /** get unique ID of this object */
+    String getGuid();
     /** get basic information about service */
     DistServiceInfo getServiceInfo();
     /** get row for registration services */
     DistAgentServiceRow getServiceRow();
     /** get configuration for cache */
     DistConfig getConfig();
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    void updateConfig(DistConfig newCfg);
     /** close and deinitialize service */
     void close();
 

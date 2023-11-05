@@ -1,5 +1,7 @@
 package com.distsystem.api;
 
+import com.distsystem.utils.JsonUtils;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -75,17 +77,19 @@ public class AgentWebApiRequest {
     public AgentWebApiResponse responseNotImplemented() {
         return new AgentWebApiResponse(501, headerText, "Not implemented Web API request for service: " + getServiceName() + ", method: " + getServiceMethod());
     }
-    public AgentWebApiResponse responseText(int code, String content) {
-        return new AgentWebApiResponse(code, headerText, content);
+    public AgentWebApiResponse responseText(int code, String c) {
+        return new AgentWebApiResponse(code, headerText, c);
     }
-    public AgentWebApiResponse responseOkText(String content) {
-        return new AgentWebApiResponse(200, headerText, content);
-    }
-
-    public AgentWebApiResponse responseOkJson(String content) {
-        return new AgentWebApiResponse(200, headerJson, content);
+    public AgentWebApiResponse responseOkText(String c) {
+        return new AgentWebApiResponse(200, headerText, c);
     }
 
+    public AgentWebApiResponse responseOkJson(String c) {
+        return new AgentWebApiResponse(200, headerJson, c);
+    }
+    public AgentWebApiResponse responseOkJsonSerialize(Object obj) {
+        return new AgentWebApiResponse(200, headerJson, JsonUtils.serialize(obj));
+    }
 
     public static final Map<String, List<String>> headerJson = Map.of("Content-Type", List.of("application/json"));
     public static final Map<String, List<String>> headerText = Map.of("Content-Type", List.of("text/html"));

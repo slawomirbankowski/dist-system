@@ -17,6 +17,7 @@ public class AgentObject {
     private final LocalDateTime createDate = LocalDateTime.now();
     /** registering object for agent */
     private AgentRegister register;
+    /** */
     private DistAgentRegisterRow agentRegisterRow;
 
     /** last updated date and time of this Agent */

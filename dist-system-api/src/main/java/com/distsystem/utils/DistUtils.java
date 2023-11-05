@@ -97,7 +97,9 @@ public class DistUtils {
     public static String generateServerGuid(String servType) {
         return "SRV_" +  hostName  + "_T" + servType + "_" + UUID.randomUUID().toString().substring(0, 8);
     }
-
+    public static String generateServiceGuid(String servType, String parentAgentShortGuid) {
+        return servType + "_" +  hostName  + "_" + parentAgentShortGuid + "_" + UUID.randomUUID().toString().substring(0, 8);
+    }
     private static final AtomicLong clientGuidSeq = new AtomicLong();
     public static String generateClientGuid(String clientType) {
         return "CL_" + clientType + "_H" + hostName + "_DT" + getDateTimeYYYYMMDDHHmmss() + "_X" + clientGuidSeq.incrementAndGet() + "_" + UUID.randomUUID().toString().substring(0, 8);

@@ -79,6 +79,13 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             parentAgent.addIssue("DaoKafkaBase.onInitialize", ex);
         }
     }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** get all topics */
     public Collection<String> getDaoStructures() {
         return getTopics();
@@ -251,8 +258,7 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             return null;
         }
     }
-    /** close current Kafka producer, admin client, consumers */
-    public boolean close() {
+    public boolean closeDao() {
         log.info("Closing Kafka DAO for brokers: " + brokers + ", consumers: " + consumersByTopic.size());
         try {
             closed = true;
@@ -264,6 +270,10 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             log.warn("Cannot close Kafka DAO, brokers: " + brokers + ", consumers: " + consumersByTopic.size() +", reason: " + ex.getMessage(), ex);
             return false;
         }
+    }
+    /** close current Kafka producer, admin client, consumers */
+    protected void onClose() {
+        closeDao();
     }
 
 }
@@ -364,7 +374,7 @@ class KafkaReceiverImpl implements Runnable, KafkaReceiver {
                 working = false;
             } catch (Exception ex) {
                 log.warn("Exception while running receiver thread for Kafka topic: " + topicName +  ", reason: " + ex.getMessage());
-                dao.getParentAgent().addIssue("KafkaReceiver.run", ex);
+                dao.getAgent().addIssue("KafkaReceiver.run", ex);
             }
             totalIterations.incrementAndGet();
         }
@@ -377,7 +387,7 @@ class KafkaReceiverImpl implements Runnable, KafkaReceiver {
             log.info("Kafka consumer closed for topic: " + topicName);
         } catch (Exception ex) {
             log.warn("Cannot close consumer, reason: " + ex.getMessage());
-            dao.getParentAgent().addIssue("KafkaReceiver.close", ex);
+            dao.getAgent().addIssue("KafkaReceiver.close", ex);
         }
     }
 

@@ -21,12 +21,19 @@ import java.util.stream.Collectors;
 public class LocalDiskStorage extends CacheStorageBase {
 
     protected static final Logger log = LoggerFactory.getLogger(LocalDiskStorage.class);
-    private final String filePrefixName;
+    private String filePrefixName;
 
     /** init local disk storage */
     public LocalDiskStorage(Cache cache) {
         super(cache);
-        filePrefixName = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_LOCAL_DISK_PREFIX_PATH, "/tmp/");
+        componentReinitialize();
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: remove all files with previous prefix???
+        filePrefixName = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_LOCALDISK_PREFIXPATH, "/tmp/");
+        return true;
     }
     /** Local Disk is external storage */
     public  boolean isInternal() { return false; }

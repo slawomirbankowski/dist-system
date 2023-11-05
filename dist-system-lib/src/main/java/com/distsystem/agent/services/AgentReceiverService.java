@@ -16,30 +16,29 @@ import java.util.Map;
 import java.util.function.Function;
 
 /** service to receive messages to any listener */
-public class AgentReceiverService extends ServiceBase implements Receiver, AgentComponent {
+public class AgentReceiverService extends ServiceBase implements Receiver {
 
     /** all external methods to process messages */
     protected Map<String, Function<DistMessage, DistMessage>> methodsToProcess = new HashMap<>();
 
-    /** processor class for Web API - instant synchronized API to be used directly with Agent service */
-    private final DistWebApiProcessor webApiProcessor = new DistWebApiProcessor()
-            .addHandlerGet("ping", (m, req) -> req.responseOkText("ping"))
-            .addHandlerGet("methods", (m, req) -> req.responseOkJson(JsonUtils.serialize(methodsToProcess.keySet())));
-
     /** */
     public AgentReceiverService(Agent parentAgent) {
         super(parentAgent);
+        parentAgent.getAgentServices().registerService(this);
     }
 
-    @Override
-    public DistComponentType getComponentType() {
-        return DistComponentType.receiver;
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
-    /** get global unique ID of this service/component */
-    @Override
-    public String getGuid() {
-        return guid;
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("method-names", (m, req) -> req.responseOkJsonSerialize(methodsToProcess.keySet()));
     }
+
     /** get custom map of info about service */
     public Map<String, String> getServiceInfoCustomMap() {
         return Map.of("methodsCount", ""+methodsToProcess.size(),
@@ -79,15 +78,11 @@ public class AgentReceiverService extends ServiceBase implements Receiver, Agent
             }
         }
     }
-    @Override
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        return webApiProcessor.handleRequest(request);
-    }
-    @Override
-    protected String createServiceUid() {
-        return DistUtils.generateCacheGuid();
-    }
 
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
     @Override
     protected void onClose() {
     }

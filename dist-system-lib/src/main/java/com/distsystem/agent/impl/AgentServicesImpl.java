@@ -3,23 +3,28 @@ package com.distsystem.agent.impl;
 import com.distsystem.agent.services.AgentReceiverService;
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistComponentType;
+import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.auth.AgentAuthImpl;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.base.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.*;
 import com.distsystem.managers.CacheManager;
 import com.distsystem.report.AgentReportsImpl;
 import com.distsystem.report.StoragesImpl;
+import com.distsystem.utils.DistWebApiProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Implementation of manager for services. Kept services, initiate them in case of the need.
  *
  *  */
-public class AgentServicesImpl extends Agentable implements AgentServices, AgentComponent {
+public class AgentServicesImpl extends ServiceBase implements AgentServices {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentServicesImpl.class);
@@ -27,6 +32,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     private final HashMap<String, DistService> services = new HashMap<>();
     /** policy to add cache Objects to storages and changing mode, ttl, priority, tags */
     protected CachePolicy policy;
+    private AgentAuth auth;
     /** service to provide message receiver and sender */
     private Receiver receiver;
     /** cache service */
@@ -36,11 +42,9 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     /** service for storages */
     private Storages storages;
     /** service for spaces */
-    private AgentSpaces agentSpaces;
+    private AgentSpace agentSpace;
     /** service for security */
     private AgentSecurity security;
-    /** */
-    private AgentAuth auth;
     /** flow service */
     private AgentFlow flow;
     /** get semaphores service */
@@ -52,17 +56,39 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     /** creates service manager for agent with parent agent assigned */
     public AgentServicesImpl(Agent parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        registerService(this);
     }
 
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
+
+    /** reinitialize all registered services */
+    public List<Boolean> reinitializeAllServices() {
+        return services.values().stream().map(DistService::reinitialize).toList();
+    }
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // nothing to be done here
+        return true;
+    }
     /** get type of this component */
     public DistComponentType getComponentType() {
         return DistComponentType.services;
     }
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("service-keys", (m, req) -> req.responseOkJsonSerialize(getServiceKeys()))
+                .addHandlerGet("services", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceInfo).toList()))
+                .addHandlerGet("services-row", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceRow).toList()))
+                .addHandlerGet("services-guid", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getGuid).toList()))
+                .addHandlerPost("service-keys", (m, req) -> req.responseOkJsonSerialize(initializeAllPossible()));
     }
+
+
     /** set new policy for services */
     public void setPolicy(CachePolicy policy) {
         this.policy = policy;
@@ -71,6 +97,9 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     public List<DistService> getServices() {
         return services.values().stream().collect(Collectors.toList());
     }
+
+
+
     /** get or create cache connected with this Agent */
     public Cache getCache() {
         if (cache != null) {
@@ -78,12 +107,26 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (cache == null) {
-                cache = new CacheManager(getParentAgent(), policy);
+                cache = new CacheManager(getAgent(), policy);
                 registerService(cache);
             }
             return cache;
         }
     }
+    /** */
+    public AgentAuth getAuth() {
+        if (auth != null) {
+            return auth;
+        }
+        synchronized (this) {
+            if (auth == null) {
+                auth = new AgentAuthImpl(getAgent());
+                registerService(auth);
+            }
+            return auth;
+        }
+    }
+
     /** get or create receiver service */
     public Receiver getReceiver() {
         if (receiver != null) {
@@ -91,7 +134,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (receiver == null) {
-                receiver = new AgentReceiverService(getParentAgent());
+                receiver = new AgentReceiverService(getAgent());
                 registerService(receiver);
             }
             return receiver;
@@ -104,7 +147,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (agentReports == null) {
-                agentReports = new AgentReportsImpl(getParentAgent());
+                agentReports = new AgentReportsImpl(getAgent());
                 registerService(agentReports);
             }
             return agentReports;
@@ -117,7 +160,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (flow == null) {
-                flow = new AgentFlowImpl(getParentAgent());
+                flow = new AgentFlowImpl(getAgent());
                 registerService(flow);
             }
             return flow;
@@ -130,7 +173,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (semaphores == null) {
-                semaphores = new AgentSemaphoresImpl(getParentAgent());
+                semaphores = new AgentSemaphoresImpl(getAgent());
                 registerService(semaphores);
             }
             return semaphores;
@@ -143,7 +186,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (ml == null) {
-                ml = new AgentMachineLearningImpl(getParentAgent());
+                ml = new AgentMachineLearningImpl(getAgent());
                 registerService(ml);
             }
             return ml;
@@ -156,23 +199,23 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (storages == null) {
-                storages = new StoragesImpl(getParentAgent());
+                storages = new StoragesImpl(getAgent());
                 registerService(storages);
             }
             return storages;
         }
     }
     /** get service for managing spaces */
-    public AgentSpaces getSpaces() {
-        if (agentSpaces != null) {
-            return agentSpaces;
+    public AgentSpace getSpace() {
+        if (agentSpace != null) {
+            return agentSpace;
         }
         synchronized (this) {
-            if (agentSpaces == null) {
-                agentSpaces = new AgentSpacesImpl(getParentAgent());
-                registerService(agentSpaces);
+            if (agentSpace == null) {
+                agentSpace = new AgentSpaceImpl(getAgent());
+                registerService(agentSpace);
             }
-            return agentSpaces;
+            return agentSpace;
         }
     }
     /** get service for security */
@@ -182,7 +225,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (security == null) {
-                security = new AgentSecurityImpl(getParentAgent());
+                security = new AgentSecurityImpl(getAgent());
                 registerService(security);
             }
             return security;
@@ -195,7 +238,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         }
         synchronized (this) {
             if (objects == null) {
-                objects = new AgentObjectsImpl(getParentAgent());
+                objects = new AgentObjectsImpl(getAgent());
                 registerService(objects);
             }
             return objects;
@@ -208,19 +251,43 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     }
     /** get keys of registered services */
     public List<String> getServiceKeys() {
-        return services.values().stream().map(DistService::getServiceUid).collect(Collectors.toList());
+        return services.values().stream().map(DistService::getGuid).collect(Collectors.toList());
     }
     /** get types of registered services */
     public Set<String> getServiceTypes() {
         return services.keySet();
     }
+    /** initialize all known services */
+    public Set<String> initializeAllPossible() {
+        getAuth();
+        getSecurity();
+        getCache();
+        getReceiver();
+        getReports();
+        getFlow();
+        getSemaphores();
+        getMl();
+        getStorages();
+        getSpace();
+        getObjects();
+        return getServiceTypes();
+    }
     /** get basic information about service for given type of UID */
     public DistServiceInfo getServiceInfo(String serviceUid) {
         DistService srv = services.get(serviceUid);
         if (srv != null) {
-            srv.getServiceInfo();
+            return srv.getServiceInfo();
+        } else {
+            return null;
         }
-        return null;
+    }
+    public Optional<DistServiceInfo> getServiceInfoOrEmpty(String serviceUid) {
+        DistService srv = services.get(serviceUid);
+        if (srv != null) {
+            return Optional.of(srv.getServiceInfo());
+        } else {
+            return Optional.empty();
+        }
     }
     /** get basic information about all services */
     public List<DistServiceInfo> getServiceInfos() {
@@ -265,7 +332,7 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
     }
 
     /** handle API request in this Web API for Agent */
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
+    public AgentWebApiResponse dispatchRequest(AgentWebApiRequest request) {
         DistService service = services.get(request.getServiceName());
         if (service != null) {
             return service.handleRequest(request);
@@ -274,8 +341,12 @@ public class AgentServicesImpl extends Agentable implements AgentServices, Agent
         return new AgentWebApiResponse(404, AgentWebApiRequest.headerText, "No service for name: " + request.getServiceName());
     }
     /** close */
-    public void close() {
+    protected void onClose() {
         log.info("Closing all registered services with agent, services: " + services.size());
+    }
+    @Override
+    public DistServiceType getServiceType() {
+        return DistServiceType.services;
     }
 
 }

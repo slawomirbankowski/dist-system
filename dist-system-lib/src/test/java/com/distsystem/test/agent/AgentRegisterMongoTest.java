@@ -17,7 +17,7 @@ public class AgentRegisterMongoTest {
     public void agentRegisterMongoTest() {
         log.info("START ------ agent register MongoDB test");
         Agent agent1 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9999)
                 .withRegistrationMongodb("localhost", 8081)
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
@@ -27,7 +27,7 @@ public class AgentRegisterMongoTest {
                 .withTimerServerPeriod(60000)
                 .createAgentInstance();
         Agent agent2 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
                 .withRegistrationMongodb("localhost", 8081)
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)

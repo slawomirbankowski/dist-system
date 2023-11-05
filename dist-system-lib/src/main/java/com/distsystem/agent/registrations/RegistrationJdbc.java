@@ -33,20 +33,27 @@ public class RegistrationJdbc extends RegistrationBase {
     /** run for initialization in classes */
     @Override
     public void onInitialize() {
-        jdbcUrl = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_JDBC_URL);
-        var jdbcDriver = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_JDBC_DRIVER, "");
-        var jdbcUser = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_JDBC_USER, "");
-        var jdbcPass = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_JDBC_PASS, "");
-        var jdbcDialect = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_JDBC_DIALECT, "");
+        jdbcUrl = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_URL);
+        var jdbcDriver = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_DRIVER, "");
+        var jdbcUser = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_USER, "");
+        var jdbcPass = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_PASS, "");
+        var jdbcDialect = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_DIALECT, "");
         dialect = JdbcDialect.getDialect(jdbcDriver, jdbcDialect);
         log.info("Initializing of JDBC registration with URL: " + jdbcUrl + ", agent: " + parentAgent.getAgentGuid() + ", dialect: " + dialect.dialectName);
-        var initConnections = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_JDBC_INIT_CONNECTIONS, 2);
-        var maxActiveConnections = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_JDBC_MAX_ACTIVE_CONNECTIONS, 10);
+        var initConnections = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_INIT, 2);
+        var maxActiveConnections = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_MAXCONNECTIONS, 10);
         DaoParams params = DaoParams.jdbcParams(jdbcUrl, jdbcDriver, jdbcUser, jdbcPass, initConnections, maxActiveConnections);
         dao = parentAgent.getAgentDao().getOrCreateDaoOrError(DaoJdbcBase.class, params);
         dao.usedByComponent(this);
         tryCreateAgentTable();
     }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        onInitialize();
+        return true;
+    }
+
 
     /** if needed - create SQL agent table */
     private void tryCreateAgentTable() {

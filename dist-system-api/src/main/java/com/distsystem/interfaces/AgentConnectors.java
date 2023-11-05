@@ -9,7 +9,7 @@ import java.util.List;
 
 /** interface for agent connectors manager
  * this is to keep connections to other agents */
-public interface AgentConnectors {
+public interface AgentConnectors extends DistService {
 
     /** open servers for communication  */
     void openServers();
@@ -33,7 +33,5 @@ public interface AgentConnectors {
     void sendMessage(DistMessageFull msgCallbacks);
     /** mark response for this message, it is executing callbacks onResponse */
     void markResponse(DistMessage msg);
-    /** close this manager */
-    void close();
 
 }

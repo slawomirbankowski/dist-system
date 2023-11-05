@@ -30,16 +30,22 @@ public class MongodbStorage extends CacheStorageBase {
     /** initialize Redis storage */
     public MongodbStorage(Cache cache) {
         super(cache);
-        mongoHost = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_MONGODB_HOST);
-        mongoPort = cache.getConfig().getPropertyAsInt(DistConfig.CACHE_STORAGE_MONGODB_PORT, 8081);
-        mongoDbName = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_MONGODB_DATABASE, "distcache");
-        mongoCollection = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_MONGODB_COLLECTION, "distcacheitems");
+        mongoHost = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_MONGODB_HOST);
+        mongoPort = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_CACHE_STORAGE_MONGODB_PORT, 8081);
+        mongoDbName = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_MONGODB_DATABASE, "distcache");
+        mongoCollection = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_MONGODB_COLLECTION, "distcacheitems");
         log.info("Try to start Cache Storage of MongoDB for agent:" + cache.getAgent().getAgentGuid() + ", host: " + mongoHost + ", port: " + mongoPort + ", DB: " + mongoDbName + ", collection" + mongoCollection);
         mongoClient = new MongoClient( mongoHost , mongoPort );
+
         mongoDb = mongoClient.getDatabase(mongoDbName);
         mongoCacheItems = mongoDb.getCollection(mongoCollection);
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization of mongo
+        return true;
+    }
     /** MongoDB is external storage */
     public  boolean isInternal() { return false; }
 

@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +21,7 @@ public class CacheStorageJdbcTest {
     public void simpleStorageJdbcTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
                 .withSerializerDefault()

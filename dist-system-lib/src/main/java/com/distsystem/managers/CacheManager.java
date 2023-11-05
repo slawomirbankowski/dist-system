@@ -47,35 +47,6 @@ public class CacheManager extends CacheBase {
             .addMethod(ServiceMethods.cacheClearContains.getMethodName(), this::messageClearContains)
             .addMethod(ServiceMethods.cacheRemoveObjectByKey.getMethodName(), this::messageClearContains);
 
-    /** processor class for Web API - instant synchronized API to be used directly with Agent service */
-    private final DistWebApiProcessor webApiProcessor = new DistWebApiProcessor()
-            .addHandlerGet("ping", (m, req) -> req.responseOkText("ping"))
-            .addHandlerGet("created", (m, req) -> req.responseOkText( getCreateDate().toString()))
-            .addHandlerGet("info", (m, req) -> req.responseOkJson( JsonUtils.serialize(getCacheInfo())))
-            .addHandlerGet("uid", (m, req) -> req.responseOkText( getServiceUid()))
-            .addHandlerGet("service-type", (m, req) -> req.responseOkText( getServiceType().name()))
-            .addHandlerGet("service-info", (m, req) -> req.responseOkJson( JsonUtils.serialize(getServiceInfo())))
-            .addHandlerGet("key-encoder", (m, req) -> req.responseOkText( getKeyEncoder().getClass().getName()))
-            .addHandlerGet("closed", (m, req) -> req.responseOkText( ""+getClosed()))
-            .addHandlerGet("storages-info", (m, req) -> req.responseOkJson(JsonUtils.serialize(getStoragesInfo())))
-            .addHandlerGet("storage-keys", (m, req) -> req.responseOkJson(JsonUtils.serialize(getStorageKeys())))
-            .addHandlerGet("storages-count", (m, req) ->  req.responseOkText( ""+getStoragesCount()))
-            .addHandlerPost("initialize-single-storage", (m, req) -> req.responseOkText( "" + initializeSingleStorage(req.getParamOne())))
-            .addHandlerGet("items-count", (m, req) -> req.responseOkText(""+getItemsCount()))
-            .addHandlerGet("objects-count", (m, req) -> req.responseOkText(""+getObjectsCount()))
-            .addHandlerGet("items-per-storage", (m, req) -> req.responseOkJson(JsonUtils.serialize(getItemsCountPerStorage())))
-            .addHandlerDelete("objects", (m, req) -> req.responseOkText( "" + clearCacheContains(req.getParamOne()) ))
-            .addHandlerDelete("object", (m, req) -> req.responseOkText( "" + removeObjectByKey(req.getParamOne()) ))
-            .addHandlerDelete("objects-clear", (m, req) -> req.responseOkText( "" + clearCaches(CacheClearMode.parseClearMode(req.getParamOne())) ))
-            .addHandlerPost("object", (m, req) -> setCacheObjectFromRequest(req))
-            .addHandlerPut("object", (m, req) -> putCacheObjectFromRequest(req))
-            .addHandlerPut("objects", (m, req) -> putCacheObjectsFromRequest(req))
-            .addHandlerGet("object", (m, req) -> getObjectFromRequest(req))
-            .addHandlerGet("objects-full", (m, req) -> getCacheValuesFromRequest(req))
-            .addHandlerGet("object-keys", (m, req) -> req.responseOkJson(JsonUtils.serialize(getCacheKeys(req.getParamOne(), true))))
-            .addHandlerGet("object-infos", (m, req) -> req.responseOkJson(JsonUtils.serialize(getCacheInfos(req.getParamOne(), true))))
-            .addHandlerGet("guid", (m, req) -> req.responseOkText(getCacheGuid()));
-
      /** initialize current manager with properties
      * this is creating storages, connecting to storages
      * creating cache policy, create agent and connecting to other cache agents */
@@ -84,7 +55,31 @@ public class CacheManager extends CacheBase {
         log.info("Initializing cache in agent: " + agent.getAgentGuid() + ", cache: " + guid);
         initializeStorages();
         initializeTimer();
-        addEvent(new CacheEvent(this, "CacheManager", CacheEvent.EVENT_CACHE_START));
+        addEvent(new AgentEvent(this, "CacheManager", AgentEvent.EVENT_CACHE_START));
+    }
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("key-encoder", (m, req) -> req.responseOkText( getKeyEncoder().getClass().getName()))
+                .addHandlerGet("storages-info", (m, req) -> req.responseOkJson(JsonUtils.serialize(getStoragesInfo())))
+                .addHandlerGet("storage-keys", (m, req) -> req.responseOkJson(JsonUtils.serialize(getStorageKeys())))
+                .addHandlerGet("storages-count", (m, req) ->  req.responseOkText( ""+getStoragesCount()))
+                .addHandlerPost("initialize-single-storage", (m, req) -> req.responseOkText( "" + initializeSingleStorage(req.getParamOne())))
+                .addHandlerGet("items-count", (m, req) -> req.responseOkText(""+getItemsCount()))
+                .addHandlerGet("objects-count", (m, req) -> req.responseOkText(""+getObjectsCount()))
+                .addHandlerGet("items-per-storage", (m, req) -> req.responseOkJson(JsonUtils.serialize(getItemsCountPerStorage())))
+                .addHandlerDelete("objects", (m, req) -> req.responseOkText( "" + clearCacheContains(req.getParamOne()) ))
+                .addHandlerDelete("object", (m, req) -> req.responseOkText( "" + removeObjectByKey(req.getParamOne()) ))
+                .addHandlerDelete("objects-clear", (m, req) -> req.responseOkText( "" + clearCaches(CacheClearMode.parseClearMode(req.getParamOne())) ))
+                .addHandlerPost("object", (m, req) -> setCacheObjectFromRequest(req))
+                .addHandlerPut("object", (m, req) -> putCacheObjectFromRequest(req))
+                .addHandlerPut("objects", (m, req) -> putCacheObjectsFromRequest(req))
+                .addHandlerGet("object", (m, req) -> getObjectFromRequest(req))
+                .addHandlerGet("objects-full", (m, req) -> getCacheValuesFromRequest(req))
+                .addHandlerGet("object-keys", (m, req) -> req.responseOkJson(JsonUtils.serialize(getCacheKeys(req.getParamOne(), true))))
+                .addHandlerGet("object-infos", (m, req) -> req.responseOkJson(JsonUtils.serialize(getCacheInfos(req.getParamOne(), true))))
+                .addHandlerGet("guid", (m, req) -> req.responseOkText(getCacheGuid()));
     }
     /** get information about all storages in this cache */
     public List<StorageInfo> getStoragesInfo() {
@@ -104,15 +99,11 @@ public class CacheManager extends CacheBase {
         cacheStats.processMessage();
         return messageProcessor.process(msg.getMethod(), msg);
     }
-    /** handle API request in this Web API for this service */
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        cacheStats.handleRequest();
-        return webApiProcessor.handleRequest(request);
-    }
+
     /** initialize all storages from configuration */
     private void initializeStorages() {
-        addEvent(new CacheEvent(this, "initializeStorages", CacheEvent.EVENT_INITIALIZE_STORAGES));
-        String cacheStorageList = ""+getConfig().getProperty(DistConfig.CACHE_STORAGES);
+        addEvent(new AgentEvent(this, "initializeStorages", AgentEvent.EVENT_INITIALIZE_STORAGES));
+        String cacheStorageList = ""+getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGES);
         log.info("Initializing cache storages: " + cacheStorageList);
         Arrays.stream(cacheStorageList.split(","))
                 .distinct()
@@ -124,7 +115,7 @@ public class CacheManager extends CacheBase {
         try {
             cacheStats.initializeSingleStorage();
             String fullClassName = "com.distsystem.storage." + className;
-            addEvent(new CacheEvent(this, "initializeStorages", CacheEvent.EVENT_INITIALIZE_STORAGE, fullClassName));
+            addEvent(new AgentEvent(this, "initializeStorages", AgentEvent.EVENT_INITIALIZE_STORAGE, fullClassName));
             log.debug("Initializing storage for class: " + fullClassName + ", current storages: " + storages.size());
             CacheStorageBase storage = (CacheStorageBase)Class.forName(fullClassName)
                     .getConstructor(Cache.class)
@@ -133,7 +124,7 @@ public class CacheManager extends CacheBase {
             log.info("Initialized storage: " + storage.getStorageUid() + ", current storages: " + storages.size());
             if (prevStorage != null) {
                 log.debug("Got previous storage to dispose: " + prevStorage.getStorageUid());
-                addEvent(new CacheEvent(this, "initializeStorages", CacheEvent.EVENT_DISPOSE_STORAGE, fullClassName));
+                addEvent(new AgentEvent(this, "initializeStorages", AgentEvent.EVENT_DISPOSE_STORAGE, fullClassName));
                 prevStorage.disposeStorage();
             }
             return true;
@@ -146,19 +137,19 @@ public class CacheManager extends CacheBase {
 
     /** initialize timers for Cache */
     protected void initializeTimer() {
-        addEvent(new CacheEvent(this, "initializeTimer", CacheEvent.EVENT_INITIALIZE_TIMERS));
+        addEvent(new AgentEvent(this, "initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMERS));
         // initialization for clean
         log.info("Scheduling clean timer task for cache: " + getCacheGuid());
-        getAgent().getAgentTimers().setUpTimer("TIMER_CLEAN_STORAGE", DistConfig.TIMER_CLEAN_STORAGE_PERIOD, DistConfig.TIMER_CLEAN_STORAGE_PERIOD_DELAY_VALUE, x -> onTimeClean());
-        addEvent(new CacheEvent(this, "initializeTimer", CacheEvent.EVENT_INITIALIZE_TIMER_CLEAN));
+        getAgent().getAgentTimers().setUpTimer("TIMER_CLEAN_STORAGE", DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD, DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD_DELAY_VALUE, x -> onTimeClean());
+        addEvent(new AgentEvent(this, "initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMER_CLEAN));
         log.info("Scheduling statistics refresh timer task for cache: " + getCacheGuid());
-        getAgent().getAgentTimers().setUpTimer("TIMER_STAT_REFRESH", DistConfig.TIMER_STAT_REFRESH_PERIOD, DistConfig.TIMER_STAT_REFRESH_PERIOD_DELAY_VALUE, x -> onTimeStatsRefresh());
-        addEvent(new CacheEvent(this, "initializeTimer", CacheEvent.EVENT_INITIALIZE_TIMER_RATIO));
+        getAgent().getAgentTimers().setUpTimer("TIMER_STAT_REFRESH", DistConfig.AGENT_CACHE_TIMER_STAT_REFRESH_PERIOD, DistConfig.AGENT_CACHE_TIMER_STAT_REFRESH_PERIOD_DELAY_VALUE, x -> onTimeStatsRefresh());
+        addEvent(new AgentEvent(this, "initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMER_RATIO));
     }
 
     /** executing close of this cache */
     protected void onClose() {
-        addEvent(new CacheEvent(this, "onClose", CacheEvent.EVENT_CLOSE_BEGIN));
+        addEvent(new AgentEvent(this, "onClose", AgentEvent.EVENT_CLOSE_BEGIN));
         log.info("Stopping all timer tasks");
         log.info("Removing caches and dispose storages");
         synchronized (storages) {
@@ -170,7 +161,7 @@ public class CacheManager extends CacheBase {
             storages.clear();
         }
         parentAgent.close();
-        addEvent(new CacheEvent(this, "onClose", CacheEvent.EVENT_CLOSE_END));
+        addEvent(new AgentEvent(this, "onClose", AgentEvent.EVENT_CLOSE_END));
     }
 
     /** set object in all or one internal caches */
@@ -274,7 +265,7 @@ public class CacheManager extends CacheBase {
 
     /** clear caches with given clear cache */
     public int clearCaches(CacheClearMode clearMode) {
-        addEvent(new CacheEvent(this, "clearCaches", CacheEvent.EVENT_CACHE_CLEAN));
+        addEvent(new AgentEvent(this, "clearCaches", AgentEvent.EVENT_CACHE_CLEAN));
         storages.values().stream().forEach(x -> x.clearCache(clearMode));
         return 1;
     }
@@ -360,14 +351,14 @@ public class CacheManager extends CacheBase {
     /** check cache every X seconds to clear TTL caches */
     public boolean onTimeClean() {
         long checkSeq = cacheStats.check();
-        addEvent(new CacheEvent(this, "onTimeClean", CacheEvent.EVENT_TIMER_CLEAN));
+        addEvent(new AgentEvent(this, "onTimeClean", AgentEvent.EVENT_TIMER_CLEAN));
         storages.values().stream().forEach(x ->  x.timeToClean(checkSeq, lastCleanTime));
         lastCleanTime = System.currentTimeMillis();
         return true;
     }
     /** */
     public boolean onTimeStatsRefresh() {
-        addEvent(new CacheEvent(this, "onTimeStatsRefresh", CacheEvent.EVENT_INITIALIZE_TIMER_RATIO));
+        addEvent(new AgentEvent(this, "onTimeStatsRefresh", AgentEvent.EVENT_INITIALIZE_TIMER_RATIO));
         cacheStats.refresh();
         return true;
     }
@@ -453,4 +444,8 @@ public class CacheManager extends CacheBase {
         return msg.response(getCacheObject(key), DistMessageStatus.ok);
     }
 
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
 }

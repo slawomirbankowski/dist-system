@@ -45,10 +45,11 @@ public class SerializersTest {
         AgentTimerInfo timers = new AgentTimerInfo("ClassName", 1L, 2, new ArrayList<>());
         DistThreadsInfo threads = new DistThreadsInfo(11, new ArrayList<>());
 
-        var agentInfo = new AgentInfo(agentGuid, LocalDateTime.now(), false,
-                Set.of(),
+        var agentInfo = new AgentInfo(agentGuid, agentGuid, agentGuid, LocalDateTime.now(), false,
+                Set.of(), List.of(),
+                new AgentConfigReaderInfo(0L, 0L, 0L, new LinkedList<>()),
                 new AgentMessageProcessorInfo(0, 0, 0),
-                new AgentApisInfo(false, List.of()),
+                new AgentApisInfo(false, 0L, 0L, List.of()),
                 connectors, services, new AgentRegistrationsInfo(List.of(), 0, List.of()), timers, threads,
                 new AgentDaosInfo(List.of(), Set.of()),
                 2, 44);

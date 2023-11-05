@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class    CacheEventTest {
-    private static final Logger log = LoggerFactory.getLogger(CacheEventTest.class);
+public class AgentEventTest {
+    private static final Logger log = LoggerFactory.getLogger(AgentEventTest.class);
 
     @Test
     public void eventsTest() {
@@ -22,20 +22,20 @@ public class    CacheEventTest {
         AtomicLong cleanEvents = new AtomicLong();
         AtomicLong storageEvents = new AtomicLong();
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheObjectTimeToLive(CacheMode.TIME_TEN_SECONDS)
-                .withCallback(CacheEvent.EVENT_CACHE_START, x -> {
+                .withCallback(AgentEvent.EVENT_CACHE_START, x -> {
                     log.info("::::::::: EVENT START CALLBACK");
 
                     return "OK";
                 })
-                .withCallback(CacheEvent.EVENT_TIMER_CLEAN, x -> {
+                .withCallback(AgentEvent.EVENT_TIMER_CLEAN, x -> {
                     log.info("::::::::: EVENT TIMER CLEAN");
                     cleanEvents.incrementAndGet();
                     return "OK";
                 })
-                .withCallback(CacheEvent.EVENT_INITIALIZE_STORAGE, x -> {
+                .withCallback(AgentEvent.EVENT_INITIALIZE_STORAGE, x -> {
                     log.info("::::::::: STORAGE NEW");
                     storageEvents.incrementAndGet();
                     return "OK";

@@ -28,7 +28,11 @@ public class InternalHashMapCacheStorage extends CacheStorageBase {
     public Map<String, Object> getStorageAdditionalInfo() {
         return Map.of("className", localCache.getClass().getName());
     }
-
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
+    }
     /** get type of this storage */
     public CacheStorageType getStorageType() {
         return CacheStorageType.memory;

@@ -38,9 +38,9 @@ public class RegistrationElasticsearch extends RegistrationBase {
     /** run for initialization in classes */
     @Override
     protected void onInitialize() {
-        elasticUrl = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_ELASTICSEARCH_URL, "");
-        elasticUser = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_ELASTICSEARCH_USER, "");
-        elasticPass = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_ELASTICSEARCH_PASS, "");
+        elasticUrl = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_URL, "");
+        elasticUser = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_USER, "");
+        elasticPass = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_PASS, "");
         registerIndexName = "distagentregister";
         serverIndexName = "distagentserver";
         issueIndexName = "distagentissue";
@@ -53,6 +53,12 @@ public class RegistrationElasticsearch extends RegistrationBase {
         log.info("Connected to Elasticsearch, url: " + elasticUrl + ", indices: " + elasticDao.getIndices().size() + ", agent: " + parentAgent.getAgentGuid());
         elasticDao.createIndicesWithCheck(Set.of(registerIndexName, serverIndexName, issueIndexName, serviceIndexName));
     }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     @Override
     protected boolean onIsConnected() {
         return elasticDao.getClusterInfo().size() > 0;

@@ -26,9 +26,15 @@ public class RedisCacheStorage extends CacheStorageBase {
     /** initialize Redis storage */
     public RedisCacheStorage(Cache cache) {
         super(cache);
-        redisHost = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_REDIS_HOST, "");
-        redisPort = cache.getConfig().getPropertyAsInt(DistConfig.CACHE_STORAGE_REDIS_PORT, 6379);
+        redisHost = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_HOST, "");
+        redisPort = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_CACHE_STORAGE_REDIS_PORT, 6379);
         jedis = new Jedis(redisHost, redisPort);
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
     /** Redis is external storage */
     public  boolean isInternal() { return false; }

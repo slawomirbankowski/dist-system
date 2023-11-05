@@ -32,8 +32,8 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
     /** initialize this server */
     public void initialize() {
         try {
-            workingPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_DATAGRAM_PORT, DistConfig.AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE);
-            int soTimeout = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_DATAGRAM_TIMEOUT,1000);
+            workingPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_DATAGRAM_PORT, DistConfig.AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE);
+            int soTimeout = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_DATAGRAM_TIMEOUT,1000);
             datagramSocket = new DatagramSocket(workingPort);
             datagramSocket.setSoTimeout(soTimeout);
             url = "udp://" + DistUtils.getCurrentHostName() + ":" + workingPort + "/";
@@ -46,6 +46,11 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
             log.info("Cannot start DATAGRAM server, reason: " + ex.getMessage());
             parentAgent.getAgentIssues().addIssue("AgentDatagramServer.initialize", ex);
         }
+    }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
     /** get type of clients to be connected to this server */
     public DistClientType getClientType() {
@@ -84,8 +89,12 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
         }
     }
 
-    @Override
-    public void close() {
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
+
+    protected void onClose() {
         try {
             log.info("Try to close DATAGRAM server for Agent: " + parentAgent.getAgentGuid());
             datagramSocket.close();

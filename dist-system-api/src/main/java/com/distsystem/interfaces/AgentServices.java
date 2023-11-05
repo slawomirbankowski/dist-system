@@ -4,6 +4,7 @@ import com.distsystem.api.*;
 import com.distsystem.base.dtos.DistAgentServiceRow;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /** interface for service manager
@@ -12,10 +13,12 @@ import java.util.Set;
  * Full list of services are in DistServiceType.
  * Each service might be having many components.
  * */
-public interface AgentServices {
+public interface AgentServices extends DistService {
 
     /** return all services assigned to this agent */
     List<DistService> getServices();
+    /** reinitialize all registered services */
+    List<Boolean> reinitializeAllServices();
     /** set new policy for services */
     void setPolicy(CachePolicy policy);
     /** get or create cache connected with this Agent */
@@ -38,8 +41,12 @@ public interface AgentServices {
     List<String> getServiceKeys();
     /** get types of registered services */
     Set<String> getServiceTypes();
+    /** initialize all known services */
+    Set<String> initializeAllPossible();
     /** get basic information about service for given type of UID */
     DistServiceInfo getServiceInfo(String serviceUid);
+    /** get service information by GUID or empty if there is no such service */
+    Optional<DistServiceInfo> getServiceInfoOrEmpty(String serviceUid);
     /** get basic information about all services */
     List<DistServiceInfo> getServiceInfos();
     /** get all rows of services to registrations */
@@ -48,9 +55,8 @@ public interface AgentServices {
     void registerService(DistService service) ;
     /** receive message from connector or server, need to find service and process that message on service */
     void receiveMessage(DistMessage msg);
-    /** handle API request in this Web API for Agent */
-    AgentWebApiResponse handleRequest(AgentWebApiRequest request);
-    /** close  */
-    void close();
+    /** dispatch API request in this Web API for Agent - find proper service and run handleRequest there */
+    AgentWebApiResponse dispatchRequest(AgentWebApiRequest request);
+
 
 }
