@@ -1,6 +1,5 @@
 package com.distsystem.base;
 
-import com.distsystem.agent.impl.Agentable;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.ClientInfo;
 import com.distsystem.base.dtos.DistAgentServerRow;

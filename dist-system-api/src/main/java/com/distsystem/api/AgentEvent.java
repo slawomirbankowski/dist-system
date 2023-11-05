@@ -3,7 +3,7 @@ package com.distsystem.api;
 import java.time.LocalDateTime;
 
 /** event from cache - full format with parent object, method, type and parameters  */
-public class CacheEvent {
+public class AgentEvent {
 
     /** date and time of event */
     private final LocalDateTime createdDateTime = LocalDateTime.now();
@@ -12,13 +12,13 @@ public class CacheEvent {
     private final String eventType;
     private final Object[] params;
 
-    public CacheEvent(Object parent, String method, String eventType, Object... params) {
+    public AgentEvent(Object parent, String method, String eventType, Object... params) {
         this.parent = parent;
         this.method = method;
         this.eventType = eventType;
         this.params = params;
     }
-    public CacheEvent(Object parent, String method, String eventType) {
+    public AgentEvent(Object parent, String method, String eventType) {
         this.parent = parent;
         this.method = method;
         this.eventType = eventType;
@@ -36,9 +36,12 @@ public class CacheEvent {
     public Object[] getParams() {
         return params;
     }
-
-    public static CacheEvent startCache() {
-        return new CacheEvent(null, "", EVENT_CACHE_START);
+    /** get event row from this event */
+    public AgentEventRow getEventRow() {
+        return new AgentEventRow(createdDateTime, parent.getClass().getName(), method, eventType);
+    }
+    public static AgentEvent startCache() {
+        return new AgentEvent(null, "", EVENT_CACHE_START);
     }
 
     public static String EVENT_INITIALIZE_STORAGES = "EVENT_INITIALIZE_STORAGES";

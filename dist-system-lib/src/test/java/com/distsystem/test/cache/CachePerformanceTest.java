@@ -20,7 +20,7 @@ public class CachePerformanceTest {
     public void cachePerformanceTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStoragePriorityQueue()
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_HOUR)
                 .withCacheMaxObjectsAndItems(100, 1000)

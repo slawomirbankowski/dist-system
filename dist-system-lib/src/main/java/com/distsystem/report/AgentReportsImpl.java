@@ -26,20 +26,23 @@ public class AgentReportsImpl extends ServiceBase implements AgentReports {
     public DistServiceType getServiceType() {
         return DistServiceType.report;
     }
-    /** create new service UID for this service */
-    protected String createServiceUid() {
-        return DistUtils.generateCacheGuid();
-    }
 
     /** process message, returns message with status */
     public DistMessage processMessage(DistMessage msg) {
         // TODO: implement processing message
         return msg;
     }
-    /** handle API request in this Web API for this service */
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        // TODO: implement handling Web Api request by reports
-        return request.responseNotImplemented();
+
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+
+        // TODO: update configuration of this service
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
     /** close and deinitialize service */
     public void onClose() {

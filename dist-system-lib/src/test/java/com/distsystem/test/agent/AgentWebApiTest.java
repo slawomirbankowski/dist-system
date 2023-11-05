@@ -18,7 +18,7 @@ public class AgentWebApiTest {
     public void agentWebApiTest() {
         log.info("START ------ agent Web API test");
         Cache cache1 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9999)
                 .withServerSocketPort(9001)
                 .withCacheStorageHashMap()
@@ -34,7 +34,7 @@ public class AgentWebApiTest {
         Agent agent1 = cache1.getAgent();
 
         Cache cache2 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
                 .withTimerStorageClean(10000)
                 .withTimerServerPeriod(10000)

@@ -21,7 +21,7 @@ public class CacheStorageElasticsearchSimpleTest {
 
         String elasticUrl = "https://localhost:9200";
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageElasticsearch(elasticUrl, "elastic", "${ELASTICSEARCH_PASS}")
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_DAY)
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_HOUR)

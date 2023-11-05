@@ -3,6 +3,7 @@ package com.distsystem.api.enums;
 /** components in Agent */
 public enum DistComponentType {
     agent,
+    config,
     issues,
     events,
     connectors,

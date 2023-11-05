@@ -7,12 +7,10 @@ import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentInfo;
-import com.distsystem.auth.AgentAuthImpl;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.base.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.*;
 import com.distsystem.serializers.ComplexSerializer;
-import com.distsystem.utils.JsonUtils;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistMessageProcessor;
 import com.distsystem.utils.DistWebApiProcessor;
@@ -21,13 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** agent class to be connected to dist-system applications, Kafka, Elasticsearch or other global agent repository
  * Agent is also connecting directly to other agents */
-public class AgentInstance extends ServiceBase implements Agent, DistService, AgentComponent {
+public class AgentInstance extends ServiceBase implements Agent, DistService {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentInstance.class);
@@ -35,21 +32,24 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     private final LocalDateTime createDate = LocalDateTime.now();
     /** configuration for agent */
     private final DistConfig config;
-    /** if agent has been closed */
-    private boolean closed = false;
+    /** friendly name of current agent */
+    private final String agentName;
     /** generate secret of this agent to be able to put commands */
     private final String agentSecret = UUID.randomUUID().toString();
     /** short GUID of agent  */
     private String agentShortGuid;
 
+    /** manager for services registered in agent  */
+    private final AgentServices agentServices = new AgentServicesImpl(this);
+
+    /** external configuration reader */
+    private final AgentConfigReader agentConfigReader = new AgentConfigReaderImpl(this);
     /** manager for threads in Agent system */
     private final AgentThreads agentThreads = new AgentThreadsImpl(this);
     /** manager for timers in Agent system */
     private final AgentTimers agentTimers = new AgentTimersImpl(this);
     /** manager for registrations */
     private final AgentRegistrations agentRegistrations = new AgentRegistrationsImpl(this);
-    /** manager for services registered in agent  */
-    private final AgentServices agentServices = new AgentServicesImpl(this);
     /** manager for agent connections to other agents */
     private final AgentConnectors agentConnectors = new AgentConnectorsImpl(this);
     /** manager for events from Agent and all services
@@ -62,10 +62,8 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     private final AgentApi agentApi = new AgentApiImpl(this);
     /** manager for DAO objects */
     private final AgentDaoImpl agentDao = new AgentDaoImpl(this);
-
     /** tags assigned to this Agent, by these tags other Agent can search set of Agent */
     private final Set<String> agentTags = new HashSet<>();
-
     /** serializer for serialization of DistMessage to external connectors */
     protected DistSerializer serializer;
 
@@ -73,45 +71,17 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     private final DistMessageProcessor messageProcessor = new DistMessageProcessor()
             .addMethod("ping", this::pingMethod)
             .addMethod("getRegistrationKeys", this::getRegistrationKeys);
-    /** processor with functions to handle Web API requests */
-    private final DistWebApiProcessor webApiProcessor = new DistWebApiProcessor()
-            .addHandlerGet("ping", createTextHandler(param -> "pong"))
-            .addHandlerGet("createdDate", (m, req) -> req.responseOkText( getCreateDate().toString()))
-            .addHandlerGet("info", createJsonHandler(param -> getAgentInfo()))
-            .addHandlerGet("config", createJsonHandler(param -> getConfig().getHashMap(false)))
-            .addHandlerGet("threads", createJsonHandler(param -> agentThreads.getThreadsInfo()))
-            .addHandlerGet("timers", createJsonHandler(param -> agentTimers.getInfo()))
 
-            .addHandlerGet("registrations", createJsonHandler(param -> agentRegistrations.getRegistrationKeys()))
-            .addHandlerGet("registration-connected-agents", createJsonHandler(param -> agentRegistrations.getAgents()))
-            .addHandlerGet("registered-servers", createJsonHandler(param -> agentRegistrations.getServers()))
-            .addHandlerGet("registration-infos", createJsonHandler(param -> agentRegistrations.getRegistrationInfos()))
-
-            .addHandlerGet("service-keys", createJsonHandler(param -> agentServices.getServiceKeys()))
-            .addHandlerGet("service-types", createJsonHandler(param -> agentServices.getServiceTypes()))
-            .addHandlerGet("services", createJsonHandler(param -> agentServices.getServiceInfos()))
-            .addHandlerGet("service", createJsonHandler(param -> agentServices.getServiceInfo(param)))
-
-            .addHandlerGet("server-keys", createJsonHandler(param -> agentConnectors.getServerKeys()))
-            .addHandlerGet("client-keys", createJsonHandler(param -> agentConnectors.getClientKeys()))
-
-            .addHandlerGet("guid", (m, req) -> req.responseOkText( getAgentGuid()));
-
-    private BiFunction<String, AgentWebApiRequest, AgentWebApiResponse> createTextHandler(Function<String, Object> methodToGetObj) {
-        return (m, req) -> req.responseOkText(JsonUtils.serialize(methodToGetObj.apply(req.getParamOne())));
-    }
-    private BiFunction<String, AgentWebApiRequest, AgentWebApiResponse> createJsonHandler(Function<String, Object> methodToGetObj) {
-        return (m, req) -> req.responseOkJson(JsonUtils.serialize( methodToGetObj.apply(req.getParamOne())));
-    }
-    /** create new agent */
-    public AgentInstance(DistConfig config, Map<String, Function<CacheEvent, String>> callbacksMethods, HashMap<String, DistSerializer> serializers,
+    /** create new agent - instance with all components and services */
+    public AgentInstance(DistConfig config, Map<String, Function<AgentEvent, String>> callbacksMethods, HashMap<String, DistSerializer> serializers,
                          CachePolicy policy, Map<String, DaoParams> daos) {
-
         super(null);
         this.parentAgent = this;
         log.info("CREATING NEW AGENT with guid: " + getAgentGuid() + ", configuration: " + config.getConfigGuid() + ", host: " + DistUtils.getCurrentHostName());
         this.config = config;
+        this.agentName = config.getProperty(DistConfig.AGENT_NAME, DistConfig.AGENT_UNIVERSE_NAME_DEFAULT);
         agentTags.addAll(Arrays.stream(config.getProperty(DistConfig.AGENT_TAGS, "").split(";")).filter(tag -> !tag.isEmpty()).collect(Collectors.toList()));
+        agentConfigReader.reinitialize();
         agentServices.setPolicy(policy);
         // self register of agent as service
         agentServices.registerService(this);
@@ -121,12 +91,17 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
         agentDao.createDaos(daos);
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        agentServices.reinitializeAllServices();
+        return true;
+    }
     /** get type of service: cache, measure, report, flow, space, ... */
     public DistServiceType getServiceType() {
         return DistServiceType.agent;
     }
     /** create new service UID for this service */
-    protected String createServiceUid() {
+    protected String createGuid() {
         agentShortGuid = DistUtils.generateShortGuid();
         return DistUtils.generateAgentGuid(agentShortGuid);
     }
@@ -134,19 +109,63 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     public DistComponentType getComponentType() {
         return DistComponentType.agent;
     }
-    /** get unique ID of this service */
-    public String getServiceUid() {
-        return guid;
-    }
+
     /** get basic information about service */
     public DistServiceInfo getServiceInfo() {
         // DistServiceType serviceType, String getServiceClass, String serviceGuid, LocalDateTime createdDateTime, boolean closed, Map<String, String> customAttributes
-
-        return new DistServiceInfo(getServiceType(), getClass().getName(), getServiceUid(), createDate, closed, getServiceInfoCustomMap());
+        return new DistServiceInfo(getServiceType(), getClass().getName(), getGuid(), createDate, closed, getServiceInfoCustomMap());
     }
     /** get row for registration services */
     public DistAgentServiceRow getServiceRow() {
-        return new DistAgentServiceRow(getAgentGuid(), "", getServiceType().name(), createDate, (closed)?0:1, LocalDateTime.now());
+        return new DistAgentServiceRow(getAgentGuid(), getAgentGuid(), getServiceType().name(), createDate, (closed)?0:1, LocalDateTime.now());
+    }
+    /** get distributed group name */
+    public String getDistGroup() {
+        return getConfig().getProperty(DistConfig.AGENT_GROUP, DistConfig.AGENT_GROUP_VALUE_DEFAULT);
+    }
+    /** get distributed system name */
+    public String getDistName() {
+        return getConfig().getProperty(DistConfig.AGENT_UNIVERSE, DistConfig.AGENT_UNIVERSE_NAME_DEFAULT);
+    }
+    /** get current agent name */
+    public String getAgentName() {
+        return agentName;
+    }
+    /** get type of current environment */
+    public String getEnvironmentType() {
+        return getConfig().getProperty(DistConfig.AGENT_ENVIRONMENT_TYPE, DistConfig.AGENT_ENVIRONMENT_TYPE_VALUE_DEFAULT);
+    }
+    /** get name of current environment */
+    public String getEnvironmentName() {
+        return getConfig().getProperty(DistConfig.AGENT_ENVIRONMENT_NAME, DistConfig.AGENT_ENVIRONMENT_NAME_VALUE_DEFAULT);
+    }
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("ping", createTextHandler(param -> "pong"))
+                .addHandlerGet("createdDate", (m, req) -> req.responseOkText( getCreateDate().toString()))
+                .addHandlerGet("info", createJsonHandler(param -> getAgentInfo()))
+                .addHandlerGet("kill", createJsonHandler(param -> kill()))
+                .addHandlerGet("config", createJsonHandler(param -> getConfig().getHashMap(false)))
+                .addHandlerGet("threads", createJsonHandler(param -> agentThreads.getThreadsInfo()))
+
+                .addHandlerGet("timers", createJsonHandler(param -> agentTimers.getInfo()))
+
+                .addHandlerGet("registrations", createJsonHandler(param -> agentRegistrations.getRegistrationKeys()))
+                .addHandlerGet("registration-connected-agents", createJsonHandler(param -> agentRegistrations.getAgents()))
+                .addHandlerGet("registered-servers", createJsonHandler(param -> agentRegistrations.getServers()))
+                .addHandlerGet("registration-infos", createJsonHandler(param -> agentRegistrations.getRegistrationInfos()))
+
+                .addHandlerGet("service-keys", createJsonHandler(param -> agentServices.getServiceKeys()))
+                .addHandlerGet("service-types", createJsonHandler(param -> agentServices.getServiceTypes()))
+                .addHandlerGet("services", createJsonHandler(param -> agentServices.getServiceInfos()))
+                .addHandlerGet("service", createJsonHandler(param -> agentServices.getServiceInfo(param)))
+                .addHandlerPost("service-init-all", createJsonHandler(param -> agentServices.initializeAllPossible()))
+
+                .addHandlerGet("server-keys", createJsonHandler(param -> agentConnectors.getServerKeys()))
+                .addHandlerGet("client-keys", createJsonHandler(param -> agentConnectors.getClientKeys()))
+
+                .addHandlerGet("guid", (m, req) -> req.responseOkText( getAgentGuid()));
     }
     /** get custom map of info about service */
     public Map<String, String> getServiceInfoCustomMap() {
@@ -159,11 +178,19 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     /** initialize agent - server, application, jdbc, kafka */
     public void initializeAgent() {
         log.info("Initializing agent for guid: " + guid);
-        agentRegistrations.createRegistrations();
-        agentConnectors.openServers();
+        // TODO: check if all items are initialized
+        agentRegistrations.reinitialize();
+        agentConnectors.reinitialize();
         agentApi.openApis();
     }
-
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
+    /** check if Agent configuration has given property by name */
+    public boolean hasConfigProperty(String propName) {
+        return getConfig().hasProperty(propName);
+    }
     /** add issue with method and exception */
     public void addIssue(String methodName, Exception ex) {
         agentIssues.addIssue(new DistIssue(this, methodName, ex));
@@ -184,11 +211,6 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
         return createDate;
     }
 
-    @Override
-    public String getGuid() {
-        return guid;
-    }
-
     /** get secret generated or set for this agent */
     public String getAgentSecret() {
         return agentSecret;
@@ -200,8 +222,10 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     }
     /** get high-level information about this agent */
     public AgentInfo getAgentInfo() {
-        return new AgentInfo(guid, createDate, closed,
+        return new AgentInfo(guid, getDistName(), getAgentName(), createDate, closed,
                 getAgentTags(),
+                componentList.stream().map(c -> c.getComponentType().name()).toList(),
+                agentConfigReader.getInfo(),
                 messageProcessor.getInfo(),
                 agentApi.getInfo(),
                 agentConnectors.getInfo(),
@@ -214,6 +238,15 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
                 getAgentIssues().getIssues().size());
     }
 
+    /** kill this agent - close it and mark is killed */
+    public AgentKillStatus kill() {
+        close();
+        return new AgentKillStatus(guid, createDate, LocalDateTime.now());
+    }
+    /** get component to read configuration from external sources */
+    public AgentConfigReader getConfigReader() {
+        return agentConfigReader;
+    }
     /** get agent threads manager */
     public AgentThreads getAgentThreads() {
         return agentThreads;
@@ -250,10 +283,6 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
     public AgentApi getAgentApi() {
         return agentApi;
     }
-    /** returns true if agent has been already closed */
-    public boolean isClosed() {
-        return closed;
-    }
 
     /** close all items in this agent */
     public void onClose() {
@@ -279,8 +308,8 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
         agentDao.close();
         log.info("Agent is trying to close message processors, agent: " + guid + ", ErrorMessagesCount: " + messageProcessor.getErrorMessagesCount());
         messageProcessor.close();
-        log.info("Agent is trying to close WebAPIs, agent: " + guid + ", RequestHandlersCount: " + webApiProcessor.getRequestHandlersCount());
-        webApiProcessor.close();
+        log.info("Agent is trying to close ConfigReader, agent: " + guid + ", ReadersCount: " + agentConfigReader.getReadersCount());
+        agentConfigReader.close();
         log.info("Agent is fully closed!, agent: " + guid);
     }
 
@@ -289,10 +318,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
         log.info("Process message by AgentInstance, message: " + msg);
         return messageProcessor.process(msg.getMethod(), msg);
     }
-    /** handle API request in this Web API for this service */
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        return webApiProcessor.handleRequest(request);
-    }
+
     /** create new message builder starting this agent */
     public DistMessageBuilder createMessageBuilder() {
         return DistMessageBuilder.empty().fromAgent(this);
@@ -352,7 +378,10 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
             return msg.pong(getAgentGuid());
         }
     }
-
+    /** register new config group */
+    public DistConfigGroup registerConfigGroup(String groupName) {
+        return config.registerConfigGroup(groupName);
+    }
     /** method to get registration keys for this agent */
     private DistMessage getRegistrationKeys(String methodName, DistMessage msg) {
         getAgentRegistrations().getRegistrationKeys();
@@ -362,7 +391,23 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Ag
 
     /** set this Agent instance as default one for current JVM */
     public Agent setAsDefaultAgent() {
+        log.info("Set current agent as default in DistFactory, agent GUID: " + getAgentGuid());
         DistFactory.setDefaultAgent(this);
         return this;
     }
+    /** wait in this thread till agent would be killed by external command */
+    public void waitTillKill() {
+        // TODO: implement waiting here in this thread till agent is killed by external command
+        try {
+            log.info("Agent will be waiting in this thread till closed, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
+            while (!closed) {
+                log.trace("Waiting for agent to be killed.");
+                Thread.sleep(5000L);
+            }
+            log.info("Agent has been closed with success, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
+        } catch (InterruptedException ex) {
+            log.info("Agent will be waiting in this thread till closed, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
+        }
+    }
+
 }

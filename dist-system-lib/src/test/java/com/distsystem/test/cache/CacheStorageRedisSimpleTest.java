@@ -22,7 +22,7 @@ public class CacheStorageRedisSimpleTest {
         String host = "localhost";
         int port = 6379;
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageRedis(host, port)
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_DAY)
                 .withTimerStorageClean(CacheMode.TIME_ONE_HOUR)

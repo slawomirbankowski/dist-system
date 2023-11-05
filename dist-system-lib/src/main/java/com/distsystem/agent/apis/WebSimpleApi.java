@@ -40,6 +40,8 @@ public class WebSimpleApi extends AgentWebApi {
     private WebSimpleApi.WebSimpleApiHandler httpHandler;
     /** port of this Web API server */
     private final int webApiPort;
+    /** if API is started */
+    private boolean started = false;
 
     /** creates new Web API and initialize it */
     public WebSimpleApi(AgentApi api) {
@@ -56,10 +58,12 @@ public class WebSimpleApi extends AgentWebApi {
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newFixedThreadPool(10)); // set default thread as Executor
             httpServer.start();
+            started = true;
             log.info("Started HTTP server as Agent Web API on port: " + webApiPort +", agent: " + parentApi.getAgent().getAgentGuid());
         } catch (Exception ex) {
             log.warn("Cannot start HTTP server as Agent Web API, reason: " + ex.getMessage());
             parentApi.getAgent().getAgentIssues().addIssue("WebSimpleApi.startApi", ex);
+            started = false;
         }
     }
     /** get type of this Agent Web API */
@@ -82,6 +86,7 @@ public class WebSimpleApi extends AgentWebApi {
         try {
             log.info("Try to close Agent Web API");
             httpServer.stop(3);
+            started = false;
         } catch (Exception ex) {
             parentApi.getAgent().getAgentIssues().addIssue("WebSimpleApi.close", ex);
         }
@@ -111,7 +116,7 @@ public class WebSimpleApi extends AgentWebApi {
                 handledRequestsCount.incrementAndGet();
                 AgentWebApiRequest req = new AgentWebApiRequest(reqSeq, startTime, t.getProtocol(), t.getRequestMethod(), t.getRequestURI(), t.getRequestHeaders(), t.getRequestBody().readAllBytes());
                 log.info(">>>>> HANDLE REQUEST [" + reqSeq + "], protocol: " + t.getProtocol() + ", method: " + t.getRequestMethod() + ", HEADERS.size: " + t.getRequestHeaders().size() + ", URI: " + t.getRequestURI().toString() + ", service: " + req.getServiceName());
-                AgentWebApiResponse response = parentApi.getAgent().getAgentServices().handleRequest(req);
+                AgentWebApiResponse response = parentApi.getAgent().getAgentServices().dispatchRequest(req);
                 var respBytes = response.getResponseContent();
                 t.getResponseHeaders().putAll(response.getHeaders());
                 long totalTime = System.currentTimeMillis() - startTime;

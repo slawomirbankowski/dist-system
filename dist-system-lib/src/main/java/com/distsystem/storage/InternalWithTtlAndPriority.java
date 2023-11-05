@@ -5,7 +5,7 @@ import com.distsystem.api.enums.CacheStorageType;
 import com.distsystem.api.info.CacheObjectInfo;
 import com.distsystem.base.CacheStorageBase;
 import com.distsystem.interfaces.Cache;
-import com.distsystem.util.measure.TimedResult;
+import com.distsystem.agent.util.measure.TimedResult;
 import com.distsystem.utils.DistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,16 @@ public class InternalWithTtlAndPriority extends CacheStorageBase {
 
   public InternalWithTtlAndPriority(Cache cache) {
     super(cache);
-    this.maxObjectCount = cache.getConfig().getPropertyAsInt(DistConfig.CACHE_MAX_LOCAL_OBJECTS, DistConfig.CACHE_MAX_LOCAL_OBJECTS_VALUE);
-    this.maxItemCount = cache.getConfig().getPropertyAsInt(DistConfig.CACHE_MAX_LOCAL_ITEMS, DistConfig.CACHE_MAX_LOCAL_ITEMS_VALUE);
+    this.maxObjectCount = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS, DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS_VALUE);
+    this.maxItemCount = cache.getConfig().getPropertyAsInt(DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS, DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS_VALUE);
     this.byPriority = new TreeMap<>();
     this.byKey = new HashMap<>();
+  }
+
+  /** read configuration and re-initialize this component */
+  public boolean componentReinitialize() {
+    // nothing to be done here
+    return true;
   }
 
   @Override

@@ -31,7 +31,11 @@ public class KafkaStorage extends CacheStorageBase {
         // TODO: implement checking connection to Kafka
         return true;
     }
-
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        //
+        return true;
+    }
     /** get additional info parameters for this storage */
     public Map<String, Object> getStorageAdditionalInfo() {
         return Map.of();

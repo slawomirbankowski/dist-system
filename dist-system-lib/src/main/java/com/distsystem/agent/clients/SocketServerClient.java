@@ -65,11 +65,17 @@ public class SocketServerClient extends AgentClientBase implements AgentClient, 
         return "socket://" + host + ":" + port;
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** initialize client - connecting or reconnecting */
     public boolean initialize() {
         try {
             log.info("Initializing socket client for agent: " + parentAgent.getAgentGuid() + ", isServer: " + isServer + ", host: " + host + ", port: " + port + ", client UID: " + clientGuid);
-            int socketTimeout = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_SOCKET_CLIENT_TIMEOUT, DistConfig.AGENT_SERVER_SOCKET_CLIENT_TIMEOUT_DEFAULT_VALUE);
+            int socketTimeout = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT, DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT_DEFAULT_VALUE);
             socket.setSoTimeout(socketTimeout);
             host = socket.getInetAddress().getHostAddress();
             port = socket.getPort();
@@ -175,7 +181,7 @@ public class SocketServerClient extends AgentClientBase implements AgentClient, 
         }
     }
     /** close this client */
-    public void close() {
+    protected void onClose() {
         try {
             working = false;
             log.info("Closing socket for GUID: " + clientGuid);

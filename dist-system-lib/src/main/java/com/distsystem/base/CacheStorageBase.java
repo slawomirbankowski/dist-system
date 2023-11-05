@@ -41,8 +41,8 @@ public abstract class CacheStorageBase implements CacheStorage, AgentComponent {
         this.cache = cache;
         this.storageUid = DistUtils.generateStorageGuid(getClass().getSimpleName());
         this.distSerializer = cache.getAgent().getSerializer();
-        this.maxObjects = cache.getConfig().getPropertyAsLong(DistConfig.CACHE_MAX_LOCAL_OBJECTS, 1000);
-        this.maxItems = cache.getConfig().getPropertyAsLong(DistConfig.CACHE_MAX_LOCAL_ITEMS, 1000);
+        this.maxObjects = cache.getConfig().getPropertyAsLong(DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS, 1000);
+        this.maxItems = cache.getConfig().getPropertyAsLong(DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS, 1000);
     }
 
     /** get type of this component */

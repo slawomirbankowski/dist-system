@@ -1,29 +1,29 @@
 package com.distsystem.agent.impl;
 
-import com.distsystem.api.DaoParams;
-import com.distsystem.api.enums.DistComponentType;
+import com.distsystem.api.*;
 import com.distsystem.api.enums.DistDaoType;
+import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentDaoInfo;
+import com.distsystem.api.info.AgentDaoSimpleInfo;
 import com.distsystem.api.info.AgentDaosInfo;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
-import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Dao;
 import com.distsystem.dao.DaoElasticsearchBase;
 import com.distsystem.dao.DaoJdbcBase;
 import com.distsystem.dao.DaoKafkaBase;
 import com.distsystem.interfaces.AgentDao;
+import com.distsystem.utils.DistWebApiProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** manager for DAOs - all external data access objects to JDBC, Kafka, Redis, Elasticsearch */
-public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent {
+public class AgentDaoImpl extends ServiceBase implements AgentDao {
 
     /** local logger for this class */
     protected static final Logger log = LoggerFactory.getLogger(AgentDaoImpl.class);
@@ -38,21 +38,88 @@ public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent 
     ));
     /** sequence for getting DAO object */
     private final AtomicLong getSequence = new AtomicLong();
+    /** created counter */
+    private final AtomicLong createdCount = new AtomicLong();
 
     /** create new DAO manager */
     public AgentDaoImpl(Agent parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        parentAgent.getAgentServices().registerService(this);
+    }
+    /** get type of service: cache, measure, report, flow, space, ... */
+    public DistServiceType getServiceType() {
+        return DistServiceType.daos;
+    }
+    /** process message, returns message with status */
+    public DistMessage processMessage(DistMessage msg) {
+        return msg.notSupported();
     }
 
-
-    /** get type of this component */
-    public DistComponentType getComponentType() {
-        return DistComponentType.daos;
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
     }
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()))
+                .addHandlerGet("dao-infos", (m, req) -> req.responseOkJsonSerialize(getDaoInfos()))
+                .addHandlerGet("dao-info", (m, req) -> req.responseOkJsonSerialize(daoInfo(req.getParamOne())))
+                .addHandlerPost("dao-close", (m, req) -> req.responseOkJsonSerialize(daoClose(req.getParamOne())))
+                .addHandlerPost("dao-reconnect", (m, req) -> req.responseOkJsonSerialize(daoReconnect(req.getParamOne())))
+                .addHandlerPost("dao-test", (m, req) -> req.responseOkJsonSerialize(daoTest(req.getParamOne())))
+                .addHandlerGet("keys", (m, req) -> req.responseOkJsonSerialize(daos.values().stream().map(d -> d.getGuid())))
+                .addHandlerGet("producer-keys", (m, req) -> req.responseOkJsonSerialize(getDaoProducerKeys()));
+    }
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
+    /** get DAO by guid or empty */
+    public Optional<Dao> getDaoOrEmpty(String daoGuid) {
+        Dao d = daos.get(daoGuid);
+        if (d != null) {
+            return Optional.of(d);
+        } else {
+            return Optional.empty();
+        }
+    }
+    /** close DAO */
+    public List<AgentDaoSimpleInfo> daoClose(String daoGuid) {
+        return getDaoOrEmpty(daoGuid).stream().map(d -> {
+            d.closeDao();
+            return d.getSimpleInfo();
+        }).toList();
+    }
+    /** info for DAO */
+    public List<AgentDaoInfo> daoInfo(String daoGuid) {
+        return getDaoOrEmpty(daoGuid).stream().map(d -> d.getInfo()).toList();
+    }
+    /** simple info for DAO */
+    public List<AgentDaoSimpleInfo> daoSimpleInfo(String daoGuid) {
+        return getDaoOrEmpty(daoGuid).stream().map(d -> d.getSimpleInfo()).toList();
+    }
+    /** */
+    public String daoReconnect(String daoGuid) {
+        //return getDaoOrEmpty(daoGuid).stream().map(d -> d.re()).toList();
+        return "";
+    }
+    /** */
+    public String daoTest(String daoGuid) {
+
+
+        return "";
+    }
+    /** */
+    public Set<String> getDaoProducerKeys() {
+        return daoProducers.keySet();
+    }
+    /** */
+    public List<AgentDaoInfo> getDaoInfos() {
+        log.info("!!!!!!!!!!!!!!!!!!!! DAO info - current daos: " + daos.size());
+        return daos.values().stream().map(d -> d.getInfo()).toList();
     }
     /** get DAO for key and class */
     public <T extends Dao> Optional<T> getOrCreateDao(Class<T> daoClass, DaoParams params) {
@@ -71,7 +138,7 @@ public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent 
         if (dao.isPresent()) {
             return dao.get();
         } else {
-            throw new IllegalArgumentException("Cannot create ");
+            throw new IllegalArgumentException("Cannot create DAO");
         }
     }
     /** get DAO for key and class */
@@ -108,7 +175,6 @@ public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent 
         }
         return Optional.of(dao);
     }
-
     /** create NEW dao and put it into DAO map */
     public <T extends Dao> Optional<T> createDao(String key, Class<T> daoClass, DaoParams params) {
         var producer = daoProducers.get(daoClass.getName());
@@ -116,6 +182,7 @@ public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent 
             return Optional.empty();
         };
         var newDao = (T)producer.apply(params);
+        createdCount.incrementAndGet();
         log.info("Created new DAO for key: " + key + ", class: " + daoClass.getName());
         daos.put(key, newDao);
         return Optional.of(newDao);
@@ -156,10 +223,10 @@ public class AgentDaoImpl extends Agentable implements AgentDao, AgentComponent 
         return new AgentDaosInfo(daos.values().stream().map(Dao::getInfo).collect(Collectors.toList()), daoProducers.keySet());
     }
     /** close all DAOs, clear the map with DAOs  */
-    public void close() {
+    protected void onClose() {
         synchronized (daos) {
             log.info("Closing DAOs for agent: " + parentAgent.getAgentGuid() +", count: " + daos.size());
-            daos.values().stream().forEach(Dao::close);
+            daos.values().stream().forEach(Dao::closeDao);
             daos.clear();
         }
     }

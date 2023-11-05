@@ -18,7 +18,7 @@ public class CacheSimpleTest {
         log.info("START------");
 
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheMaxObjectsAndItems(30, 100)
                 .createCacheInstance();
@@ -28,13 +28,13 @@ public class CacheSimpleTest {
         assertNotNull( cache.getCacheGuid(), "Cache GUID should not be null");
         assertEquals(cache.getObjectsCount(), 0, "There should be 0 objects in cache");
         assertEquals(cache.getItemsCount(), 0, "There should be 0 objects in cache");
-        assertEquals(cache.getClosed(), false, "Cache should not be closed");
+        assertEquals(cache.isClosed(), false, "Cache should not be closed");
         assertEquals(cache.getStorageKeys().size(), 1, "There should be 1 storage in cache");
         log.info("Config GUID: " + cache.getConfig().getConfigGuid());
         log.info("Cache GUID: " + cache.getCacheGuid());
         log.info("Cache getObjectsCount: " + cache.getObjectsCount());
         log.info("Cache getItemsCount: " + cache.getItemsCount());
-        log.info("Cache getClosed: " + cache.getClosed());
+        log.info("Cache getClosed: " + cache.isClosed());
         log.info("Cache storages: " + cache.getStorageKeys());
         for (int i=0; i<30; i++) {
             // get 30 times the same value

@@ -19,7 +19,7 @@ public class CachePriorityClearTest {
     public void performanceTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheObjectTimeToLive(CacheMode.TIME_ONE_HOUR)
                 .withCacheMaxObjectsAndItems(500, 3000)

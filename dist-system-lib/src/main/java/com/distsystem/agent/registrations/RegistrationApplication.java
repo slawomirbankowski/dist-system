@@ -34,7 +34,7 @@ public class RegistrationApplication extends RegistrationBase {
     /** run for initialization in classes */
     @Override
     public void onInitialize() {
-        urlString = parentAgent.getConfig().getProperty(DistConfig.CACHE_APPLICATION_URL);
+        urlString = parentAgent.getConfig().getProperty(DistConfig.AGENT_CACHE_APPLICATION_URL);
         try {
             log.info("Connecting to dist-cache application, URL: " + urlString);
             applicationConn = HttpConnectionHelper.createHttpClient(urlString);
@@ -44,6 +44,17 @@ public class RegistrationApplication extends RegistrationBase {
         }
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+
+        if (applicationConn != null) {
+
+        }
+        onInitialize();
+
+        return true;
+    }
     @Override
     protected boolean onIsConnected() {
         return false;

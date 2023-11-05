@@ -7,7 +7,7 @@ import java.util.Queue;
 /** Interface for Issue manager to have possibilities to add and list issues added by services connected to Agent.
  * Issues are waiting in a queue with limited size, it means that the oldest issues would be removed forever.
  * */
-public interface AgentIssues extends IssueHandler {
+public interface AgentIssues extends IssueHandler, DistService {
 
     /** add issue to agent to be revoked by parent
      * issue could be Exception, Error, problem with connecting to storage,
@@ -15,6 +15,5 @@ public interface AgentIssues extends IssueHandler {
     void addIssue(DistIssue issue);
     /** get all recent issues */
     Queue<DistIssue> getIssues();
-    /** close this manager for issues */
-    void close();
+
 }

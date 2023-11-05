@@ -1,4 +1,4 @@
-package com.distsystem.util.measure;
+package com.distsystem.agent.util.measure;
 
 import java.util.function.Supplier;
 

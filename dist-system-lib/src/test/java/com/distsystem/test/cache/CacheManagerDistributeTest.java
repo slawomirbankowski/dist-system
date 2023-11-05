@@ -15,7 +15,7 @@ public class CacheManagerDistributeTest {
     public void distributeAgentsTest() {
         log.info("START------");
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest") // set friendly cache name
+                .withUniverseName("GlobalCacheTest") // set friendly cache name
                 .withServerSocketDefaultPort() // open TCP port for listening to commands and external cache agents
                 .withRegisterApplication("https://localhost:8080/") // connect to cache standalone application to synchronize cache agents
                 .withCacheStorageHashMap() // add storage build of HashMap manager by cache

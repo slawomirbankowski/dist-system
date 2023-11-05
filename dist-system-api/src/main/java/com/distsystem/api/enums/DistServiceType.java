@@ -14,20 +14,30 @@ package com.distsystem.api.enums;
  * */
 public enum DistServiceType {
     agent, // agent service to bind all other services, providing communication, thread management, issues and events management
+    api,
     auth, // authentication and authorization
-    receiver,
     cache, // distributed cache
-    measure, // measures in distributed environment
-    space, // shared spaces with objects with owners but allowed to be modified by anyone
-    flow, // flow of rows in distributed environment
-    objects, // shared read-only distributed objects, cached and distributed like key-value store
-    ml, // ML manager to create ML models
-    report, // executing reports based on storages
-    storage, // storages that can be defined anywhere and are available everywhere
     config,
-    schedule,
+    configreader,
+    connectors, //
+    daos,
+    events,
+    flow, // flow of rows in distributed environment
+    issues,
+    measure, // measures in distributed environment
+    ml, // ML manager to create ML models
+    objects, // shared read-only distributed objects, cached and distributed like key-value store
+    receiver,
+    registrations,
+    remote, // remote execution of methods on registred objects
+    report, // executing reports based on storages
     semaphores, // service with distributed semaphores
     security, // distributed security: authentication AND authorization
-    remote, // remote execution of methods on registred objects
+    services,
+    schedule,
+    space, // shared spaces with objects with owners but allowed to be modified by anyone
+    storage, //     /** update configuration of this Service to add registrations, services, servers, ... */
+    threads,
+    timers,
     custom
 }

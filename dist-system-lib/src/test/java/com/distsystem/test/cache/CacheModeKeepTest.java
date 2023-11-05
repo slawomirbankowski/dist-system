@@ -17,7 +17,7 @@ public class CacheModeKeepTest {
     public void modeKeepTest() {
         log.info("START ------ clean test");
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withCacheStorageHashMap()
                 .withCacheObjectTimeToLive(CacheMode.TIME_TWO_SECONDS)
                 .withTimerStorageClean(CacheMode.TIME_TWO_SECONDS)
@@ -35,7 +35,7 @@ public class CacheModeKeepTest {
         DistUtils.sleep(2000);
         assertEquals(cache.getObjectsCount(), 30, "There should be 30 objets in cache");
         cache.close();
-        assertTrue(cache.getClosed(), "Cache should be closed");
+        assertTrue(cache.isClosed(), "Cache should be closed");
         assertEquals(cache.getObjectsCount(), 0, "There should be no objects in cache after close");
         log.info("END-----");
     }

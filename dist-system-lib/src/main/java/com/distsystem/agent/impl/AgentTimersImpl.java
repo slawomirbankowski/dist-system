@@ -1,9 +1,15 @@
 package com.distsystem.agent.impl;
 
 import com.distsystem.agent.AgentInstance;
+import com.distsystem.api.AgentWebApiRequest;
+import com.distsystem.api.AgentWebApiResponse;
+import com.distsystem.api.DistConfig;
+import com.distsystem.api.DistMessage;
 import com.distsystem.api.enums.DistComponentType;
+import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentTimerInfo;
 import com.distsystem.api.info.AgentTimerTaskInfo;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.AgentTimers;
 import org.slf4j.Logger;
@@ -16,7 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** implementation of timer manager with scheduled tasks */
-public class AgentTimersImpl extends Agentable implements AgentTimers, AgentComponent {
+public class AgentTimersImpl extends ServiceBase implements AgentTimers {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentTimersImpl.class);
@@ -30,17 +36,38 @@ public class AgentTimersImpl extends Agentable implements AgentTimers, AgentComp
     /** creates service manager for agent with parent agent assigned */
     public AgentTimersImpl(AgentInstance parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        parentAgent.getAgentServices().registerService(this);
     }
 
+    /** get type of service: cache, measure, report, flow, space, ... */
+    public DistServiceType getServiceType() {
+        return DistServiceType.timers;
+    }
+    /** process message, returns message with status */
+    public DistMessage processMessage(DistMessage msg) {
+        return msg.notSupported();
+    }
+
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
+    }
     /** get type of this component */
     public DistComponentType getComponentType() {
         return DistComponentType.timers;
     }
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
-    }
+
     /** get number of timer tasks */
     public int getTimerTasksCount() {
         return timerTasks.size();
@@ -52,7 +79,7 @@ public class AgentTimersImpl extends Agentable implements AgentTimers, AgentComp
 
     /** schedule timer */
     public void setUpTimer(String timerName, String delayConfigName, long defaultTimerValue, Function<String, Boolean> onTask) {
-        long timerPeriod = getParentAgent().getConfig().getPropertyAsLong(delayConfigName, defaultTimerValue);
+        long timerPeriod = getAgent().getConfig().getPropertyAsLong(delayConfigName, defaultTimerValue);
         setUpTimer(timerName, timerPeriod, timerPeriod, onTask);
     }
     /** set-up timer for given method */
@@ -83,6 +110,13 @@ public class AgentTimersImpl extends Agentable implements AgentTimers, AgentComp
         timerTasks.add(agentTask);
         timer.scheduleAtFixedRate(taskToBeScheduled, delayMs, periodMs);
     }
+    /** cancel timer with task for given name */
+    public boolean cancelTimer(String timerName) {
+        timerTasks.stream().filter(tt -> tt.getName().equals(timerName)).forEach(tt -> {
+            tt.close();
+        });
+        return true;
+    }
     /** get list of infos for timer tasks */
     public List<AgentTimerTaskInfo> getInfoTasks() {
         return timerTasks.stream().map(t -> t.toInfo()).collect(Collectors.toList());
@@ -94,7 +128,7 @@ public class AgentTimersImpl extends Agentable implements AgentTimers, AgentComp
     }
 
     /** close all tasks and timer */
-    public void close() {
+    protected void onClose() {
         log.info("Closing all tasks for agent: " + getParentAgentGuid() + ", tasks: " + timerTasks.size());
         timerTasks.stream().forEach(tt -> tt.close());
         log.info("Closing timer");

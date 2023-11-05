@@ -14,11 +14,13 @@ import com.distsystem.api.*;
 import com.distsystem.api.info.AgentServerInfo;
 import com.distsystem.api.info.ClientInfo;
 import com.distsystem.base.ServerBase;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.base.dtos.DistAgentRegisterRow;
 import com.distsystem.base.dtos.DistAgentServerRow;
 import com.distsystem.interfaces.*;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistMapTimeStorage;
+import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.HashMapMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /** manager for connections inside agent - servers and clients */
-public class AgentConnectorsImpl extends Agentable implements AgentConnectors, AgentComponent {
+public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentConnectorsImpl.class);
@@ -54,38 +57,67 @@ public class AgentConnectorsImpl extends Agentable implements AgentConnectors, A
     private final java.util.ArrayList<AgentClient> clientTable = new ArrayList<>();
     /** messages already sent with callbacks */
     private final DistMapTimeStorage<DistMessageFull> sentMessages = new DistMapTimeStorage();
+    /** opened server counter */
+    private final AtomicLong openedServersCount = new AtomicLong();
+    /** check counter */
+    private final AtomicLong checkCount = new AtomicLong();
 
     /** create new connectors */
     public AgentConnectorsImpl(Agent parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        parentAgent.getAgentServices().registerService(this);
+    }
+    /** get type of service: cache, measure, report, flow, space, ... */
+    public DistServiceType getServiceType() {
+        return DistServiceType.connectors;
+    }
+    /** process message, returns message with status */
+    public DistMessage processMessage(DistMessage msg) {
+        return msg.notSupported();
     }
 
-
-    /** get type of this component */
-    public DistComponentType getComponentType() {
-        return DistComponentType.connectors;
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
     }
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()))
+                .addHandlerGet("client-keys", (m, req) -> req.responseOkJsonSerialize(getClientKeys()))
+                .addHandlerGet("clients-local", (m, req) -> req.responseOkJsonSerialize(localConnectors.values().stream().map(c -> c.getClientInfo()).toList()))
+                .addHandlerGet("servers", (m, req) -> req.responseOkJsonSerialize(servers.values().stream().map(s -> s.getInfo()).toList()))
+                .addHandlerGet("server-rows", (m, req) -> req.responseOkJsonSerialize(agentServers.values().stream().toList()))
+                .addHandlerGet("clients-table", (m, req) -> req.responseOkJsonSerialize(clientTable.stream().map(c -> c.getClientInfo()).toList()))
+                .addHandlerGet("client-infos", (m, req) -> req.responseOkJsonSerialize(getClientTableInfos()))
+                .addHandlerGet("server-keys", (m, req) -> req.responseOkJsonSerialize(getServerKeys()));
+    }
+
+    public List<ClientInfo> getClientTableInfos() {
+        return clientTable.stream().map(c -> c.getClientInfo()).toList();
     }
     /** open servers for communication  */
     public void openServers() {
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_SERVER_SOCKET_PORT)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_PORT)) {
             addNewServer(new AgentServerSocket(parentAgent));
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_SERVER_HTTP_PORT)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT)) {
             addNewServer(new AgentHttpServer(parentAgent));
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_SERVER_DATAGRAM_PORT)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_CONNECTORS_SERVER_DATAGRAM_PORT)) {
             addNewServer(new AgentDatagramServer(parentAgent));
         }
-        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_SERVER_KAFKA_BROKERS)) {
+        if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_CONNECTORS_SERVER_KAFKA_BROKERS)) {
             addNewServer(new AgentKafkaServer(parentAgent));
         }
         log.info("Set up timer to check servers and clients for agent: " + getParentAgentGuid() +", servers count: " + servers.size());
-        parentAgent.getAgentTimers().setUpTimer("TIMER_SERVER_CLIENT", DistConfig.TIMER_SERVER_CLIENT_PERIOD, DistConfig.TIMER_SERVER_CLIENT_PERIOD_DELAY_VALUE, x -> onTimeServersCheck());
+        parentAgent.getAgentTimers().setUpTimer("TIMER_SERVER_CLIENT", DistConfig.AGENT_CACHE_TIMER_SERVER_CLIENT_PERIOD, DistConfig.TIMER_SERVER_CLIENT_PERIOD_DELAY_VALUE, x -> onTimeServersCheck());
+    }
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        openServers();
+        // TODO: implement reinitialization
+        return true;
     }
     /** get full information about connectors - servers, clients */
     public AgentConnectorsInfo getInfo() {
@@ -96,23 +128,25 @@ public class AgentConnectorsImpl extends Agentable implements AgentConnectors, A
     }
     /** add new server - put in map of servers and register server to registration services */
     private void addNewServer(ServerBase serv) {
+        openedServersCount.incrementAndGet();
         servers.put(serv.getServerGuid(), serv);
         parentAgent.getAgentRegistrations().registerServer(serv.createServerRow());
     }
     /** run by agent every X seconds to check servers and clients */
     public boolean onTimeServersCheck() {
         try {
-            List<DistAgentServerRow> servers = getParentAgent().getAgentRegistrations().getServers();
-            List<DistAgentRegisterRow> connectedAgents = getParentAgent().getAgentRegistrations().getAgents();
+            checkCount.incrementAndGet();
+            List<DistAgentServerRow> servers = getAgent().getAgentRegistrations().getServers();
+            List<DistAgentRegisterRow> connectedAgents = getAgent().getAgentRegistrations().getAgents();
             log.info("Check servers for agent: " + parentAgent.getAgentGuid() + ", connectedAgents: " + connectedAgents.size() + ", servers from registrations: " + servers.size());
             parentAgent.getAgentConnectors().checkActiveServers(servers);
             // TODO: connect to all nearby agents, check statuses
             // TODO: implement communication of agent with other cache agents
-            log.info("AGENT REGISTRATION summary for guid: " + parentAgent.getAgentGuid() + ", registrations: " + getParentAgent().getAgentRegistrations().getRegistrationsCount() + ", connected agents: " + connectedAgents.size() + ", registeredServers: " + servers.size());
+            log.info("AGENT REGISTRATION summary for guid: " + parentAgent.getAgentGuid() + ", registrations: " + getAgent().getAgentRegistrations().getRegistrationsCount() + ", connected agents: " + connectedAgents.size() + ", registeredServers: " + servers.size());
             return true;
         } catch (Exception ex) {
             log.warn("Cannot communicate with other agents, reason: " + ex.getMessage(), ex);
-            parentAgent.getAgentIssues().addIssue("AgentConnectorsImpl.onTimeServersCheck", ex);
+            addIssueToAgent("AgentConnectorsImpl.onTimeServersCheck", ex);
             return false;
         }
     }
@@ -154,8 +188,8 @@ public class AgentConnectorsImpl extends Agentable implements AgentConnectors, A
                             clientTable.add(createdClient.get());
                         }
                     } catch (Exception ex) {
-
                         log.warn("Cannot create client to server: " + srv.serverguid + ", reason: " + ex.getMessage());
+                        addIssueToAgent("AgentConnectorsImpl.checkActiveServers", ex);
                     }
                 } else {
                     // client.get().send("CHECK SERVERS - PING AGENT FROM " + parentAgent.getAgentGuid());
@@ -263,12 +297,12 @@ public class AgentConnectorsImpl extends Agentable implements AgentConnectors, A
                 log.debug("Mark response for message: " + msg.getMessageUid() + ", NO original message, messages: " + sentMessages.getItemsCount());
             }
         } catch (Exception ex) {
-            parentAgent.getAgentIssues().addIssue("AgentConnectorsImpl.markResponse", ex);
+            addIssueToAgent("AgentConnectorsImpl.markResponse", ex);
         }
     }
 
     /** close all connectors, clients, servers  */
-    public void close() {
+    protected void onClose() {
         log.info("Closing connectors for agent: " + parentAgent.getAgentGuid() + ", servers: " + servers.size() + ", clients: " + clients.totalSize());
         servers.values().stream().forEach(serv -> {
             serv.close();

@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 /** interface for DAO manager to keep DAO objects for JDBC, Kafka, Elasticsearch, Redis, MongoDB and others
  * */
-public interface AgentDao {
+public interface AgentDao extends DistService {
 
     /** get DAO for key and class */
     <T extends Dao> Optional<T> getOrCreateDao(Class<T> daoClass, DaoParams params);

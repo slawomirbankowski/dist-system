@@ -13,7 +13,7 @@ import java.util.List;
  * registration services could be build based on different central technology like:
  * JDBC compliant database, Elasticsearch, Kafka, Redis, ...
  *  */
-public interface AgentRegistrations {
+public interface AgentRegistrations extends DistService {
 
     /** create initial registration services */
     void createRegistrations();
@@ -39,6 +39,5 @@ public interface AgentRegistrations {
     List<DistAgentRegisterRow> getAgents();
     /** add issue to registrations */
     void addIssue(DistIssue issue);
-    /** close registrations */
-    void close();
+
 }

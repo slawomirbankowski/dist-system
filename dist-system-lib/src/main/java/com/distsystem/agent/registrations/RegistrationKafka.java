@@ -47,8 +47,8 @@ public class RegistrationKafka extends RegistrationBase {
     /** run for initialization in classes */
     @Override
     protected void onInitialize() {
-        kafkaBrokers = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_KAFKA_BROKERS);
-        topicPrefix = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_KAFKA_TOPIC, "dist-agent-");
+        kafkaBrokers = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_BROKERS);
+        topicPrefix = parentAgent.getConfig().getProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_TOPIC, "dist-agent-");
         log.info("Creating Kafka registration object with brokers: " + kafkaBrokers + ", topic prefix: " + topicPrefix);
         registrationTopicName = topicPrefix + "register";
         serverTopicName = topicPrefix + "server";
@@ -67,6 +67,12 @@ public class RegistrationKafka extends RegistrationBase {
             log.warn("Cannot connect registration to Kafka brokers: " + ex.getMessage(), ex);
         }
     }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** read registration messages from Kafka topic */
     public Boolean readMessageRegistration(KafkaReceiver receiver, ConsumerRecord<String, String> row) {
         log.info("READ REGISTRATION FROM KAFKA !!!!!!!!! "+ row.value() + ", agents: " + agents.size());

@@ -9,10 +9,8 @@ import java.util.List;
  * All services can register methods to be executed with that direct communication Request-Response
  *
  * */
-public interface AgentApi {
+public interface AgentApi extends DistService {
 
-    /** get parent agent connected to this API implementation */
-    Agent getAgent();
     /** get first non empty Web API port */
     int getPort();
     /** open all known APIs for this agent */

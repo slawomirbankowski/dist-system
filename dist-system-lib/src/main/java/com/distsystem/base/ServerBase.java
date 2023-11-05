@@ -1,6 +1,5 @@
 package com.distsystem.base;
 
-import com.distsystem.agent.impl.Agentable;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentServerInfo;
 import com.distsystem.api.enums.DistClientType;
@@ -48,10 +47,6 @@ public abstract class ServerBase extends Agentable implements AgentServer, Agent
     @Override
     public DistConfig getConfig() {
         return parentAgent.getConfig();
-    }
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
     /** get information about this server */

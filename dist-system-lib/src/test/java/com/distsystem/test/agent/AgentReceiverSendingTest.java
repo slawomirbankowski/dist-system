@@ -3,7 +3,6 @@ package com.distsystem.test.agent;
 import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Cache;
-import com.distsystem.interfaces.Receiver;
 import com.distsystem.utils.DistUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ public class AgentReceiverSendingTest {
         log.info("START ------ agent receiver sending test");
 
         Agent agent1 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9999)
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
@@ -30,9 +29,11 @@ public class AgentReceiverSendingTest {
                 .createAgentInstance();
 
         Cache cache = agent1.getAgentServices().getCache();
+        cache.getAgent();
+        agent1.getAgentInfo();
 
         Agent agent2 = DistFactory.buildEmptyFactory()
-                .withName("GlobalAgent")
+                .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")

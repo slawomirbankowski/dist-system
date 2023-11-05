@@ -13,9 +13,13 @@ import java.util.Set;
 public class AgentInfo implements Serializable {
 
     private String agentGuid;
+    private String distName;
+    private String agentName;
     private LocalDateTime createDate;
     private boolean closed;
     private Set<String> tags;
+    private List<String> components;
+    private AgentConfigReaderInfo configReader;
     private AgentMessageProcessorInfo messageProcessor;
     private AgentApisInfo apis;
     List<DistServiceInfo> services;
@@ -28,9 +32,13 @@ public class AgentInfo implements Serializable {
     private int issuesCount;
 
     public AgentInfo(String agentGuid,
+                     String distName,
+                     String agentName,
                      LocalDateTime createDate,
                      boolean closed,
                      Set<String> tags,
+                     List<String> components,
+                     AgentConfigReaderInfo configReader,
                      AgentMessageProcessorInfo messageProcessor,
                      AgentApisInfo apis,
                      AgentConnectorsInfo connectors,
@@ -41,10 +49,14 @@ public class AgentInfo implements Serializable {
                      AgentDaosInfo daos,
                      int eventsCount, int issuesCount) {
         this.agentGuid = agentGuid;
+        this.distName = distName;
+        this.agentName = agentName;
         this.createDate = createDate;
         this.closed = closed;
         this.messageProcessor = messageProcessor;
         this.tags = tags;
+        this.components = components;
+        this.configReader = configReader;
         this.apis = apis;
         this.connectors = connectors;
         this.services = services;
@@ -67,7 +79,12 @@ public class AgentInfo implements Serializable {
     public String getAgentGuid() {
         return agentGuid;
     }
-
+    public String getDistName() {
+        return distName;
+    }
+    public String getAgentName() {
+        return agentName;
+    }
     public String getAgentHostName() { return DistUtils.getCurrentHostName(); }
     public String getCreateDate() {
         return createDate.toString();
@@ -81,6 +98,14 @@ public class AgentInfo implements Serializable {
     }
     public Set<String> getTags() {
         return tags;
+    }
+
+    public List<String> getComponents() {
+        return components;
+    }
+
+    public AgentConfigReaderInfo getConfigReader() {
+        return configReader;
     }
     public AgentMessageProcessorInfo getMessageProcessor() {
         return messageProcessor;

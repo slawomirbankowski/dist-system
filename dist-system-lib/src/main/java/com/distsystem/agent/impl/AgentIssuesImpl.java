@@ -1,10 +1,9 @@
 package com.distsystem.agent.impl;
 
-import com.distsystem.api.DistConfig;
-import com.distsystem.api.DistIssue;
-import com.distsystem.api.enums.DistComponentType;
+import com.distsystem.api.*;
+import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
-import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.AgentIssues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ import java.util.Queue;
  * Issues could be added in case of incorrect data, Exception, any error or unsupported thing in service
  * Issues could be stored and analyzed.
  * */
-public class AgentIssuesImpl extends Agentable implements AgentIssues, AgentComponent {
+public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentIssuesImpl.class);
@@ -25,12 +24,24 @@ public class AgentIssuesImpl extends Agentable implements AgentIssues, AgentComp
     /** */
     public AgentIssuesImpl(Agent parentAgent) {
         super(parentAgent);
-        parentAgent.addComponent(this);
+        parentAgent.getAgentServices().registerService(this);
     }
 
-    /** get type of this component */
-    public DistComponentType getComponentType() {
-        return DistComponentType.api;
+    /** get type of service: cache, measure, report, flow, space, ... */
+    public DistServiceType getServiceType() {
+        return DistServiceType.issues;
+    }
+    /** process message, returns message with status */
+    public DistMessage processMessage(DistMessage msg) {
+        return msg.notSupported();
+    }
+
+    /** update configuration of this Service to add registrations, services, servers, ... */
+    public void updateConfig(DistConfig newCfg) {
+    }
+    /** read configuration and re-initialize this component */
+    public boolean reinitialize() {
+        return true;
     }
     /** add issue to be revoked by parent
      * issue could be Exception, Error, problem with connecting to storage,
@@ -40,7 +51,7 @@ public class AgentIssuesImpl extends Agentable implements AgentIssues, AgentComp
             issues.add(issue);
             // add issue for registration services
             parentAgent.getAgentRegistrations().addIssue(issue);
-            while (issues.size() > parentAgent.getConfig().getPropertyAsLong(DistConfig.CACHE_ISSUES_MAX_COUNT, DistConfig.CACHE_ISSUES_MAX_COUNT_VALUE)) {
+            while (issues.size() > parentAgent.getConfig().getPropertyAsLong(DistConfig.AGENT_CACHE_ISSUES_MAX_COUNT, DistConfig.AGENT_CACHE_ISSUES_MAX_COUNT_VALUE)) {
                 issues.poll();
             }
         }
@@ -57,15 +68,11 @@ public class AgentIssuesImpl extends Agentable implements AgentIssues, AgentComp
     }
 
     /** close issues with clearing all */
-    public void close() {
+    protected void onClose() {
         synchronized (issues) {
             log.info("Closing Issues, clearing all, count: " + issues.size());
             issues.clear();
         }
     }
 
-    @Override
-    public String getGuid() {
-        return getParentAgentGuid();
-    }
 }

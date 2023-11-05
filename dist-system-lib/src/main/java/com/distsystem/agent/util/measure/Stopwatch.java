@@ -1,4 +1,4 @@
-package com.distsystem.util.measure;
+package com.distsystem.agent.util.measure;
 
 public class Stopwatch {
   private final long t0;

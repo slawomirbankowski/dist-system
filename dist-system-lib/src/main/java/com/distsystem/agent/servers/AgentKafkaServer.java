@@ -36,8 +36,8 @@ public class AgentKafkaServer extends ServerBase implements AgentServer {
     }
     public void initialize() {
         try {
-            brokers = parentAgent.getConfig().getProperty(DistConfig.AGENT_SERVER_KAFKA_BROKERS, DistConfig.AGENT_SERVER_KAFKA_BROKERS_DEFAULT_VALUE);
-            topicTemplate = parentAgent.getConfig().getProperty(DistConfig.AGENT_SERVER_KAFKA_TOPIC, "dist-agent-");
+            brokers = parentAgent.getConfig().getProperty(DistConfig.AGENT_CONNECTORS_SERVER_KAFKA_BROKERS, DistConfig.AGENT_CONNECTORS_SERVER_KAFKA_BROKERS_DEFAULT_VALUE);
+            topicTemplate = parentAgent.getConfig().getProperty(DistConfig.AGENT_CONNECTORS_SERVER_KAFKA_TOPIC, "dist-agent-");
             agentDedicatedTopicName = topicTemplate + parentAgent.getAgentShortGuid();
             String consumerGroup = topicTemplate + parentAgent.getAgentShortGuid();
             var tagTopicNames = parentAgent.getAgentTags().stream().map(tag -> ""+tag).collect(Collectors.toSet());
@@ -58,6 +58,11 @@ public class AgentKafkaServer extends ServerBase implements AgentServer {
         }
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: reinitialize this component
+        return true;
+    }
     /** receive message from Kafka */
     public Boolean receiveMessages(KafkaReceiver receiver, ConsumerRecord<String, String> kafkaMsg) {
         try {
@@ -89,8 +94,7 @@ public class AgentKafkaServer extends ServerBase implements AgentServer {
         return brokers;
     }
 
-    @Override
-    public void close() {
+    protected void onClose() {
         try {
             log.info("Try to close Kafka server for Agent: " + parentAgent.getAgentGuid());
             daoKafka.close();

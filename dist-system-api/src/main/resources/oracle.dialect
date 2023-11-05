@@ -48,3 +48,5 @@ deleteAgentService=delete from distagentservice where serviceguid=?
 createAgentIssue=create table distagentissue(agentguid text, methodname text, exceptionmessage text, exceptiontext text, parameterslist text, createddate timestamp)
 insertAgentIssue=insert into distagentissue(agentguid, methodname, exceptionmessage, exceptiontext, parameterslist, createddate) values (?,?,?,?,?,?)
 
+createConfigInit=create table distagentconfiginit(distname text, configname text, configvalue text, configpriority int default 0, createddate timestamp default now())
+selectConfigInit=select * from distagentconfiginit where ? like distname

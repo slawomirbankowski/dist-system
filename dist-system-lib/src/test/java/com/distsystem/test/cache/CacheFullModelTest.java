@@ -15,7 +15,7 @@ public class CacheFullModelTest {
     public void fullDaoModelTest() {
         log.info("START------");
         Cache cache = DistFactory.buildDefaultFactory()
-                .withName("GlobalCacheTest")
+                .withUniverseName("GlobalCacheTest")
                 .withRegisterApplication("https://localhost:9999/")
                 .withCacheStorageHashMap()
                 //.withStorageKafka("")

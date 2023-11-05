@@ -31,6 +31,11 @@ public class InternalWeakHashMapCacheStorage extends CacheStorageBase {
         return CacheStorageType.memory;
     }
 
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // nothing to be done here
+        return true;
+    }
     /** check if object has given key, optional with specific type */
     public boolean contains(String key) {
         return false;

@@ -1,7 +1,6 @@
 package com.distsystem.base;
 
 import com.distsystem.agent.AgentInstance;
-import com.distsystem.agent.impl.Agentable;
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentRegistrationInfo;
@@ -156,10 +155,6 @@ public abstract class RegistrationBase extends Agentable implements AgentCompone
     /** set active servers with last ping date before given date as inactive */
     public abstract boolean serversCheck(LocalDateTime inactivateBeforeDate, LocalDateTime deleteBeforeDate);
 
-    /** close current connector */
-    public void close() {
-        onClose();
-    }
     /** close current connector */
     protected abstract void onClose();
 

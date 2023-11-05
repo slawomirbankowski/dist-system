@@ -29,6 +29,7 @@ public class HttpClient extends AgentClientBase implements AgentClient {
 
         initialize();
     }
+
     /** get type of client - socket, http, datagram, ... */
     public DistClientType getClientType() {
         return DistClientType.http;
@@ -53,7 +54,13 @@ public class HttpClient extends AgentClientBase implements AgentClient {
             return false;
         }
     }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
 
+
+        // TODO: reinitialize this component
+        return true;
+    }
     /** send message to this client */
     public boolean send(DistMessage msg) {
         try {
@@ -69,7 +76,7 @@ public class HttpClient extends AgentClientBase implements AgentClient {
     }
 
     /** close this client */
-    public void close() {
+    protected void onClose() {
         log.info("Closing HTTP client for GUID: " + clientGuid);
         try {
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
