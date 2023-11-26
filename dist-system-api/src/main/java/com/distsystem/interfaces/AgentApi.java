@@ -13,8 +13,6 @@ public interface AgentApi extends DistService {
 
     /** get first non empty Web API port */
     int getPort();
-    /** open all known APIs for this agent */
-    void openApis();
     /** get count of APIs */
     int getApisCount();
     /** get information structure about APIs */
@@ -22,7 +20,7 @@ public interface AgentApi extends DistService {
     /** get all UIDs of servers */
     List<String> getApiTypes();
     /** check all registered APIs */
-    void checkApis();
+    List<Boolean> checkApis();
     /** close this manager */
     void close();
 

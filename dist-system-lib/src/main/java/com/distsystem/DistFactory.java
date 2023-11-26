@@ -72,6 +72,7 @@ public class DistFactory {
     }
     /** register agent in this JVM */
     public static void registerAgent(Agent agent) {
+        log.info("Register new agent in all local agents, guid: " + agent.getAgentGuid());
         createdAgents.put(agent.getAgentGuid(), agent);
     }
     /** set default agent to new value */
@@ -85,7 +86,7 @@ public class DistFactory {
                 .withCallbacks(callbacks)
                 .createCacheInstance();
     }
-    /** */
+    /** * create new instance of cache with properties */
     public static Cache createCacheInstance(DistConfig cacheCfg) {
         return DistFactory
                 .buildConfigFactory(cacheCfg)
@@ -132,7 +133,7 @@ public class DistFactory {
     }
 
     /** cache properties for factory */
-    private Properties props = new Properties();
+    private final Properties props = new Properties();
     /** callbacks for events - methods (values) to call when there is event of given type (keys) */
     private final HashMap<String, Function<AgentEvent, String>> callbacks = new HashMap<>();
     /** all serializers assigned to class name
@@ -142,11 +143,11 @@ public class DistFactory {
     /** cache policy */
     private CachePolicy policy = CachePolicyBuilder.empty().create();
     /** resolver for configuration values */
-    private ResolverManager resolver = new ResolverManager()
+    private final ResolverManager resolver = new ResolverManager()
             .addResolver(new PropertyResolver(props))
             .addResolver(new MapResolver(System.getenv()));
     /** all DAOs parameters by name to create DAO in Agent */
-    private Map<String, DaoParams> daos = new HashMap<>();
+    private final Map<String, DaoParams> daos = new HashMap<>();
 
     /** factory is just creating managers */
     private DistFactory() {
@@ -160,16 +161,24 @@ public class DistFactory {
      * this is creating Agent and Agent is creating Cache by get method
      * */
     public Cache createCacheInstance() {
-        return createAgentInstance().getAgentServices().getCache();
+        return createAgentInstance().getCache();
     }
     /** create instance of agent from current factory using properties and callbacks
      * This is just creating Agent itself
      * */
     public Agent createAgentInstance() {
+        Runtime rt = Runtime.getRuntime();
+        long memoryBefore = rt.maxMemory()-rt.freeMemory();
+        log.info("New Agent to be created...., free: " + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory());
+        long startTime = System.currentTimeMillis();
         DistConfig config = new DistConfig(props, resolver);
         AgentInstance agent = new AgentInstance(config, callbacks, serializers, policy, daos);
         DistFactory.registerAgent(agent);
         agent.initializeAgent();
+        long totalTime = System.currentTimeMillis() - startTime;
+        long memoryAfter = rt.maxMemory()-rt.freeMemory();
+        long memoryUsed = memoryAfter-memoryBefore;
+        log.info("New Agent created and initialized, guid: " + agent.getAgentGuid() +", services: " + agent.getServices().getServicesCount() + ", totalTime: " + totalTime + ", free: "  + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory() + ", used: " + memoryUsed);
         return agent;
     }
     /** set type and name of the environment */
@@ -224,7 +233,11 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_NAME, name);
         return this;
     }
-
+    /** */
+    public DistFactory withAgentParentApplication(String applicationName) {
+        props.setProperty(DistConfig.AGENT_PARENT_APPLICATION, applicationName);
+        return this;
+    }
     /** script with all agent properties */
     public DistFactory withScript(String multiLineSettingsScript) {
         Arrays.stream(multiLineSettingsScript.split("\\n")).forEach(line -> {
@@ -236,10 +249,10 @@ public class DistFactory {
     }
     /** add common properties for this cache/machine/agent/address/path */
     public DistFactory withCommonProperties() {
-        props.setProperty("CACHE_GUID", DistUtils.getCacheGuid());
-        props.setProperty("CACHE_HOST_NAME", DistUtils.getCurrentHostName());
-        props.setProperty("CACHE_HOST_ADDRESS", DistUtils.getCurrentHostAddress());
-        props.setProperty("CACHE_LOCATION_PATH", DistUtils.getCurrentLocationPath());
+        props.setProperty(DistConfig.AGENT_GLOBAL_GUID, DistUtils.getGuid());
+        props.setProperty(DistConfig.AGENT_HOST_NAME, DistUtils.getCurrentHostName());
+        props.setProperty(DistConfig.AGENT_HOST_ADDRESS, DistUtils.getCurrentHostAddress());
+        props.setProperty(DistConfig.AGENT_LOCATION_PATH, DistUtils.getCurrentLocationPath());
         return this;
     }
 
@@ -338,7 +351,7 @@ public class DistFactory {
         return this;
     }
     public DistFactory withSerializer(DistSerializerTypes serializer, String... className) {
-        // TODO: add better way to define serializers
+        // TODO: add better way to define serializers - from classes and definitions and types???
 
         //serializers.put()
         //ComplexSerializer.createComplexSerializer()
@@ -370,7 +383,7 @@ public class DistFactory {
         daos.put(name, DaoParams.elasticsearchParams(url, user, pass));
         return this;
     }
-    public DistFactory withDaoKafka(String name, String brokers, int numPartitions, short replicationFactor) {
+    public DistFactory withDaoKafka(String name, String brokers, String topicName, int numPartitions, short replicationFactor) {
         daos.put(name, DaoParams.kafkaParams(brokers, numPartitions, replicationFactor));
         return this;
     }
@@ -444,7 +457,27 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_CONNECTORS_DELETE_AFTER, ""+deleteWithoutPingMs);
         return this;
     }
-
+    public DistFactory withRegisterCleanAfterDefault() {
+        props.setProperty(DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER, ""+DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER_DEFAULT_VALUE);
+        props.setProperty(DistConfig.AGENT_CONNECTORS_DELETE_AFTER, ""+DistConfig.AGENT_CONNECTORS_DELETE_AFTER_DEFAULT_VALUE);
+        return this;
+    }
+    /** add auth storage as JDBC */
+    public DistFactory withAuthStorageJdbc(String url, String driver, String user, String pass) {
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_JDBC_URL, url);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_JDBC_DRIVER, driver);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_JDBC_USER, user);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_JDBC_PASS, pass);
+        return this;
+    }
+    /** add auth storage as Kafka topic */
+    public DistFactory withAuthStorageKafka(String brokers, String topic, int partitions, int replication) {
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_BROKERS, brokers);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_TOPIC, topic);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_PARTITIONS, ""+partitions);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_REPLICATION, ""+replication);
+        return this;
+    }
 
     /** define port for Socket communication */
     public DistFactory withServerSocketPort(int port) {
@@ -469,6 +502,10 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_CONNECTORS_SERVER_DATAGRAM_PORT, ""+port);
         return this;
     }
+    /** define default port for Datagram connection */
+    public DistFactory withServerDatagramPortDefaultValue() {
+        return withServerDatagramPort(DistConfig.AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE);
+    }
     /** define port for Kafka communication */
     public DistFactory withServerKafka(String brokers, String topicName) {
         props.setProperty(DistConfig.AGENT_CONNECTORS_SERVER_KAFKA_BROKERS, brokers);
@@ -476,7 +513,7 @@ public class DistFactory {
         return this;
     }
     /** get comma-separated list of defined cache storages */
-    private String getExistingStorageList() {
+    private String withCacheExistingStorageList() {
         String existingStorages = props.getProperty(DistConfig.AGENT_CACHE_STORAGES);
         if (existingStorages == null) {
             existingStorages = "";
@@ -485,20 +522,20 @@ public class DistFactory {
     }
     /** add storage with HashMap */
     public DistFactory withCacheStorageHashMap() {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_HASHMAP);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_HASHMAP);
         return this;
     }
     /**  */
     public DistFactory withCacheStoragePriorityQueue() {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_PRIORITYQUEUE);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_PRIORITYQUEUE);
         return this;
     }
     public DistFactory withCacheStorageWeakHashMap() {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_WEAKHASHMAP);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_WEAKHASHMAP);
         return this;
     }
     public DistFactory withCacheStorageElasticsearch(String url, String user, String pass) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_URL, url);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_USER, user);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_PASS, pass);
@@ -506,7 +543,7 @@ public class DistFactory {
     }
 
     public DistFactory withCacheStorageElasticsearchFromEnv() {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_URL, "${ELASTICSEARCH_URL}");
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_USER, "${ELASTICSEARCH_USER}");
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_PASS, "${ELASTICSEARCH_PASS}");
@@ -514,7 +551,7 @@ public class DistFactory {
     }
     /** add JDBC as external storage */
     public DistFactory withCacheStorageJdbc(String url, String driver, String user) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_URL, url);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_DRIVER, driver);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_USER, user);
@@ -523,7 +560,7 @@ public class DistFactory {
     }
     /** add JDBC as external storage */
     public DistFactory withCacheStorageJdbc(String url, String driver, String user, String pass) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_URL, url);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_DRIVER, driver);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_USER, user);
@@ -533,7 +570,7 @@ public class DistFactory {
     }
     /** add JDBC as external storage */
     public DistFactory withCacheStorageJdbcFromEnv() {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_JDBC);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_URL, "${JDBC_URL}");
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_DRIVER, "${JDBC_DRIVER}");
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_JDBC_USER, "${JDBC_USER}");
@@ -544,20 +581,20 @@ public class DistFactory {
 
     /** add LocalDisk with custom path as cache storage for large objects */
     public DistFactory withCacheStorageLocalDisk(String basePath) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_LOCAL_DISK);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_LOCAL_DISK);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_LOCALDISK_PREFIXPATH, basePath);
         return this;
     }
     /** add cache storage as Redis */
     public DistFactory withCacheStorageRedis(String url, int port) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_REDIS);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_REDIS);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_URL, url);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_PORT, ""+port);
         return this;
     }
     /** add cache storage as Mongodb */
     public DistFactory withCacheStorageMongo(String host, int port) {
-        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, getExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_MONGO);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_MONGO);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_MONGODB_HOST, host);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_MONGODB_PORT, ""+port);
         return this;

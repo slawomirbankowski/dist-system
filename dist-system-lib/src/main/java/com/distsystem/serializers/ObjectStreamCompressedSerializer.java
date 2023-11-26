@@ -1,6 +1,7 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 /** */
-public class ObjectStreamCompressedSerializer implements DistSerializer {
+public class ObjectStreamCompressedSerializer extends DistSerializerBase implements DistSerializer {
 
     private static final Logger log = LoggerFactory.getLogger(ObjectStreamCompressedSerializer.class);
 

@@ -5,12 +5,12 @@ import com.distsystem.api.enums.DistClientType;
 
 /** information class about Server manager in Agent. */
 public class AgentServerInfo {
-    private DistClientType serverType;
-    private String serverGuid;
-    private String url;
-    private int port;
-    private boolean closed;
-    private long receivedMessages;
+    private final DistClientType serverType;
+    private final String serverGuid;
+    private final String url;
+    private final int port;
+    private final boolean closed;
+    private final long receivedMessages;
 
     public AgentServerInfo(DistClientType serverType, String serverGuid, String url, int port, boolean closed, long receivedMessages) {
         this.serverType = serverType;

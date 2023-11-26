@@ -3,6 +3,7 @@ package com.distsystem.utils.resolvers;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Resolver;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -21,7 +22,8 @@ public class PropertyResolver implements Resolver {
         return Optional.of(value);
     }
 
-    /** connect */
-    public void connectAgent(Agent agent) {
+    /** get all known keys */
+    public List<String> getKnownKeys() {
+        return pr.keySet().stream().map(x -> x.toString()).toList();
     }
 }

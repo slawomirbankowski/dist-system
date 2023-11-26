@@ -1,7 +1,6 @@
 package com.distsystem.test.agent;
 
 import com.distsystem.DistFactory;
-import com.distsystem.api.enums.DistEnvironmentType;
 import com.distsystem.interfaces.*;
 import com.distsystem.utils.DistUtils;
 import org.junit.jupiter.api.Test;
@@ -22,19 +21,19 @@ public class AgentConfigReaderTest {
                 .withCommonProperties()
                 .createAgentInstance();
 
-        Cache cache = agent.getAgentServices().getCache();
+        Cache cache = agent.getCache();
         log.info("Cache: " + cache.getGuid());
 
-        AgentSemaphores semaphores = agent.getAgentServices().getSemaphores();
+        AgentSemaphores semaphores = agent.getSemaphores();
         log.info("AgentSemaphores: " + semaphores.getGuid());
 
-        AgentReports reports = agent.getAgentServices().getReports();
+        AgentReports reports = agent.getReports();
         log.info("AgentReports: " + reports.getGuid());
 
-        Receiver receiver = agent.getAgentServices().getReceiver();
+        Receiver receiver = agent.getReceiver();
         log.info("Receiver: " + receiver.getGuid());
 
-        AgentFlow flow = agent.getAgentServices().getFlow();
+        AgentFlow flow = agent.getFlow();
         log.info("AgentFlow: " + flow.getGuid());
 
         for (int i=0; i<6; i++) {

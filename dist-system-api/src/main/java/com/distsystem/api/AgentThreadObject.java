@@ -18,11 +18,11 @@ public class AgentThreadObject {
     private final LocalDateTime createdDate = LocalDateTime.now();
     /** global unique ID */
     private final String threadGuid = DistUtils.generateConnectorGuid(this.getClass().getSimpleName());
-    private String threadFriendlyName;
+    private final String threadFriendlyName;
     /** parent component of Agent system */
     private final AgentComponent parent;
     /** Thread created in Dist Agent system or Dist Service */
-    private Thread thread;
+    private final Thread thread;
 
     public AgentThreadObject(AgentComponent parent, Thread thread, String threadFriendlyName) {
         this.parent = parent;
@@ -44,7 +44,6 @@ public class AgentThreadObject {
         return thread.getName();
     }
     public Map<String, Object> getInfoMap() {
-
         return Map.of("", "");
     }
     /** check if thread has guid or name or friendly name*/
@@ -53,7 +52,13 @@ public class AgentThreadObject {
     }
     /** stop this thread */
     public AgentThreadInfo stopThread() {
-
+        if (thread != null) {
+            try {
+                thread.join(2000);
+            } catch (Exception ex) {
+                log.warn("Cannot stop thread", ex);
+            }
+        }
         return getInfo();
     }
     /** try to close stop current thread */

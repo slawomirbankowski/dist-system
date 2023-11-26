@@ -1,6 +1,6 @@
 package com.distsystem.api.info;
 
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 
 import java.time.LocalDateTime;
 import java.util.Set;

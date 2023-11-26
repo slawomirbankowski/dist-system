@@ -1,14 +1,14 @@
 package com.distsystem.api.info;
 
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 
 import java.util.List;
 
 /** information class about connectors in Agent: servers and clients */
 public class AgentConnectorsInfo {
-    private List<AgentServerInfo> createdServers;
-    private List<DistAgentServerRow> serverDefinitions;
-    private List<ClientInfo> clientInfos;
+    private final List<AgentServerInfo> createdServers;
+    private final List<DistAgentServerRow> serverDefinitions;
+    private final List<ClientInfo> clientInfos;
     public AgentConnectorsInfo(List<AgentServerInfo> createdServers, List<DistAgentServerRow> serverDefinitions, List<ClientInfo> clientInfos) {
         this.createdServers = createdServers;
         this.serverDefinitions = serverDefinitions;

@@ -46,7 +46,7 @@ public class AgentServerKafkaTest {
 
         DistUtils.sleep(3000);
 
-        Receiver receiver = agent1.getAgentServices().getReceiver();
+        Receiver receiver = agent1.getReceiver();
         receiver.registerReceiverMethod("custom", msg -> {
             log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Receive message: " + msg.getMessage());
             return msg.response("custom_pong", DistMessageStatus.ok);
@@ -54,7 +54,7 @@ public class AgentServerKafkaTest {
 
         agent1.sendMessageBroadcast(DistServiceType.agent, DistServiceType.agent, "ping", "ping", DistCallbacks.createEmpty().addCallback(DistCallbackType.onResponse, x -> { System.out.println("GOT PONG"); return true; } ));
         var msgPing = DistMessageBuilder.empty()
-                .fromService(agent1.getAgentServices().getCache())
+                .fromService(agent1.getCache())
                 .toDestination(agent2.getAgentGuid(), DistServiceType.agent, "custom")
                 .withObject("ping")
                 .build();

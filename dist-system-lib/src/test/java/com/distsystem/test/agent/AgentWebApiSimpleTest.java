@@ -37,19 +37,19 @@ public class AgentWebApiSimpleTest {
                 .withSerializerDefault()
                 .createAgentInstance();
 
-        Cache cache = agent.getAgentServices().getCache();
+        Cache cache = agent.getCache();
         log.info("Cache: " + cache.getGuid());
 
-        AgentSemaphores semaphores = agent.getAgentServices().getSemaphores();
+        AgentSemaphores semaphores = agent.getSemaphores();
         log.info("AgentSemaphores: " + semaphores.getGuid());
 
-        AgentReports reports = agent.getAgentServices().getReports();
+        AgentReports reports = agent.getReports();
         log.info("AgentReports: " + reports.getGuid());
 
-        Receiver receiver = agent.getAgentServices().getReceiver();
+        Receiver receiver = agent.getReceiver();
         log.info("Receiver: " + receiver.getGuid());
 
-        AgentFlow flow = agent.getAgentServices().getFlow();
+        AgentFlow flow = agent.getFlow();
         log.info("AgentFlow: " + flow.getGuid());
 
 

@@ -6,17 +6,17 @@ import java.util.List;
 /** simple info about cache - this is to be returned in dist-cache application */
 public class CacheInfo {
 
-    private String cacheManagerGuid;
-    private LocalDateTime createdDateTime;
-    private long checkSequence;
-    private long addedItemsSequence;
-    private boolean isClosed;
-    private long issuesCount;
-    private long eventsCount;
-    private int itemsCount;
-    private int objectsCount;
+    private final String cacheManagerGuid;
+    private final LocalDateTime createdDateTime;
+    private final long checkSequence;
+    private final long addedItemsSequence;
+    private final boolean isClosed;
+    private final long issuesCount;
+    private final long eventsCount;
+    private final int itemsCount;
+    private final int objectsCount;
     /** */
-    private List<StorageInfo> storages;
+    private final List<StorageInfo> storages;
 
     public CacheInfo(String cacheManagerGuid, LocalDateTime createdDateTime, long checkSequence, long addedItemsSequence,
                      boolean isClosed, long issuesCount, long eventsCount, int itemsCount, int objectsCount,

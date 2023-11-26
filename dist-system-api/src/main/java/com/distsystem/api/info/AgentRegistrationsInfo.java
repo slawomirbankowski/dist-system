@@ -6,10 +6,10 @@ import java.util.List;
 public class AgentRegistrationsInfo {
 
     /** */
-    private List<AgentRegistrationInfo> registrations;
-    private long checkCount;
+    private final List<AgentRegistrationInfo> registrations;
+    private final long checkCount;
     /** */
-    private List<AgentRegisteredInfo> agents;
+    private final List<AgentRegisteredInfo> agents;
     /** */
     public AgentRegistrationsInfo(List<AgentRegistrationInfo> registrations, long checkCount, List<AgentRegisteredInfo> agents) {
         this.registrations = registrations;

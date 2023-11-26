@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /** BAse class for any DAO connection to any storage: JDBC, Elasticsearch, Kafka, Redis, MongoDB, Cassandra and others... */
-public abstract class DaoBase extends Agentable implements Dao, AgentComponent {
+public abstract class DaoBase extends AgentableBase implements Dao, AgentComponent {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(DaoBase.class);
@@ -29,6 +29,11 @@ public abstract class DaoBase extends Agentable implements Dao, AgentComponent {
         super(agent);
         parentAgent.addComponent(this);
         this.params = params;
+    }
+    /** reinitialize this DAO and test it */
+    public Map<String, Object> reinitializeDao() {
+        componentReinitialize();
+        return testDao();
     }
     /** get unique ID of this DAO */
     public String getGuid() {
@@ -50,6 +55,10 @@ public abstract class DaoBase extends Agentable implements Dao, AgentComponent {
     public void usedByComponent(AgentComponent component) {
         components.put(component.getGuid(), component);
         log.info("Added component that is using DAO, DAO GUID: " + getGuid() + ", URL: " + getUrl() + ", component: " + component.getComponentType() + ", component GUID: " + component.getGuid() + ", current components: " + components.size());
+    }
+    /** */
+    public void notUsedByComponent(AgentComponent component) {
+        components.remove(component.getGuid());
     }
     /** get all structures from DAO: tables, indices, topics, Document databases, ... */
     public abstract Collection<String> getDaoStructures();

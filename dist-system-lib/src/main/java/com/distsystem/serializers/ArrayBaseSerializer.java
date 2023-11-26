@@ -1,9 +1,12 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
+
+import java.util.Map;
 
 /** serialize using JSON */
-public abstract class ArrayBaseSerializer implements DistSerializer {
+public abstract class ArrayBaseSerializer extends DistSerializerBase implements DistSerializer {
 
     @Override
     public byte[] serialize(Object obj) {

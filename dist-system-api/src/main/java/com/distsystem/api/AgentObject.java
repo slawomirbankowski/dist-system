@@ -1,7 +1,7 @@
 package com.distsystem.api;
 
 import com.distsystem.api.info.AgentRegisteredInfo;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -28,8 +28,6 @@ public class AgentObject {
     private final Set<String> registrationKeys = new HashSet<>();
     /** time of last ping from this agent */
     private LocalDateTime lastPingDate = LocalDateTime.now();
-
-    // TODO: add more useful info like last ping time, updated storages, connection network from this agent
 
     public AgentObject(AgentRegister register) {
         this.register = register;
@@ -62,8 +60,8 @@ public class AgentObject {
     /** get information about registered remove Agent */
     public AgentRegisteredInfo getRegisteredInfo() {
         return new AgentRegisteredInfo(
-                agentRegisterRow.getAgentguid(), agentRegisterRow.getHostname(), agentRegisterRow.getHostip(), agentRegisterRow.getPortnumber(),
-                lastUpdated, updatesCount.get(),  lastPingDate, createDate, agentRegisterRow.getIsactive()
+                agentRegisterRow.getAgentGuid(), agentRegisterRow.getHostName(), agentRegisterRow.getHostIp(), agentRegisterRow.getPortNumber(),
+                lastUpdated, updatesCount.get(),  lastPingDate, createDate, agentRegisterRow.getActive()
         );
     }
 
@@ -77,7 +75,7 @@ public class AgentObject {
     }
 
     public boolean isActive() {
-        return agentRegisterRow.getIsactive() == 1;
+        return agentRegisterRow.getActive() == 1;
     }
     /** */
     public LocalDateTime getCreateDate() {

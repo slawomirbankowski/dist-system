@@ -3,8 +3,8 @@ package com.distsystem.interfaces;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.api.DistIssue;
 import com.distsystem.api.info.AgentRegistrationsInfo;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 
 import java.util.List;
 
@@ -15,8 +15,6 @@ import java.util.List;
  *  */
 public interface AgentRegistrations extends DistService {
 
-    /** create initial registration services */
-    void createRegistrations();
     /** register this server */
     void registerServer(DistAgentServerRow servDto);
 

@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,9 +47,16 @@ public class WebSimpleApi extends AgentWebApi {
 
     /** creates new Web API and initialize it */
     public WebSimpleApi(AgentApi api) {
+        super(api.getAgent());
         parentApi = api;
         webApiPort = parentApi.getAgent().getConfig().getPropertyAsInt(DistConfig.AGENT_API_PORT, DistConfig.AGENT_API_PORT_DEFAULT_VALUE);
         startApi();
+
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
     }
     /** start this Agent Web API */
     public void startApi() {
@@ -62,7 +71,7 @@ public class WebSimpleApi extends AgentWebApi {
             log.info("Started HTTP server as Agent Web API on port: " + webApiPort +", agent: " + parentApi.getAgent().getAgentGuid());
         } catch (Exception ex) {
             log.warn("Cannot start HTTP server as Agent Web API, reason: " + ex.getMessage());
-            parentApi.getAgent().getAgentIssues().addIssue("WebSimpleApi.startApi", ex);
+            parentApi.getAgent().getIssues().addIssue("WebSimpleApi.startApi", ex);
             started = false;
         }
     }
@@ -81,14 +90,31 @@ public class WebSimpleApi extends AgentWebApi {
                 httpHandler.getHandledRequestsTime(),
                 httpHandler.getHandledRequestsErrors());
     }
+    /** get number of requests */
+    public long getHandledRequestsCount() {
+        return httpHandler.getHandledRequestsCount();
+    }
+    /** get total time of requests */
+    public long getHandledRequestsTime() {
+        return httpHandler.getHandledRequestsTime();
+    }
+    /** get count of errors in requests */
+    public long getHandledRequestsErrors() {
+        return httpHandler.getHandledRequestsErrors();
+    }
+
+    /** check this Web API */
+    public boolean check() {
+        return true;
+    }
     /** close this Agent Web API */
-    public void close() {
+    protected void onClose() {
         try {
             log.info("Try to close Agent Web API");
             httpServer.stop(3);
             started = false;
         } catch (Exception ex) {
-            parentApi.getAgent().getAgentIssues().addIssue("WebSimpleApi.close", ex);
+            parentApi.getAgent().getIssues().addIssue("WebSimpleApi.close", ex);
         }
     }
     /** handler of HTTP requests */
@@ -97,47 +123,52 @@ public class WebSimpleApi extends AgentWebApi {
         protected static final Logger log = LoggerFactory.getLogger(WebSimpleApiHandler.class);
         /** parent API for this web server */
         private AgentApi parentApi;
-        /** */
+        /** total number of requests handled */
         private AtomicLong handledRequestsCount = new AtomicLong();
-        /** */
+        /** total time of handled requests */
         private AtomicLong handledRequestsTime = new AtomicLong();
-        /** */
+        /** total number of errors in requests */
         private AtomicLong handledRequestsErrors = new AtomicLong();
 
         public WebSimpleApiHandler(AgentApi parentApi) {
             this.parentApi = parentApi;
         }
+
         /** handle HTTP request */
         @Override
-        public void handle(HttpExchange t) throws IOException {
+        public void handle(HttpExchange httpExchange) throws IOException {
             long reqSeq = AgentWebApi.requestSeq.incrementAndGet();
             long startTime = System.currentTimeMillis();
             try {
                 handledRequestsCount.incrementAndGet();
-                AgentWebApiRequest req = new AgentWebApiRequest(reqSeq, startTime, t.getProtocol(), t.getRequestMethod(), t.getRequestURI(), t.getRequestHeaders(), t.getRequestBody().readAllBytes());
-                log.info(">>>>> HANDLE REQUEST [" + reqSeq + "], protocol: " + t.getProtocol() + ", method: " + t.getRequestMethod() + ", HEADERS.size: " + t.getRequestHeaders().size() + ", URI: " + t.getRequestURI().toString() + ", service: " + req.getServiceName());
-                AgentWebApiResponse response = parentApi.getAgent().getAgentServices().dispatchRequest(req);
+                Map<String, Object> attributes = new HashMap<>();
+                attributes.putAll(httpExchange.getHttpContext().getAttributes());
+                //httpExchange.getHttpContext().getAttributes();
+                //httpExchange.getRequestURI().getRawPath()
+                AgentWebApiRequest req = new AgentWebApiRequest(reqSeq, startTime, httpExchange.getProtocol(), httpExchange.getRequestMethod(), httpExchange.getRequestURI(), httpExchange.getRequestHeaders(), httpExchange.getRequestBody().readAllBytes(), httpExchange.getRequestURI().getRawQuery(), attributes);
+                log.info(">>>>> HANDLE REQUEST [" + reqSeq + "], protocol: " + httpExchange.getProtocol() + ", method: " + httpExchange.getRequestMethod() + ", HEADERS.size: " + httpExchange.getRequestHeaders().size() + ", URI: " + httpExchange.getRequestURI().toString() + ", service: " + req.getServiceName());
+                AgentWebApiResponse response = parentApi.getAgent().getServices().dispatchRequest(req);
                 var respBytes = response.getResponseContent();
-                t.getResponseHeaders().putAll(response.getHeaders());
+                httpExchange.getResponseHeaders().putAll(response.getHeaders());
                 long totalTime = System.currentTimeMillis() - startTime;
                 handledRequestsTime.addAndGet(totalTime);
-                t.getResponseHeaders().put("Request-Time", List.of(""+totalTime));
-                t.getResponseHeaders().put("Request-Seq", List.of(""+reqSeq));
-                t.getResponseHeaders().put("Request-User", List.of("ANONYMOUS")); // TODO: add Authorization to request-response
-                t.getResponseHeaders().put("Agent-Guid", List.of(parentApi.getAgent().getAgentGuid()));
-                t.sendResponseHeaders(response.getResponseCode(), respBytes.length);
-                OutputStream os = t.getResponseBody();
+                httpExchange.getResponseHeaders().put("Request-Time", List.of(""+totalTime));
+                httpExchange.getResponseHeaders().put("Request-Seq", List.of(""+reqSeq));
+                httpExchange.getResponseHeaders().put("Request-User", List.of("ANONYMOUS")); // TODO: add Authorization to request-response
+                httpExchange.getResponseHeaders().put("Agent-Guid", List.of(parentApi.getAgent().getAgentGuid()));
+                httpExchange.sendResponseHeaders(response.getResponseCode(), respBytes.length);
+                OutputStream os = httpExchange.getResponseBody();
                 os.write(respBytes);
                 os.flush();
-                log.info(">>>>> END OF HANDLE REQUEST[" + reqSeq + "], totalTime: " + totalTime + ", code: " + response.getResponseCode() + " content.len: " + response.getResponseContent().length + ", headers: " + t.getResponseHeaders().size());
+                log.info(">>>>> END OF HANDLE REQUEST[" + reqSeq + "], totalTime: " + totalTime + ", code: " + response.getResponseCode() + " content.len: " + response.getResponseContent().length + ", headers: " + httpExchange.getResponseHeaders().size());
                 os.close();
             } catch (Exception ex) {
                 handledRequestsErrors.incrementAndGet();
                 log.warn("Web API Exception: " + ex.getMessage());
-                parentApi.getAgent().getAgentIssues().addIssue("WebSimpleApiHandler.handle", ex);
+                parentApi.getAgent().getIssues().addIssue("WebSimpleApiHandler.handle", ex);
                 String errorResponse = ">>>>> ERROR DURING REQUEST [" + reqSeq +  "] +, reason: " + ex.getMessage();
-                t.sendResponseHeaders(501, errorResponse.length());
-                OutputStream os = t.getResponseBody();
+                httpExchange.sendResponseHeaders(501, errorResponse.length());
+                OutputStream os = httpExchange.getResponseBody();
                 os.write(errorResponse.getBytes());
                 os.flush();
             }

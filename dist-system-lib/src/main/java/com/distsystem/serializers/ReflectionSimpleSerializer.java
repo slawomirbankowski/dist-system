@@ -1,9 +1,10 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 
 /** serializer and deserializer using reflection - get all fields and get/set values as simple Strings */
-public class ReflectionSimpleSerializer implements DistSerializer {
+public class ReflectionSimpleSerializer extends DistSerializerBase implements DistSerializer {
 
     @Override
     public byte[] serialize(Object obj) {

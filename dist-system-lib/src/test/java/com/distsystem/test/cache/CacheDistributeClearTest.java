@@ -55,12 +55,12 @@ public class CacheDistributeClearTest {
 
         DistUtils.sleep(2000);
 
-        assertEquals(1, cache1.getAgent().getAgentConnectors().getServersCount(), "There should be 1 server for agent1");
-        assertEquals(1, cache2.getAgent().getAgentConnectors().getServersCount(), "There should be 1 server for agent2");
+        assertEquals(1, cache1.getAgent().getConnectors().getServersCount(), "There should be 1 server for agent1");
+        assertEquals(1, cache2.getAgent().getConnectors().getServersCount(), "There should be 1 server for agent2");
 
         DistUtils.sleep(2000);
-        assertEquals(1, cache1.getAgent().getAgentConnectors().getClientsCount(), "There should be 1 client for agent1");
-        assertEquals(1, cache2.getAgent().getAgentConnectors().getClientsCount(), "There should be 1 client for agent2");
+        assertEquals(1, cache1.getAgent().getConnectors().getClientsCount(), "There should be 1 client for agent1");
+        assertEquals(1, cache2.getAgent().getConnectors().getClientsCount(), "There should be 1 client for agent2");
 
         log.info("Empty caches");
         assertEquals(cache1.getObjectsCount(), 0, "There should be no objects in cache");

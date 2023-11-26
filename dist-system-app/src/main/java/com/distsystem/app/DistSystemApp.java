@@ -19,7 +19,7 @@ public class DistSystemApp {
     /** start DistSystem */
     public static void main(String[] args) {
         commandLineArguments = args;
-        log.info("STARTING DistSystem REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getCacheGuid());
+        log.info("STARTING DistSystem REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getGuid());
         Agent agent = DistFactory.buildEmptyFactory()
                 .withCommonProperties()
                 .withEnvironmentVariables()

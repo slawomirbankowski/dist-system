@@ -1,7 +1,7 @@
 package com.distsystem.test;
 
 import com.distsystem.api.CacheObjectRequest;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 import com.distsystem.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

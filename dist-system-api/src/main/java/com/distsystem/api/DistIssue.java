@@ -1,7 +1,6 @@
 package com.distsystem.api;
 
-import com.distsystem.base.dtos.DistAgentIssueRow;
-import com.distsystem.interfaces.AgentComponent;
+import com.distsystem.api.dtos.DistAgentIssueRow;
 import com.distsystem.interfaces.DistService;
 import com.distsystem.utils.DistUtils;
 

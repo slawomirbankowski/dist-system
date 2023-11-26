@@ -4,6 +4,7 @@ package com.distsystem.api.enums;
 public enum DistComponentType {
     agent,
     config,
+    authjdbc,
     issues,
     events,
     connectors,
@@ -18,5 +19,6 @@ public enum DistComponentType {
     server,
     daos,
     dao,
-    receiver;
+    receiver,
+    unknown;
 }

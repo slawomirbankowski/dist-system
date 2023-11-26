@@ -7,9 +7,9 @@ import java.util.List;
 public class CacheSetBackInfo {
 
     /** info about previous objects in cache */
-    private List<CacheObjectInfo> prevObjects;
+    private final List<CacheObjectInfo> prevObjects;
     /** */
-    private CacheObjectInfo currentObject;
+    private final CacheObjectInfo currentObject;
 
     public CacheSetBackInfo(List<CacheObjectInfo> prevObjects, CacheObjectInfo currentObject) {
         this.prevObjects = prevObjects;

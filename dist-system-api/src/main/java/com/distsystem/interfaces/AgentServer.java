@@ -1,5 +1,6 @@
 package com.distsystem.interfaces;
 
+import com.distsystem.api.dtos.DistAgentServerRow;
 import com.distsystem.api.info.AgentServerInfo;
 import com.distsystem.api.DistConfig;
 
@@ -23,4 +24,6 @@ public interface AgentServer {
     void close();
     /** get information about this server */
     AgentServerInfo getInfo();
+    /** get row for current server */
+    DistAgentServerRow createServerRow();
 }

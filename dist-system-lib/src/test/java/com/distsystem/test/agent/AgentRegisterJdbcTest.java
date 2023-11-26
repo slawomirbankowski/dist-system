@@ -49,14 +49,14 @@ public class AgentRegisterJdbcTest {
         log.info("========-----> Agent1: " + agent1.getAgentInfo());
         log.info("========-----> Agent2: " + agent2.getAgentInfo());
 
-        assertEquals(2, agent1.getAgentRegistrations().getAgents().size(), "There should be 2 agents known by agent1");
-        assertEquals(2, agent2.getAgentRegistrations().getAgents().size(), "There should be 2 agents known by agent2");
+        assertEquals(2, agent1.getRegistrations().getAgents().size(), "There should be 2 agents known by agent1");
+        assertEquals(2, agent2.getRegistrations().getAgents().size(), "There should be 2 agents known by agent2");
 
-        log.info("========-----> Agent1 client keys: " + agent1.getAgentConnectors().getClientKeys());
-        log.info("========-----> Agent2 client keys: " + agent2.getAgentConnectors().getClientKeys());
+        log.info("========-----> Agent1 client keys: " + agent1.getConnectors().getClientKeys());
+        log.info("========-----> Agent2 client keys: " + agent2.getConnectors().getClientKeys());
 
-        assertEquals(1, agent1.getAgentConnectors().getClientsCount(), "There should be 1 client in agent1");
-        assertEquals(1, agent2.getAgentConnectors().getClientsCount(), "There should be 1 client in agent2");
+        assertEquals(1, agent1.getConnectors().getClientsCount(), "There should be 1 client in agent1");
+        assertEquals(1, agent2.getConnectors().getClientsCount(), "There should be 1 client in agent2");
 
         agent1.sendMessageBroadcast(DistServiceType.agent, DistServiceType.agent, "ping", "ping", DistCallbacks.createEmpty().addCallback(DistCallbackType.onResponse, x -> {
             log.info("RESPONSE GET for message: " + x.getMessageUid());

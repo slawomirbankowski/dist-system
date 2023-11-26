@@ -43,31 +43,13 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     /** initialize current manager with properties
      * this is creating storages, connecting to storages
      * creating cache policy, create agent and connecting to other cache agents */
-    public CacheBase(Agent parentAgent, CachePolicy policy) {
+    public CacheBase(Agent parentAgent) {
         super(parentAgent);
-        this.policy = policy;
-        var stringPolicyItems = CachePolicyBuilder.empty().parse(parentAgent.getConfig().getProperty(DistConfig.AGENT_CACHE_POLICY, "")).create().getItems();
-        policy.addItems(stringPolicyItems);
-        // add all callback functions
-        initializeEncoder();
-        initializeSerializer();
-        log.info("--------> Created new cache with GUID: " + guid + ", CONFIG: " + getConfig().getConfigGuid() + ", properties: " + getConfig().getProperties().size());
     }
 
-    /** read configuration and re-initialize this component */
-    public boolean reinitialize() {
-        // TODO: implement reinitialization
-        return true;
-    }
     /** create new service UID for this service */
     protected String createGuid() {
         return DistUtils.generateCacheGuid();
-    }
-
-    /** read configuration and re-initialize this component */
-    public boolean componentReinitialize() {
-        // TODO: reinitialize this component
-        return true;
     }
 
     /** create new message builder starting this agent */
@@ -108,7 +90,7 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     public CacheInfo getCacheInfo() {
         return new CacheInfo(guid, createDate, cacheStats.checksCount(),
                 cacheStats.addedItemsCount(), closed,
-            getAgent().getAgentIssues().getIssues().size(), getAgent().getAgentEvents().getEvents().size(),
+            getAgent().getIssues().getIssues().size(), getAgent().getEvents().getEvents().size(),
             getItemsCount(), getObjectsCount(), getStoragesInfo());
     }
     /** get custom map of info about service */
@@ -117,14 +99,14 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     }
 
     /** initialize key encoder to encode secrets */
-    private void initializeEncoder() {
+    protected void initializeEncoder() {
         // initialize encoder for secrets and passwords in key
         keyEncoder = new KeyEncoderNone();
         // TODO: finish initialization of encoder based on configuration
     }
 
     /** initialize serializer used for serialization of an object into byte[] or String to be saved in external storages */
-    private void initializeSerializer() {
+    protected void initializeSerializer() {
         String serializerDef = getConfig().getProperty(DistConfig.AGENT_SERIALIZER_DEFINITION, DistConfig.AGENT_SERIALIZER_DEFINITION_SERIALIZABLE_VALUE);
         //serializer = new ComplexSerializer(serializerDef);
         // TODO: finish initialization of serializer based on configuration
@@ -135,7 +117,7 @@ public abstract class CacheBase extends ServiceBase implements Cache {
      * internal error, not consistent state that is unknown and could be used by parent manager */
     public void addIssue(DistIssue issue) {
         cacheStats.addIssue();
-        getAgent().getAgentIssues().addIssue(issue);
+        getAgent().getIssues().addIssue(issue);
     }
     /** add issue with method and exception */
     public void addIssue(String methodName, Exception ex) {
@@ -144,11 +126,11 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     /** add new event and distribute it to callback methods,
      * event could be useful information about change of cache status, new connection, refresh of cache, clean */
     protected void addEvent(AgentEvent event) {
-        getAgent().getAgentEvents().addEvent(event);
+        getAgent().getEvents().addEvent(event);
     }
     /** set new callback method for events for given type */
     public void setCallback(String eventType, Function<AgentEvent, String> callback) {
-        getAgent().getAgentEvents().setCallback(eventType, callback);
+        getAgent().getEvents().setCallback(eventType, callback);
     }
     /** set object to cache */
     public CacheSetBack setCacheObject(String key, Object value, CacheMode mode) {
@@ -159,11 +141,11 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     }
     /** get all recent issues with cache */
     public Queue<DistIssue> getIssues() {
-        return getAgent().getAgentIssues().getIssues();
+        return getAgent().getIssues().getIssues();
     }
     /** get all recent events added to cache */
     public Queue<AgentEvent> getEvents() {
-        return getAgent().getAgentEvents().getEvents();
+        return getAgent().getEvents().getEvents();
     }
 
     public <T> T withCache(String key, Supplier<? extends T> supplier) {

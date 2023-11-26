@@ -19,6 +19,10 @@ public interface AgentEvents extends DistService {
     void setCallback(String eventType, Function<AgentEvent, String> callback);
     /** get all recent events added to cache */
     Queue<AgentEvent> getEvents();
+    /** get number of events per method */
+    Map<String, Long> eventsByMethod();
+    /** get number of events by type */
+    Map<String, Long> eventsByType();
     /** get info about events */
     EventsInfo getInfo();
     /** clear events */

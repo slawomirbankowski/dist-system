@@ -1,5 +1,7 @@
 package com.distsystem.dao;
 
+import com.distsystem.api.BaseRow;
+import com.distsystem.api.DaoModel;
 import com.distsystem.api.DaoParams;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.Agent;
@@ -11,7 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -64,13 +69,27 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         onInitialize();
     }
 
-    /** read configuration and re-initialize this component */
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
+    }
+     /** read configuration and re-initialize this component */
     public boolean componentReinitialize() {
         // nothing to be done here
+        log.info("Reinitializing JDBC Dao for agent: " +parentAgent.getAgentGuid() + ", DAO guid: " + getGuid() + ", URL: " + getUrl());
+        if (connPool!= null) {
+            try {
+                connPool.close();
+            } catch (Exception ex) {
+                log.warn("Cannot close existing connection pool for JDBC DAO, agent: " +parentAgent.getAgentGuid() + ", DAO guid: " + getGuid() + ", URL: " + getUrl());
+            }
+            connPool = null;
+            onInitialize();
+        }
         return true;
     }
 
-    /** get URL of this DAO */
+    /** get RL of this DAO */
     public String getUrl() {
         return jdbcUrl;
     }
@@ -102,7 +121,7 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     /** get all tables */
     public Collection<String> getDaoStructures() {
         return executeSelectQuery("select table_name from information_schema.tables where table_name like 'dist%'",
-                new Object[0], row -> row.get("table_name").toString());
+                new Object[0], row -> row.get("table_name").toString(), Integer.MAX_VALUE);
     }
 
     public <T> T withConnection(Function<Connection, T> toDo, T errorObj) {
@@ -151,6 +170,17 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             }, -1);
         }
     }
+    /** */
+    public int checkAndCreate(String structureName, String... createQueries) {
+        if (!checkDaoStructure(structureName)) {
+            Arrays.stream(createQueries).forEach(createQuery -> {
+                executeAnyQuery(createQuery, new Object[0]);
+            });
+            return createQueries.length;
+        } else {
+            return 0;
+        }
+    }
     /** execute any query on database */
     public int executeAnyQuery(String sql) {
         return executeAnyQuery(sql, new Object[0]);
@@ -159,6 +189,8 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public int executeAnyQuery(String sql, Object[] params) {
         return executeAnyQuery(sql, rowtoParams(params));
     }
+
+
     /** execute any query on database with given SQL and parameters */
     public int executeAnyQuery(String sql, List<Object[]> params) {
         if (sql == null || sql.isEmpty()) {
@@ -187,34 +219,7 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         }
     }
     /** execute SELECT query from resultset */
-    public LinkedList<Map<String, Object>> executeSelectQuery(String sql) {
-        return executeSelectQuery(sql, new Object[0]);
-    }
-    public AdvancedMap executeSelectQuerySingle(String sql) {
-        LinkedList<Map<String, Object>> rows = executeSelectQuery(sql, new Object[0]);
-        if (rows.isEmpty()) {
-            return new AdvancedMap(Map.of());
-        } else {
-            AdvancedMap map = new AdvancedMap(rows.get(0));
-            return map;
-        }
-    }
-    public LinkedList<Map<String, Object>> executeSelectQuery(String sql, Object[] params) {
-        return executeSelectQuery(sql, params, x -> x);
-    }
-    public List<Object> executeSelectQuerySingleColumn(String sql, Object[] params, String colName) {
-        return executeSelectQuery(sql, params).stream().map(x -> x.getOrDefault(colName, "")).collect(Collectors.toList());
-    }
-    /** */
-    public <T> LinkedList<T> executeSelectQuery(String sql, Function<Map<String, Object>, T> convertMethod) {
-        return executeSelectQuery(sql, EMPTY_OBJECT_TAB, convertMethod);
-    }
-    /** execute SELECT query from resultset */
-    public <T> List<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod) {
-        return executeSelectQuery(sql, params, convertMethod).stream().flatMap(x -> x.stream()).collect(Collectors.toList());
-    }
-    /** execute SELECT query from resultset */
-    public <T> LinkedList<T> executeSelectQuery(String sql, Object[] params, Function<Map<String, Object>, T> convertMethod) {
+    public <T> LinkedList<T> executeSelectQueryResultSet(String sql, Object[] params, BiFunction<Integer, ResultSet, T> convertMethod, int maxRows) {
         if (sql == null || sql.isEmpty()) {
             return new LinkedList<>();
         } else {
@@ -225,12 +230,13 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
                     fillStatement(stat, params);
                     ResultSet rs = stat.executeQuery();
                     int colsCount = stat.getMetaData().getColumnCount();
-                    while (rs.next()) {
-                        Map<String, Object> row = new HashMap<>();
-                        for (int col=1; col<=colsCount; col++) {
-                            row.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
+                    int rowNum = 0;
+                    while (rs.next() && rowNum<maxRows) {
+                        T row = convertMethod.apply(colsCount, rs);
+                        if (row != null) {
+                            tmpRows.add(row);
+                            rowNum++;
                         }
-                        tmpRows.add(convertMethod.apply(row));
                     }
                     return tmpRows;
                 } catch (SQLException ex) {
@@ -240,6 +246,110 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             }, new LinkedList<T>());
         }
     }
+    /** execute SELECT query from Map */
+    public <T> LinkedList<T> executeSelectQuery(String sql, Object[] params, Function<Map<String, Object>, T> convertMethod, int maxRows) {
+        return executeSelectQueryResultSet(sql, params, (colsCount, rs) -> {
+            try {
+                Map<String, Object> row = new HashMap<>();
+                for (int col=1; col<=colsCount; col++) {
+                    row.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
+                }
+                return convertMethod.apply(row);
+            } catch (SQLException ex) {
+                return null;
+            }
+        }, maxRows);
+    }
+    /** */
+    public LinkedList<Map<String, Object>> executeSelectQuery(String sql, Object[] params, int maxRows) {
+        return executeSelectQuery(sql, params, x -> x, maxRows);
+    }
+    /** execute SELECT query from resultset */
+    public LinkedList<Map<String, Object>> executeSelectQuery(String sql, int maxRows) {
+        return executeSelectQuery(sql, new Object[0], maxRows);
+    }
+    /** execute SELECT query from resultset */
+    public LinkedList<Map<String, Object>> executeSelectQuery(String sql) {
+        return executeSelectQuery(sql, Integer.MAX_VALUE);
+    }
+
+    /** */
+    public AdvancedMap executeSelectQuerySingle(String sql, int maxRows) {
+        LinkedList<Map<String, Object>> rows = executeSelectQuery(sql, new Object[0], maxRows);
+        if (rows.isEmpty()) {
+            return new AdvancedMap(Map.of());
+        } else {
+            AdvancedMap map = new AdvancedMap(rows.get(0));
+            return map;
+        }
+    }
+
+    /** */
+    public AdvancedMap executeSelectQuerySingle(String sql) {
+        return executeSelectQuerySingle(sql, Integer.MAX_VALUE);
+    }
+    /** execute query for SQL and returns only first row as a Map */
+    public Optional<Map<String, Object>> executeSelectQueryFirstRow(String sql, Object[] params) {
+        return executeSelectQuery(sql, params, x -> x, 1).stream().findFirst();
+    }
+    /** execute select for model and convert map to model class */
+    public <T> LinkedList<T> executeSelectQuery(String sql, Function<Map<String, Object>, T> convertMethod, int maxRows) {
+        return executeSelectQuery(sql, EMPTY_OBJECT_TAB, convertMethod, maxRows);
+    }
+    /** execute select for model and convert map to model class */
+    public <T> LinkedList<T> executeSelectQuery(String sql, Function<Map<String, Object>, T> convertMethod) {
+        return executeSelectQuery(sql, convertMethod, Integer.MAX_VALUE);
+    }
+    /** select query and convert to given type */
+    public <T> Optional<T> executeSelectQueryFirstRow(String sql, Function<Map<String, Object>, T> convertMethod) {
+        return executeSelectQuery(sql, EMPTY_OBJECT_TAB, convertMethod, 1).stream().findFirst();
+    }
+    /** execute SELECT query and convert from map to given type */
+    public <T> List<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod, int maxRows) {
+        return executeSelectQuery(sql, params, convertMethod, maxRows).stream().flatMap(x -> x.stream()).collect(Collectors.toList());
+    }
+
+    /** execute SELECT query and convert from map to given type */
+    public <T> List<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod) {
+        return executeSelectQueryOptional(sql, params, convertMethod, Integer.MAX_VALUE);
+    }
+
+    /** get all rows for given model */
+    public <X extends BaseRow> LinkedList<X> executeSelectAllModel(DaoModel<X> model, int maxRows) {
+        return executeSelectQuery(model.getSelectAllQuery(), new Object[0], map -> model.convert(map), maxRows);
+    }
+
+    /** get the latest rows for given model */
+    public <X extends BaseRow> List<X> executeSelectLatestRowsModel(DaoModel<X> model, int n) {
+        return executeSelectQueryResultSet(model.getSelectLimitQuery(n), new Object[0], (colsCount, rs) -> model.fromResultSet(rs), n);
+    }
+    /** get first row for given model and object name */
+    public <X extends BaseRow> Optional<X> executeSelectForNameModelFirst(DaoModel<X> model, String objectName) {
+        return executeSelectQuery(model.getSelectForNameQuery(), new Object[] { objectName }, map -> model.convert(map), 1).stream().findFirst();
+    }
+    /** get rows for given model for given object name */
+    public <X extends BaseRow> List<X> executeSelectForNameModelAll(DaoModel<X> model, String objectName, int maxRows) {
+        return executeSelectQuery(model.getSelectForNameQuery(), new Object[] { objectName }, map -> model.convert(map), maxRows);
+    }
+    public <X extends BaseRow> List<X> executeSelectForNameModelAll(DaoModel<X> model, String objectName) {
+        return executeSelectForNameModelAll(model, objectName, Integer.MAX_VALUE);
+    }
+
+    /** */
+    public List<Object> executeSelectQuerySingleColumn(String sql, Object[] params, String colName, int maxRows) {
+        return executeSelectQuery(sql, params, row -> row.getOrDefault(colName, ""), maxRows);
+    }
+    /** */
+    public List<String> executeSelectQuerySingleColumnString(String sql, Object[] params, String colName, int maxRows) {
+        return executeSelectQuery(sql, params, row -> row.getOrDefault(colName, "").toString(), maxRows);
+    }
+
+
+
+
+
+
+
     /** */
     public int executeInsert(Object obj, String tableName) {
         return executeInsert(List.of(obj), tableName);
@@ -257,6 +367,38 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             return executeUpdateQuery(sql, params);
         }
     }
+    /** insert full object to given table name */
+    public <X extends BaseRow> int executeInsertForModel(DaoModel<X> model, List<X> objs) {
+        if (objs.isEmpty()) {
+            return 0;
+        } else {
+            //executeUpdateQuery();
+            Object sampleObj = objs.get(0);
+            String sql = model.getInsertQuery();
+            log.debug("SAVING objects to DB, count: " + objs.size() +  "; SQL: " + sql);
+            //Field[] fields = sampleObj.getClass().getDeclaredFields();
+            //L//ist<Object[]> params = objs.stream().map(o -> DistUtils.getValuesForFields(o, fields)).collect(Collectors.toList());
+
+            objs.forEach(row -> {
+                row.toInsertRow();
+
+            });
+            return 1; //executeUpdateQuery(sql, params);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
     /** returns true if DB is connected */
     public boolean isConnected() {
         try {
@@ -270,10 +412,15 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             return false;
         }
     }
+    /** test DAO and returns items */
+    public Map<String, Object> testDao() {
+        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    }
     public boolean closeDao() {
         try {
             log.info("Closing DAO JDBC for agent: " + parentAgent.getAgentGuid());
             connPool.close();
+            connPool = null;
             return true;
         } catch (SQLException ex) {
             return false;
@@ -307,7 +454,9 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         for (int i=1; i<=params.length; i++) {
             Object obj = params[i-1];
             if (obj instanceof java.util.Date) {
-                st.setTimestamp(i, new Timestamp(((java.util.Date)obj).getTime()));
+                st.setTimestamp(i, new Timestamp(((java.util.Date) obj).getTime()));
+            } else if (obj instanceof LocalDateTime) {
+                st.setTimestamp(i, new Timestamp(((LocalDateTime) obj).toEpochSecond(ZoneOffset.UTC)));
             } else {
                 st.setObject(i, obj);
             }
