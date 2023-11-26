@@ -3,7 +3,7 @@ package com.distsystem.app.services;
 import com.distsystem.DistFactory;
 import com.distsystem.api.*;
 import com.distsystem.api.info.AgentInfo;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 import com.distsystem.interfaces.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -30,9 +30,9 @@ public class AgentConfigParserTest {
                 .extractConfig();
 
         //log.info("PROPERTIES: " + cfg.toPropertiesString());
-        DistConfigGroup gr = cfg.registerConfigGroup(DistConfig.AGENT_CACHE_STORAGE);
+        //DistConfigGroup gr = cfg.registerConfigGroup(DistConfig.AGENT_CACHE_STORAGE);
 
-        gr.getBuckets();
+       // gr.getBuckets();
 
 
         log.info("END-----");

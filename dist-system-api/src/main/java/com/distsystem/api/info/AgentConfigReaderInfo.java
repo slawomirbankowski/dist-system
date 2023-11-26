@@ -4,10 +4,10 @@ import java.util.List;
 
 public class AgentConfigReaderInfo {
 
-    private long readCount;
-    private long readerObjectCount;
-    private long readersCount;
-    private List<String> readerKeys;
+    private final long readCount;
+    private final long readerObjectCount;
+    private final long readersCount;
+    private final List<String> readerKeys;
 
     public AgentConfigReaderInfo(long readCount, long readerObjectCount, long readersCount, List<String> readerKeys) {
         this.readCount = readCount;

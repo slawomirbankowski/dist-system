@@ -5,7 +5,7 @@ import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.AgentClientBase;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentClient;
 import org.slf4j.Logger;
@@ -29,8 +29,13 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
     public DatagramClient(Agent parentAgent, DistAgentServerRow srv) {
         super(parentAgent, srv);
         this.srv = srv;
-        this.connectedAgentGuid = srv.agentguid;
+        this.connectedAgentGuid = srv.getAgentGuid();
         initialize();
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
     }
     /** get type of client - socket, http, datagram, ... */
     public DistClientType getClientType() {
@@ -38,19 +43,20 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
     }
     /** get unified URL of this client */
     public String getUrl() {
-        return srv.serverurl;
+        return srv.getServerUrl();
     }
     /** initialize client - connecting or reconnecting */
     public boolean initialize() {
         try {
-            address = new InetSocketAddress(srv.serverhost, srv.serverport);
+            address = new InetSocketAddress(srv.getServerHost(), srv.getServerPort());
             datagramSocket = new DatagramSocket();
-            log.info("Created new DATAGRAM client for server: " + srv.servertype + ", url: " + srv.serverurl + ", host: " + srv.serverhost + ", port: " + srv.serverport);
+            log.info("Created new DATAGRAM client for server: " + srv.simpleInfo());
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
         } catch (Exception ex) {
+            addIssueToAgent("initialize", ex);
             log.warn("Cannot initialize client " + clientGuid + ", agent: " + this.parentAgent.getAgentGuid() + ", Exception at Start: "+ex.getMessage(), ex);
             return false;
         }
@@ -58,7 +64,7 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
 
     /** read configuration and re-initialize this component */
     public boolean componentReinitialize() {
-        // TODO: reinitialize this component
+        // TODO: reinitialize this component - restart datagram server on port
         return true;
     }
     /** send message to this client */
@@ -71,7 +77,7 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
             return true;
         } catch (Exception ex) {
             log.warn("Error while sending Datagram packet for client: " + clientGuid + ", reason: " + ex.getMessage(), ex);
-            parentAgent.getAgentIssues().addIssue("DatagramClient.send", ex);
+            addIssueToAgent("send", ex);
             return false;
         }
     }
@@ -83,12 +89,11 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
             DistMessage closeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "close",  welcome);
             send(closeMsg);
-
             datagramSocket.close();
             working = false;
         } catch (Exception ex) {
             log.info(" Error while closing Datagram client connection, reason: "+ex.getMessage());
-
+            addIssueToAgent("onClose", ex);
         }
     }
 

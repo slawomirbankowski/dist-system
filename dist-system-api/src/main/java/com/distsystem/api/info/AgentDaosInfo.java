@@ -6,8 +6,8 @@ import java.util.Set;
 /** Information class about DAOs in Agent */
 public class AgentDaosInfo {
 
-    private List<AgentDaoInfo> daos;
-    private Set<String> producers;
+    private final List<AgentDaoInfo> daos;
+    private final Set<String> producers;
 
     public AgentDaosInfo(List<AgentDaoInfo> daos, Set<String> producers) {
         this.daos = daos;

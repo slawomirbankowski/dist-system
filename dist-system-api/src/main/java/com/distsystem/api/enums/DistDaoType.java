@@ -9,7 +9,7 @@ public enum DistDaoType {
     mongodb("com.distsystem.dao.");
 
     /** */
-    private String className;
+    private final String className;
 
     /** */
     public String getClassName() {

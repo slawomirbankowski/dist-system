@@ -8,12 +8,12 @@ import java.util.Collection;
 /** Information class about remote agent maintained by other system */
 public class AgentDaoInfo {
 
-    private LocalDateTime createDate;
-    private String key;
-    private DistDaoType daoType;
-    private String url;
-    private boolean connected;
-    private Collection<String> structures;
+    private final LocalDateTime createDate;
+    private final String key;
+    private final DistDaoType daoType;
+    private final String url;
+    private final boolean connected;
+    private final Collection<String> structures;
 
     public AgentDaoInfo(LocalDateTime createDate, String key, DistDaoType daoType, String url, boolean connected, Collection<String> structures) {
         this.createDate = createDate;

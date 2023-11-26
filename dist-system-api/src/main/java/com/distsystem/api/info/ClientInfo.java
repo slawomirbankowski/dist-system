@@ -9,21 +9,21 @@ import java.util.Set;
 public class ClientInfo implements Serializable {
 
     /** type of client */
-    private DistClientType clientType;
+    private final DistClientType clientType;
     /** class name of client */
-    private String clientClassName;
+    private final String clientClassName;
     /** URL of client */
-    private String url;
+    private final String url;
     /** true is this client is still working */
-    private boolean working;
+    private final boolean working;
     /** unique ID of this client */
-    private String clientGuid;
+    private final String clientGuid;
     /** tags for this client */
-    private Set<String> tags;
+    private final Set<String> tags;
     /** number of received messages */
-    private long receivedMessages;
+    private final long receivedMessages;
     /** number of received messages */
-    private long sentMessages;
+    private final long sentMessages;
 
     public ClientInfo(DistClientType clientType, String clientClassName, String url, boolean working, String clientGuid, Set<String> tags, long receivedMessages, long sentMessages) {
         this.clientType = clientType;

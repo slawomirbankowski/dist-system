@@ -2,6 +2,8 @@ package com.distsystem.utils.resolvers;
 
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Resolver;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,7 +21,8 @@ public class MapResolver implements Resolver {
         }
         return Optional.of(value);
     }
-    /** connect */
-    public void connectAgent(Agent agent) {
+    /** get all known keys */
+    public List<String> getKnownKeys() {
+        return map.keySet().stream().toList();
     }
 }

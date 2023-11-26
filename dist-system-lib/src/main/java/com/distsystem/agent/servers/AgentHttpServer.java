@@ -1,6 +1,7 @@
 package com.distsystem.agent.servers;
 
 import com.distsystem.api.AgentWelcomeMessage;
+import com.distsystem.api.ServiceObjectParams;
 import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.DistConfig;
 import com.distsystem.api.DistMessage;
@@ -28,13 +29,18 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
     private int httpPort;
     private String httpUrl;
 
-    public AgentHttpServer(Agent parentAgent) {
-        super(parentAgent);
+    public AgentHttpServer(ServiceObjectParams params) {
+        super(params);
         initialize();
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 4L;
     }
     public void initialize() {
         try {
-            httpPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet());
+            httpPort = getConfigPropertyAsInt(DistConfig.PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet()); // parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet());
             httpUrl = "http://" + DistUtils.getCurrentHostName() + ":" + httpPort + "/";
             log.info("Starting new HTTP server at port:" + httpPort + ", agent: " + parentAgent.getAgentGuid());
             httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
@@ -45,7 +51,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
             log.info("Started HTTP server!!!");
         } catch (Exception ex) {
             log.info("Cannot start HTTP server, reason: " + ex.getMessage());
-            parentAgent.getAgentIssues().addIssue("AgentHttpServer", ex);
+            parentAgent.getIssues().addIssue("AgentHttpServer", ex);
         }
     }
     /** read configuration and re-initialize this component */
@@ -83,7 +89,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
                 if (msg.isSystem()) {
                     // parseWelcomeMessage(msg);
                 } else {
-                    parentAgent.getAgentServices().receiveMessage(msg);
+                    parentAgent.getServices().receiveMessage(msg);
                 }
                 String response = "OK";
                 t.sendResponseHeaders(200, response.length());
@@ -91,7 +97,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
                 os.write(response.getBytes());
                 os.close();
             } catch (Exception ex) {
-                parentAgent.getAgentIssues().addIssue("AgentHttpHandler.handle", ex);
+                parentAgent.getIssues().addIssue("AgentHttpHandler.handle", ex);
             }
         }
     }
@@ -102,7 +108,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
             log.info("Got WELCOME message, server: " + getServerGuid() + ", from agent: " + welcome.getAgentInfo().getAgentGuid() + ", from client: " + welcome.getClientInfo().getClientGuid());
             // TODO: welcome message to SocketClient - set Agent name and initial information from Welcome message
         } catch (Exception ex) {
-            parentAgent.getAgentIssues().addIssue("parseWelcomeMessage", ex);
+            parentAgent.getIssues().addIssue("parseWelcomeMessage", ex);
         }
     }
 

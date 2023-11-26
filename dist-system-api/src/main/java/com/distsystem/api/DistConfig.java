@@ -1,5 +1,7 @@
 package com.distsystem.api;
 
+import com.distsystem.api.info.DistConfigGroupInfo;
+import com.distsystem.interfaces.DistService;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.JsonUtils;
 import com.distsystem.utils.ResolverManager;
@@ -27,19 +29,25 @@ public class DistConfig {
     public static DistConfig buildEmptyConfig() {
         return new DistConfig(new Properties());
     }
+    /** build DistConfig using initial properties*/
     public static DistConfig buildConfig(Properties initialProperties) {
         return new DistConfig(initialProperties);
     }
+    /** build DistConfig using Map */
+    public static DistConfig buildConfigFromMap(Map<String, String> map) {
+        Properties pr = new Properties();
+        pr.putAll(map);
+        return new DistConfig(pr);
+    }
+
     /** global unique ID of this configuration */
     private final String configGuid = DistUtils.generateConfigGuid();
     /** all properties to be used for DistSystem initialization */
     private final Properties props;
-
     /** SEQ ID of change for configuration parameters */
     private final AtomicLong changeSeq = new AtomicLong();
     /** resolver for String values in properties */
     private final ResolverManager resolver;
-
     /** all configuration groups AGENT_REGISTRATION, CACHE_STORAGE */
     private final Map<String, DistConfigGroup> configGroups = new HashMap<>();
 
@@ -56,29 +64,51 @@ public class DistConfig {
         props.setProperty(AGENT_CONFIG_GUID, configGuid);
     }
 
-    /** register new config group */
-    public DistConfigGroup registerConfigGroup(String groupName) {
+    /** count objects in this agentable object including this object */
+    public long countObjects() {
+        return 4L + props.size()*2L + configGroups.size()*2L;
+    }
+    /** register new config group and parse configuration values into buckets */
+    public DistConfigGroup registerConfigGroup(String groupName, DistService parentService) {
         synchronized (configGroups) {
             DistConfigGroup gr = configGroups.get(groupName);
             if (gr == null) {
-                log.info("Try to register new configuration group for name: " + groupName + ", groups: " + configGroups.size());
-                gr = new DistConfigGroup(this, groupName);
+                log.info("Try to register new configuration group for name: " + groupName + ", groups: " + configGroups.size() + ", parent service: " + parentService.getServiceType().name());
+                gr = new DistConfigGroup(this, groupName, parentService);
                 configGroups.put(groupName, gr);
             }
+            parentService.afterInitialization();
             return gr;
+        }
+    }
+    /** unregister config group for name */
+    public void unregisterConfigGroup(String groupName) {
+        synchronized (configGroups) {
+            log.info("Try to unregister configuration group for name: " + groupName + ", groups: " + configGroups.size());
+            configGroups.remove(groupName);
         }
     }
     /** get resolver manager to resolve names, values, properties */
     public ResolverManager getResolverManager() {
         return resolver;
     }
-
+    /** get all configuration groups */
+    public List<DistConfigGroup> getConfigGroups() {
+        return configGroups.values().stream().toList();
+    }
+    /** get all configuration group infos */
+    public List<DistConfigGroupInfo> getConfigGroupInfos() {
+        return configGroups.values().stream().map(DistConfigGroup::getInfo).toList();
+    }
     /** add listener for given value change */
     public DistConfig addListener(String fullConfigName, Function<String, Boolean> onCfgValueChange) {
 
         return this;
     }
-
+    /** get count of properties */
+    public int getPropertiesCount() {
+        return props.size();
+    }
     /** get current properties */
     public Map getProperties() {
         return Collections.unmodifiableMap(props);
@@ -110,29 +140,32 @@ public class DistConfig {
     public String getProperty(String name) {
         return resolver.resolve(props.getProperty(name));
     }
-
     /** configuration contains property for given name */
     public boolean hasProperty(String name) {
         return props.containsKey(name);
-    }
-    /** configStart=AGENT_REGISTRATION_(type)_(name)(key)  */
-    public DistConfig extractConfigGroup(String configStart) {
-
-
-        return this;
     }
     /** get property */
     public String getProperty(String name, String defaultValue) {
         String value = getProperty(name);
         if (value != null) {
             return value;
-        } else {
-            return defaultValue;
         }
+        value = getProperty(name.replace("_PRIMARY", ""));
+        if (value != null) {
+            return value;
+        }
+        value = getProperty(name + "_PRIMARY");
+        if (value != null) {
+            return value;
+        }
+        return defaultValue;
     }
 
     /** commit properties after read */
     public void mergeWithConfig(DistConfig newCfg) {
+        // TODO: implement merge new configuration with current configuration
+
+
 
 
     }
@@ -182,7 +215,45 @@ public class DistConfig {
         }
     }
 
+    public static String JDBC = "JDBC";
+    public static String APPLICATION = "APPLICATION";
+    public static String ELASTICSEARCH = "ELASTICSEARCH";
+    public static String REDIS = "REDIS";
+    public static String KAFKA = "KAFKA";
+    public static String MONGODB = "MONGODB";
+    public static String HTTP = "HTTP";
+    public static String SOCKET = "SOCKET";
+    public static String DATAGRAM = "DATAGRAM";
+    public static String CASSANDRA = "CASSANDRA";
 
+    public static String DEFAULT = "DEFAULT";
+    public static String URL = "URL";
+    public static String DRIVER = "DRIVER";
+    public static String USER = "USER";
+    public static String PASS = "PASS";
+    public static String TABLE = "TABLE";
+    public static String DIALECT = "DIALECT";
+    public static String INIT_CONNECTIONS = "INIT_CONNECTIONS";
+    public static String MAX_ACTIVE_CONNECTIONS = "MAX_ACTIVE_CONNECTIONS";
+    public static String BROKERS = "BROKERS";
+    public static String HOST = "HOST";
+    public static String PORT = "PORT";
+    public static String TIMEOUT = "TIMEOUT";
+    public static String TOPIC = "TOPIC";
+    public static String PARTITIONS = "PARTITIONS";
+    public static String REPLICATION = "REPLICATION";
+    public static String PERIOD = "PERIOD";
+    public static String DATABASE = "DATABASE";
+    public static String COLLECTION = "COLLECTION";
+    public static String INDEX = "INDEX";
+    public static String HEADERS = "HEADERS";
+
+    public static String PRIMARY = "PRIMARY";
+    public static String SECONDARY = "SECONDARY";
+    public static String TERTIARY = "TERTIARY";
+
+
+    public static String AGENT_GLOBAL_GUID = "AGENT_GLOBAL_GUID";
     public static String AGENT_CONFIG_GUID = "AGENT_CONFIG_GUID";
 
     /** name of Agent distributed universe */
@@ -204,6 +275,11 @@ public class DistConfig {
     public static String AGENT_ENVIRONMENT_NAME = "DIST_ENVIRONMENT_NAME";
     public static String AGENT_ENVIRONMENT_NAME_VALUE_DEFAULT = "development";
 
+    public static String AGENT_HOST_NAME = "AGENT_HOST_NAME";
+    public static String AGENT_HOST_ADDRESS = "AGENT_HOST_ADDRESS";
+    public static String AGENT_LOCATION_PATH = "AGENT_LOCATION_PATH";
+    public static String AGENT_PARENT_APPLICATION = "AGENT_PARENT_APPLICATION";
+
     /** port for HTTP REST Web API to contact directly to Agent */
     public static String AGENT_API_PORT = "AGENT_API_PORT";
     public static int AGENT_API_PORT_DEFAULT_VALUE = 9999;
@@ -211,6 +287,15 @@ public class DistConfig {
     /** tags used to identify agent */
     public static String AGENT_TAGS = "AGENT_TAGS";
     public static String AGENT_REGISTRATION = "AGENT_REGISTRATION";
+
+
+    public static Map<String, String> AGENT_REGISTRATION_CLASS_MAP = Map.of(
+            APPLICATION, "com.distsystem.agent.registrations.RegistrationApplication",
+            JDBC, "com.distsystem.agent.registrations.RegistrationJdbc",
+            KAFKA, "com.distsystem.agent.registrations.RegistrationKafka",
+            ELASTICSEARCH, "com.distsystem.agent.registrations.RegistrationElasticsearch",
+            MONGODB, "com.distsystem.agent.registrations.RegistrationMongodb"
+    );
 
     /** JDBC connection for agent registration */
     public static String AGENT_REGISTRATION_OBJECT_JDBC_URL = "AGENT_REGISTRATION_OBJECT_JDBC_URL";
@@ -242,7 +327,34 @@ public class DistConfig {
     public static String AGENT_REGISTRATION_OBJECT_MONGODB_HOST = "AGENT_REGISTRATION_OBJECT_MONGODB_HOST";
     public static String AGENT_REGISTRATION_OBJECT_MONGODB_PORT = "AGENT_REGISTRATION_OBJECT_MONGODB_PORT";
 
+    public static Map<String, String> AGENT_AUTH_CLASS_MAP = Map.of(
+            JDBC, "com.distsystem.agent.auth.AgentAuthJdbc",
+            KAFKA, "com.distsystem.agent.auth.AgentAuthKafka"
+    );
+    public static String AGENT_AUTH_OBJECT_JDBC_URL = "AGENT_CACHE_APPLICATION_URL";
 
+    public static Map<String, String> AGENT_AUTH_STORAGE_CLASS_MAP = Map.of(
+            JDBC, "com.distsystem.agent.auth.AgentAuthStorageJdbc",
+            KAFKA, "com.distsystem.agent.auth.AgentAuthStorageKafka"
+    );
+    public static String AGENT_AUTH_STORAGE_JDBC_URL = "AGENT_AUTH_STORAGE_JDBC_URL";
+    public static String AGENT_AUTH_STORAGE_JDBC_DRIVER = "AGENT_AUTH_STORAGE_JDBC_DRIVER";
+    public static String AGENT_AUTH_STORAGE_JDBC_USER = "AGENT_AUTH_STORAGE_JDBC_USER";
+    public static String AGENT_AUTH_STORAGE_JDBC_PASS = "AGENT_AUTH_STORAGE_JDBC_PASS";
+    public static String AGENT_AUTH_STORAGE_JDBC_DIALECT = "AGENT_AUTH_STORAGE_JDBC_DIALECT";
+
+    public static String AGENT_AUTH_STORAGE_KAFKA_BROKERS = "AGENT_AUTH_STORAGE_KAFKA_BROKERS";
+    public static String AGENT_AUTH_STORAGE_KAFKA_TOPIC = "AGENT_AUTH_STORAGE_KAFKA_TOPIC";
+    public static String AGENT_AUTH_STORAGE_KAFKA_PARTITIONS = "AGENT_AUTH_STORAGE_KAFKA_PARTITIONS";
+    public static String AGENT_AUTH_STORAGE_KAFKA_REPLICATION = "AGENT_AUTH_STORAGE_KAFKA_REPLICATION";
+
+
+    public static Map<String, String> AGENT_CONNECTORS_CLASS_MAP = Map.of(
+            SOCKET, "com.distsystem.agent.servers.AgentServerSocket",
+            HTTP, "com.distsystem.agent.servers.AgentHttpServer",
+            DATAGRAM, "com.distsystem.agent.servers.AgentDatagramServer",
+            KAFKA, "com.distsystem.agent.servers.AgentKafkaServer"
+    );
     /**port of SockerServer to exchange messages between Agents */
     public static String AGENT_CONNECTORS_SERVER_SOCKET_PORT = "AGENT_CONNECTORS_SERVER_SOCKET_PORT";
     /** */
@@ -275,6 +387,7 @@ public class DistConfig {
     public static final long AGENT_CONNECTORS_INACTIVATE_AFTER_DEFAULT_VALUE = CacheMode.TIME_TEN_MINUTES;
     public static final String AGENT_CONNECTORS_DELETE_AFTER = "AGENT_CONNECTORS_DELETE_AFTER";
     public static final long AGENT_CONNECTORS_DELETE_AFTER_DEFAULT_VALUE = CacheMode.TIME_ONE_DAY;
+
 
     /** URL of cache standalone application to synchronize all distributed cache managers
      * Cache Standalone App is registering and unregistering all cache agents with managers
@@ -406,6 +519,10 @@ public class DistConfig {
     public static String AGENT_CONFIGREADER_OBJECT_HTTP_URL = "AGENT_CONFIGREADER_OBJECT_HTTP_URL";
     public static String AGENT_CONFIGREADER_OBJECT_HTTP_HEADERS = "AGENT_CONFIGREADER_OBJECT_HTTP_HEADERS";
 
+    public static Map<String, String> AGENT_CONFIGREADER_MAP = Map.of(
+            JDBC, "com.distsystem.agent.configreaders.ConfigReaderHttp",
+            KAFKA, "com.distsystem.agent.configreaders.ConfigReaderKafka"
+    );
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_URL = "AGENT_CONFIGREADER_OBJECT_JDBC_URL";
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_DRIVER = "AGENT_CONFIGREADER_OBJECT_JDBC_DRIVER";
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_USER = "AGENT_CONFIGREADER_OBJECT_JDBC_USER";
@@ -413,44 +530,19 @@ public class DistConfig {
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_TABLE = "AGENT_CONFIGREADER_OBJECT_JDBC_TABLE";
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_DIALECT = "AGENT_CONFIGREADER_OBJECT_JDBC_DIALECT";
 
-
+    public static String AGENT_AUTH_OBJECT = "AGENT_AUTH_OBJECT";
+    public static String AGENT_AUTH_STORAGE = "AGENT_AUTH_STORAGE";
+    public static String AGENT_AUTH_TOKEN = "AGENT_AUTH_TOKEN";
+    public static String AGENT_AUTH_IDENTITY = "AGENT_AUTH_IDENTITY";
     public static String AGENT_CONFIGREADER_OBJECT = "AGENT_CONFIGREADER_OBJECT";
     public static String AGENT_REGISTRATION_OBJECT = "AGENT_REGISTRATION_OBJECT";
     public static String AGENT_CONNECTORS_SERVER = "AGENT_CONNECTORS_SERVER";
     public static String AGENT_CACHE_STORAGE = "AGENT_CACHE_STORAGE";
     public static String AGENT_SEMAPHORE_OBJECT = "AGENT_SEMAPHORE_OBJECT";
+    public static String AGENT_STORAGE_OBJECT = "AGENT_STORAGE_OBJECT";
 
-
-    public static String JDBC = "JDBC";
-    public static String ELASTICSEARCH = "ELASTICSEARCH";
-    public static String REDIS = "REDIS";
-    public static String KAFKA = "KAFKA";
-    public static String MONGODB = "MONGODB";
-    public static String HTTP = "HTTP";
-    public static String SOCKET = "SOCKET";
-    public static String DATAGRAM = "DATAGRAM";
-    public static String CASSANDRA = "CASSANDRA";
-
-    public static String URL = "URL";
-    public static String DRIVER = "DRIVER";
-    public static String USER = "USER";
-    public static String PASS = "PASS";
-    public static String DIALECT = "DIALECT";
-    public static String INIT_CONNECTIONS = "INIT_CONNECTIONS";
-    public static String MAX_ACTIVE_CONNECTIONS = "MAX_ACTIVE_CONNECTIONS";
-    public static String BROKERS = "BROKERS";
-    public static String HOST = "HOST";
-    public static String PORT = "PORT";
-    public static String TOPIC = "TOPIC";
-    public static String PARTITIONS = "PARTITIONS";
-    public static String REPLICATION = "REPLICATION";
-    public static String PERIOD = "PERIOD";
-    public static String DATABASE = "DATABASE";
-    public static String COLLECTION = "COLLECTION";
-    public static String INDEX = "INDEX";
-
-    public static String PRIMARY = "PRIMARY";
-    public static String SECONDARY = "SECONDARY";
-    public static String TETRIARY = "TETRIARY";
+    public static Map<String, String> AGENT_SEMAPHORE_CLASS_MAP = Map.of(
+            JDBC, "com.distsystem.agent.impl.semaphores.SemaphoreJdbc"
+    );
 
 }

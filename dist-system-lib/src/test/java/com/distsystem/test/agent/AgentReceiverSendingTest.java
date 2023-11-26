@@ -28,7 +28,7 @@ public class AgentReceiverSendingTest {
                 .withTimerServerPeriod(1000)
                 .createAgentInstance();
 
-        Cache cache = agent1.getAgentServices().getCache();
+        Cache cache = agent1.getCache();
         cache.getAgent();
         agent1.getAgentInfo();
 

@@ -3,11 +3,12 @@ package com.distsystem.utils;
 import com.distsystem.interfaces.DistSerializer;
 
 import java.util.Base64;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /** custom serializer to serialize and deserialize objects to be sent through network or write/read from external storages */
-public class CustomSerializer implements DistSerializer {
+public class CustomSerializer extends DistSerializerBase implements DistSerializer {
 
     private Function<Object, String> serializeFunction;
     private BiFunction<String, String, Object> deserializeFunction;

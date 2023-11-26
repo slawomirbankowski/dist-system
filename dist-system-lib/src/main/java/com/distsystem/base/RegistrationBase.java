@@ -1,12 +1,9 @@
 package com.distsystem.base;
 
-import com.distsystem.agent.AgentInstance;
 import com.distsystem.api.*;
+import com.distsystem.api.dtos.*;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentRegistrationInfo;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
-import com.distsystem.base.dtos.DistAgentServerRow;
-import com.distsystem.base.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.utils.CacheHitRatio;
 import com.distsystem.utils.DistUtils;
@@ -16,12 +13,13 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** base class to connect to registration service - global storage that is managing agents
  * connector should be able to register agent, ping it, check health
  * */
-public abstract class RegistrationBase extends Agentable implements AgentComponent {
+public abstract class RegistrationBase extends ServiceObjectBase implements AgentComponent {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(RegistrationBase.class);
@@ -30,18 +28,14 @@ public abstract class RegistrationBase extends Agentable implements AgentCompone
 
     /** confirmation of registration of this agent to connector */
     protected AgentConfirmation registerConfirmation;
-    /** flat to indicate if connector is initialized */
-    private boolean initialized = false;
-    /** is registration closed */
-    private boolean closed = false;
     /** status of last connection OR false if there were no connections yet */
     private boolean lastConnected = false;
     /** connection ratio */
     private final CacheHitRatio connectRatio = new CacheHitRatio();
 
     /** constructor to save parent agent */
-    public RegistrationBase(AgentInstance parentAgent) {
-        super(parentAgent);
+    public RegistrationBase(ServiceObjectParams params) {
+        super(params);
         parentAgent.addComponent(this);
         initialize();
     }
@@ -66,10 +60,6 @@ public abstract class RegistrationBase extends Agentable implements AgentCompone
     }
     /** run for initialization in classes */
     protected abstract void onInitialize();
-    /** returns status of initialized */
-    public boolean isInitialized() {
-        return initialized;
-    }
 
     /** if connector is connected */
     public boolean isConnected() {
@@ -146,10 +136,110 @@ public abstract class RegistrationBase extends Agentable implements AgentCompone
     public abstract List<DistAgentRegisterRow> getAgents();
     /** get list of active agents */
     public List<DistAgentRegisterRow> getAgentsActive() {
-        return getAgents().stream().filter(a -> a.isactive==1).collect(Collectors.toList());
+        return getAgents().stream().filter(a -> a.getActive()==1).collect(Collectors.toList());
     }
     /** get all communication servers */
     public abstract List<DistAgentServerRow> getServers();
+
+    /** get all shared storages */
+    public abstract List<DistAgentStorageRow> getStorages();
+    /** get all shared storage names */
+    public abstract List<String> getStorageNames();
+    /** get storage by name */
+    public abstract Optional<DistAgentStorageRow> getStorageByName(String storageName);
+    /** add storage */
+    public abstract boolean addStorage(DistAgentStorageRow storage);
+
+    /** get all shared reports */
+    public abstract List<DistAgentStorageRow> getReports();
+    /** get all shared report names */
+    public abstract List<String> getReportNames();
+    /** get report by name */
+    public abstract Optional<DistAgentReportRow> getReportByName(String reportName);
+    /** add report */
+    public abstract boolean addReport(DistAgentReportRow report);
+    /** add report run */
+    public abstract boolean addReportRun(DistAgentReportRunRow reportRun);
+
+    /** get all monitors */
+    public abstract List<DistAgentMonitorRow> getMonitors();
+    /** get all monitor names */
+    public abstract List<String> getMonitorNames();
+    /** get monitor by name */
+    public abstract Optional<DistAgentMonitorRow> getMonitorByName(String reportName);
+    /** add monitor */
+    public abstract boolean addMonitor(DistAgentMonitorRow monitor);
+    /** add monitor check */
+    public abstract boolean addMonitorCheck(DistAgentMonitorCheckRow monitorCheck);
+
+    /** get all notifications */
+    public abstract List<DistAgentNotificationRow> getNotifications();
+    /** add notification */
+    public abstract boolean addNotification(DistAgentNotificationRow notif);
+
+    /** get all schedules */
+    public abstract List<DistAgentScheduleRow> getSchedules();
+    /** add schedule */
+    public abstract boolean addSchedule(DistAgentScheduleRow schedule);
+    /** add schedule */
+    public abstract boolean addScheduleExecution(DistAgentScheduleRow schedule);
+
+    /** get all spaces */
+    public abstract List<DistAgentSpaceRow> getSpaces();
+    /** get all space names */
+    public abstract List<String> getSpaceNames();
+    /** get space by name */
+    public abstract Optional<DistAgentSpaceRow> getSpaceByName(String spaceName);
+    /** add space */
+    public abstract boolean addSpace(DistAgentSpaceRow space);
+    /** remove space */
+    public abstract boolean removeSpace(String spaceName);
+
+    /** get all measures */
+    public abstract List<DistAgentMeasureRow> getMeasures();
+    /** get all measure names */
+    public abstract List<String> getMeasureNames();
+    /** add measure */
+    public abstract boolean addMeasure(DistAgentMeasureRow measure);
+
+    /** get all queries */
+    public abstract List<DistAgentQueryRow> getQueries();
+    /** get all query names */
+    public abstract List<String> getQueryNames();
+    /** get query by name */
+    public abstract Optional<DistAgentQueryRow> getQueryByName(String queryName);
+    /** add or edit query */
+    public abstract boolean addQuery(DistAgentQueryRow measure);
+
+    /** add DAO row */
+    public abstract boolean addDao(DistAgentDaoRow dao);
+
+    /** get all global resources for given type */
+    public abstract List<DistAgentResourceRow> getResourcesForType(String resourceType);
+    /** get all global resource names for given type */
+    public abstract List<String> getResourceNamesForType(String resourceType);
+    /** get resource by name */
+    public abstract Optional<DistAgentResourceRow> getResourceByName(String queryName);
+    /** add new resources */
+    public abstract boolean addResources(List<DistAgentResourceRow> resources);
+
+    /** get all settings */
+    public abstract List<DistAgentSettingRow> getSettings();
+    /** search for settings */
+    public abstract List<DistAgentSettingRow> searchSettings(String findStr);
+    /** add settings */
+    public abstract boolean addSettings(List<DistAgentSettingRow> settings);
+
+    /** get resource by name */
+    public abstract List<String> getScriptNames();
+    /** get script by name */
+    public abstract Optional<DistAgentScriptRow> getScriptForName(String scriptName);
+    /** add script */
+    public abstract boolean addScript(DistAgentScriptRow script);
+
+
+
+
     /** ping given server by GUID */
     public abstract boolean serverPing(DistAgentServerRow serv);
     /** set active servers with last ping date before given date as inactive */

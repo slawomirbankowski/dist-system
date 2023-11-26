@@ -9,15 +9,27 @@ public class AgentWebApiResponse {
     private final int code;
     /** response headers */
     private final Map<String, List<String>> headers;
+    /** */
+    private final Object object;
     /** response content as text */
     private final String content;
 
+    public AgentWebApiResponse(int code, Map<String, List<String>> headers, Object object, String content) {
+        this.code = code;
+        this.headers = headers;
+        this.object = object;
+        this.content = content;
+    }
     public AgentWebApiResponse(int code, Map<String, List<String>> headers, String content) {
         this.code = code;
         this.headers = headers;
+        this.object = content;
         this.content = content;
     }
-
+    /** get response object */
+    public Object getObject() {
+        return object;
+    }
     /** */
     public String getContent() {
         return content;

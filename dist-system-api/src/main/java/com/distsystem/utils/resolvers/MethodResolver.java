@@ -2,6 +2,8 @@ package com.distsystem.utils.resolvers;
 
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Resolver;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -16,7 +18,8 @@ public class MethodResolver implements Resolver {
         return method.apply(key);
     }
 
-    /** connect */
-    public void connectAgent(Agent agent) {
+    /** get all known keys */
+    public List<String> getKnownKeys() {
+        return List.of();
     }
 }

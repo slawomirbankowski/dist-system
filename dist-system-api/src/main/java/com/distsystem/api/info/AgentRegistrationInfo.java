@@ -7,16 +7,16 @@ import java.util.Map;
 
 /** information about Registration class to register Agent */
 public class AgentRegistrationInfo {
-    private String registerGuid;
-    private String registrationType;
-    private LocalDateTime createdDate;
-    private boolean initialized;
-    private boolean closed;
-    private boolean lastConnected;
-    private String url;
-    private AgentConfirmation confirmation;
+    private final String registerGuid;
+    private final String registrationType;
+    private final LocalDateTime createdDate;
+    private final boolean initialized;
+    private final boolean closed;
+    private final boolean lastConnected;
+    private final String url;
+    private final AgentConfirmation confirmation;
 
-    private Map<String, Object> parameters;
+    private final Map<String, Object> parameters;
 
     public AgentRegistrationInfo(String registerGuid, String registrationType, LocalDateTime createdDate, boolean initialized, boolean closed, boolean lastConnected, String url,
                                  AgentConfirmation confirmation, Map<String, Object> parameters) {

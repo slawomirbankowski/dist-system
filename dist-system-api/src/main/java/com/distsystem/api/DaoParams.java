@@ -60,6 +60,12 @@ public class DaoParams {
         return (short)params.getInt(REPL_FACTOR, 1);
     }
 
+    /** create DaoParams from Map */
+    public static DaoParams fromMap(Map<String, Object> props) {
+        String key = props.getOrDefault("key", DistUtils.generateCustomGuid("DAO")).toString();
+        String type = props.getOrDefault("type", "jdbc").toString();
+        return new DaoParams(DistDaoType.valueOf(type.toLowerCase()), key, props);
+    }
     /** create DAO parameters for Kafka */
     public static DaoParams kafkaParams(String brokers, int numPartitions, short replicationFactor) {
         String key = DistDaoType.kafka.name() + ":" + DistUtils.fingerprint( brokers);
@@ -88,7 +94,7 @@ public class DaoParams {
     }
     /** create DAO parameters for Elasticsearch */
     public static DaoParams elasticsearchParams(String elasticUrl, String elasticUser, String elasticPass) {
-        String key = DistDaoType.jdbc.name() + "" + DistUtils.fingerprint( elasticUrl + ":" + elasticUser);
+        String key = DistDaoType.elasticsearch.name() + "" + DistUtils.fingerprint( elasticUrl + ":" + elasticUser);
         return new DaoParams(DistDaoType.elasticsearch, key, Map.of(
                 URL, elasticUrl,
                 USER, elasticUser,

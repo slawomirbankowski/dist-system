@@ -1,11 +1,12 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 /** serialize using JSON */
-public class JsonSerializer implements DistSerializer {
+public class JsonSerializer extends DistSerializerBase implements DistSerializer {
 
     @Override
     public byte[] serialize(Object obj) {

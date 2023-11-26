@@ -34,6 +34,8 @@ public interface Cache extends DistService {
     /** get all keys for storages, each storage has unique key to identify  */
     Set<String> getStorageKeys();
 
+    /** set cache policy */
+    void setPolicy(CachePolicy policy);
     /** get all cache keys that contains given string
      * cache keys are searched in all storages
      * this might return only TOP X keys if there are by far too many keys in cache to be downloaded */

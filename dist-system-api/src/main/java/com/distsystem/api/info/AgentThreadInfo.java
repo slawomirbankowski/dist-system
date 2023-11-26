@@ -6,15 +6,15 @@ import java.time.LocalDateTime;
 public class AgentThreadInfo {
 
     /** date and time of creation */
-    private LocalDateTime createdDate;
-    private String threadGuid;
-    private String threadFriendlyName;
-    private String threadName;
-    private String threadState;
-    private int threadPriority;
-    private long threadId;
-    private boolean isAlive;
-    private String threadClassName;
+    private final LocalDateTime createdDate;
+    private final String threadGuid;
+    private final String threadFriendlyName;
+    private final String threadName;
+    private final String threadState;
+    private final int threadPriority;
+    private final long threadId;
+    private final boolean isAlive;
+    private final String threadClassName;
 
     public AgentThreadInfo(LocalDateTime createdDate, String threadGuid, String threadFriendlyName, String threadName, String threadState, int threadPriority, long threadId, boolean isAlive, String threadClassName) {
         this.createdDate = createdDate;

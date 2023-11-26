@@ -3,7 +3,7 @@ package com.distsystem.app.controllers;
 import com.distsystem.api.*;
 import com.distsystem.api.info.AgentInfo;
 import com.distsystem.app.services.AgentService;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

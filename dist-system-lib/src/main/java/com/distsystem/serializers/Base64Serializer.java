@@ -1,11 +1,12 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 
 import java.util.Base64;
 
 /** serialize using JSON */
-public class Base64Serializer implements DistSerializer {
+public class Base64Serializer extends DistSerializerBase implements DistSerializer {
 
     @Override
     public byte[] serialize(Object obj) {

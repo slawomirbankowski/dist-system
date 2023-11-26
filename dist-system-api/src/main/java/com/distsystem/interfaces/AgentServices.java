@@ -1,11 +1,10 @@
 package com.distsystem.interfaces;
 
 import com.distsystem.api.*;
-import com.distsystem.base.dtos.DistAgentServiceRow;
+import com.distsystem.api.dtos.DistAgentServiceRow;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /** interface for service manager
  * there are many services that would be working with Dist system, example:
@@ -21,28 +20,15 @@ public interface AgentServices extends DistService {
     List<Boolean> reinitializeAllServices();
     /** set new policy for services */
     void setPolicy(CachePolicy policy);
-    /** get or create cache connected with this Agent */
-    Cache getCache();
-    /** get or create service for reports to create, update, remove or execute reports */
-    AgentReports getReports();
-    /** get or create receiver service */
-    Receiver getReceiver();
-    /** get flow service */
-    AgentFlow getFlow();
-    /** get semaphores service */
-    AgentSemaphores getSemaphores();
-    /** get ML service */
-    AgentMachineLearning getMl();
-    /** get service for managing shared objects */
-    AgentObjects getObjects();
+
     /** get number of services */
     int getServicesCount();
     /** get keys of registered services */
     List<String> getServiceKeys();
     /** get types of registered services */
-    Set<String> getServiceTypes();
+    List<String> getServiceTypes();
     /** initialize all known services */
-    Set<String> initializeAllPossible();
+    List<String> initializeAllPossible();
     /** get basic information about service for given type of UID */
     DistServiceInfo getServiceInfo(String serviceUid);
     /** get service information by GUID or empty if there is no such service */

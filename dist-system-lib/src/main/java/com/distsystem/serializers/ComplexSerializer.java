@@ -1,13 +1,14 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 import com.distsystem.utils.DistUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /** complex serializer that is keeping other serializers mapped to class name */
-public class ComplexSerializer implements DistSerializer {
+public class ComplexSerializer extends DistSerializerBase implements DistSerializer {
 
     /** all serializers per class */
     private HashMap<String, DistSerializer> serializerHashMap = new HashMap<>();
@@ -18,15 +19,23 @@ public class ComplexSerializer implements DistSerializer {
         serializerHashMap.putAll(serializers);
         defaultSerializer = serializerHashMap.getOrDefault("*", new ObjectStreamSerializer());
     }
+
     public ComplexSerializer() {
         defaultSerializer = new ObjectStreamSerializer();
     }
+
+    /** count objects  */
+    public long countObjects() {
+        return serializerHashMap.size()*3L;
+    }
+    /** */
     public Set<String> getSerializerKeys() {
         return serializerHashMap.keySet().stream().collect(Collectors.toSet());
     }
     public Set<String> getSerializerClasses() {
         return serializerHashMap.values().stream().map(s -> s.getClass().getName()).collect(Collectors.toSet());
     }
+
     public void initializeSerializers(String serializerDef) {
 
         // TODO: initialize serializers for classes and default ones

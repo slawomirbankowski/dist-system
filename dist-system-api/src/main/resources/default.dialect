@@ -52,5 +52,121 @@ insertAgentIssue=insert into distagentissue(agentguid, methodname, exceptionmess
 createConfigInit=create table distagentconfiginit(distname text, configname text, configvalue text, configpriority int default 0, createddate timestamp default now())
 selectConfigInit=select * from distagentconfiginit where ? like distname
 
+createDistAgentAuthAccount=create table distagentauthaccount(accountname text not null, domainname text not null, accountattributes text not null, isactive int not null, createddate timestamp not null)
+createDistAgentAuthAccountIndex=create unique index idx_distagentauthaccount_accountname on distagentauthaccount(accountname)
+insertDistAgentAuthAccount=insert into distagentauthaccount(domainname, domaindescription, createddate, isactive) values (?, ?, ?, ?)
+selectDistAgentAuthAccount=select * from distagentauthaccount
+selectDistAgentAuthAccountForName=select * from distagentauthaccount where accountname=?
+selectDistAgentAuthAccountSearch=select * from distagentauthaccount where accountname like ?
+deleteDistAgentAuthAccount=delete from distagentauthaccount where accountname=?
+disableDistAgentAuthAccount=update distagentauthaccount set isactive=0 where accountname=?
+
+createDistAgentAuthDomain=create table distagentauthdomain(domainname text not null, domaindescription text not null, domainattributes text not null, isactive int not null, createddate timestamp not null)
+createDistAgentAuthDomainIndex=create unique index idx_distagentauthdomain_domainname on distagentauthdomain(domainname)
+insertDistAgentAuthDomain=insert into distagentauthdomain(domainname, domaindescription, isactive, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthDomain=select * from distagentauthdomain
+
+createDistAgentAuthIdentity=create table distagentauthidentity(identityname text not null, identitytype text not null, identityattributes text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthIdentity=insert into distagentauthidentity(identityname, identitytype, identityattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthIdentity=select * from distagentauthidentity
+
+createDistAgentAuthRole=create table distagentauthrole(rolename text not null, roledescription text, roleattributes text, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthRole=insert into distagentauthrole(rolename, roledescription, roleattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthRole=select * from distagentauthrole
+
+createDistAgentAuthKey=create table distagentauthkey(keyname text not null, keytype text not null, keyvalue text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthKey=insert into distagentauthkey(keyname, keytype, keyvalue, isactive, createddate) values (?, ?, ?, ?, ?)
+selectDistAgentAuthKey=select * from distagentauthkey
+selectDistAgentAuthKeyForName=select * from distagentauthkey where keyname=?
+
+createDistAgentAuthTokenParser=create table distagentauthtokenparser(tokenparsername text not null, tokenparserattributes text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthTokenParser=insert into distagentauthtokenparser(tokenparsername, tokenparserattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthTokenParser=select * from distagentauthtokenparser
+
+createDistAgentDao=create table distagentdao(agentGuid text not null, daoKey text not null, daoType text not null, daoUrl text not null, structureList text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentDaoIndex=create index idx_distagentdao_agentGuid on distagentdao(agentGuid)
+selectDistAgentDao=select * from distagentdao
+selectDistAgentDaoForAgent=select * from distagentdao where agentGuid=?
+selectDistAgentDaoForUrl=select * from distagentdao where daoUrl=?
+deleteDistAgentDaoOldest=delete from distagentdao where createdDate<?
+
+createDistAgentMeasure=create table distagentmeasure(measureName text not null, measureType text not null, measureParameters text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentMeasureIndex=create unique index idx_distagentmeasure_measureName on distagentmeasure(measureName)
+selectDistAgentMeasure=select * from distagentmeasure
+selectDistAgentMeasureForName=select * from distagentmeasure where measureName=?
+deleteDistAgentMeasure=delete from distagentmeasure where measureName=?
+
+createDistAgentMonitor=create table distagentmonitor(monitorName text not null, monitorType text not null, monitorUrl text not null, monitorParams text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentMonitorIndex=create unique index idx_distagentmonitor_monitorName on distagentmonitor(monitorName)
+selectDistAgentMonitor=select * from distagentmonitor
+selectDistAgentMonitorForName=select * from distagentmonitor where monitorName=?
+selectDistAgentMonitorForType=select * from distagentmonitor where monitorType=?
+deleteDistAgentMonitorForName=select * from distagentmonitor where monitorName=?
+
+createDistAgentMonitorCheck=create table distagentmonitorcheck(monitorName text not null, agentGuid text not null, checkStatus text not null, checkValue float not null, checkOutput text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentMonitorCheckIndex=create index idx_distagentmonitorcheck_monitorName on distagentmonitorcheck(monitorName)
+selectDistAgentMonitorCheck=select * from distagentmonitorcheck
+selectDistAgentMonitorCheckForMonitor=select * from distagentmonitorcheck where monitorName=?
+deleteDistAgentMonitorCheckOldest=delete from distagentmonitorcheck where createdDate<?
+
+createDistAgentNotification=create table distagentnotification(notificationName text not null, notificationType text not null, notificationParams text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentNotificationIndex=create unique index idx_distagentnotification_notificationName on distagentnotification(notificationName)
+selectDistAgentNotification=select * from distagentnotification
+selectDistAgentNotificationForName=select * from distagentnotification where notificationName=?
+deleteDistAgentNotificationForName=delete from distagentnotification where notificationName=?
+
+createDistAgentQuery=create table distagentquery(queryName text not null, queryDefinition text not null, queryParameters text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentQueryIndex=create unique index idx_distagentquery_queryName on distagentquery(queryName)
+selectDistAgentQuery=select * from distagentquery
+selectDistAgentQueryForName=select * from distagentquery where queryName=?
+
+createDistAgentReport=create table distagentreport(reportName text not null, reportDescription text not null, reportType text not null, reportQuery text not null, storageName text not null, columnList text not null, filterList text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentReportIndex=create unique index idx_distagentreport_reportName on distagentreport(reportName)
+selectDistAgentReport=select * from distagentreport
+selectDistAgentReportForName=select * from distagentreport where reportName=?
+
+createDistAgentReportRun=create table distagentreportrun(runGuid text not null, reportName text not null, reportParams text not null, formatName text not null, runDate timestamp not null, runStatus text not null, rowsCount bigint not null, columnsCount bigint not null, contentSize bigint not null, contentPath text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentReportRunIndex=create index idx_distagentreportrun_ on distagentreportrun()
+selectDistAgentReportRun=select * from distagentreportrun
+selectDistAgentReportRunForGuid=select * from distagentreportrun where runGuid=?
+selectDistAgentReportRunForReportName=select * from distagentreportrun where reportName=?
+
+createDistAgentResource=create table distagentresource(resourceName text not null, resourceType text not null, resourceDescription text null, resourceParameters text null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentResourceIndex=create unique index idx_distagentresource_resourceName on distagentresource(resourceName)
+selectDistAgentResource=select * from distagentresource
+selectDistAgentResourceForResource=select * from distagentresource where resourceName=?
+selectDistAgentResourceForType=select * from distagentresource where resourceType=?
+
+createDistAgentScheduleExecution=create table distagentscheduleexecution(executionGuid text not null, scheduleName text not null, agentGuid text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentScheduleExecutionIndex=create unique index idx_distagentscheduleexecution_executionGuid on distagentscheduleexecution(executionGuid)
+selectDistAgentScheduleExecution=select * from distagentscheduleexecution
+
+createDistAgentSchedule=create table distagentschedule(scheduleName text not null, scheduleType text not null, scheduleExpression text not null, scheduleParams text not null, scheduleStartDate timestamp not null, scheduleEndDate timestamp not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentScheduleIndex=create unique index idx_distagentschedule_scheduleName on distagentschedule(scheduleName)
+selectDistAgentSchedule=select * from distagentschedule
+selectDistAgentScheduleForName=select * from distagentschedule where scheduleName=?
+
+createDistAgentScript=create table distagentscript(scriptName text not null, scriptType text not null, scriptContent text not null, scriptParameters text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentScriptIndex=create unique index idx__ on ()
+selectDistAgentScript=select * from distagentscript
+selectDistAgentScriptForName=select * from distagentscript where scriptName=?
+
+createDistAgentSetting=create table distagentsetting(settingName text not null, settingCategory text not null, settingType text not null, settingValue text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentSettingIndex=create unique index idx_distagentsetting_settingName on distagentsetting(settingName)
+selectDistAgentSetting=select * from distagentsetting
+selectDistAgentSettingForName=select * from distagentsetting where settingName=?
+selectDistAgentSettingForCategory=select * from distagentsetting where settingCategory=?
+selectDistAgentSettingForType=select * from distagentsetting where settingType=?
+
+createDistAgentSpace=create table distagentspace(spaceName text not null, spaceOwner text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentSpaceIndex=create unique index idx_distagentspace_spaceName on distagentspace(spaceName)
+selectDistAgentSpace=select * from distagentspace
+selectDistAgentSpaceForName=select * from distagentspace where spaceName=?
+
+createDistAgentStorage=create table distagentstorage(storageName text not null, storageType text not null, storageCategory text not null, storageUrl text not null, storageHost text not null, storagePort text not null, storageUser text not null, storagePassword text not null, storageDefinition text not null, storageParams text not null, createdDate timestamp not null, isactive int not null, lastUpdatedDate timestamp not null)
+createDistAgentStorageIndex=create unique index idx_distagentstorage_storageName on distagentstorage(storageName)
+selectDistAgentStorage=select * from distagentstorage
+selectDistAgentStorageForName=select * from distagentstorage where storageName=?
+selectDistAgentStorageForType=select * from distagentstorage where storageType=?
 
 

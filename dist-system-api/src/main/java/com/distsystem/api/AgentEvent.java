@@ -1,5 +1,7 @@
 package com.distsystem.api;
 
+import com.distsystem.interfaces.Agentable;
+
 import java.time.LocalDateTime;
 
 /** event from cache - full format with parent object, method, type and parameters  */
@@ -7,22 +9,27 @@ public class AgentEvent {
 
     /** date and time of event */
     private final LocalDateTime createdDateTime = LocalDateTime.now();
-    private final Object parent;
+    private final Agentable parent;
     private final String method;
     private final String eventType;
     private final Object[] params;
 
-    public AgentEvent(Object parent, String method, String eventType, Object... params) {
+    public AgentEvent(Agentable parent, String method, String eventType, Object... params) {
         this.parent = parent;
+        // parent.getAgentableName();
         this.method = method;
         this.eventType = eventType;
         this.params = params;
     }
-    public AgentEvent(Object parent, String method, String eventType) {
+    public AgentEvent(Agentable parent, String method, String eventType) {
         this.parent = parent;
         this.method = method;
         this.eventType = eventType;
         this.params = new Object[0];
+    }
+    /** count objects in this agentable object including this object */
+    public long countObjects() {
+        return 4+params.length;
     }
     public Object getParent() {
         return parent;
@@ -38,10 +45,19 @@ public class AgentEvent {
     }
     /** get event row from this event */
     public AgentEventRow getEventRow() {
+        // TODO: add to event row service/agentable name and GUID of parent component that added this event
+        // parent.getAgentableName();
+        // parent.getGuid()
         return new AgentEventRow(createdDateTime, parent.getClass().getName(), method, eventType);
     }
-    public static AgentEvent startCache() {
-        return new AgentEvent(null, "", EVENT_CACHE_START);
+
+    /** create new event */
+    public static AgentEvent createEvent(Agentable parent, String method, String eventType, Object[] params) {
+        return new AgentEvent(parent, method, eventType, params);
+    }
+    /** create new event */
+    public static AgentEvent createEvent(Agentable parent, String method, String eventType) {
+        return new AgentEvent(parent, method, eventType);
     }
 
     public static String EVENT_INITIALIZE_STORAGES = "EVENT_INITIALIZE_STORAGES";

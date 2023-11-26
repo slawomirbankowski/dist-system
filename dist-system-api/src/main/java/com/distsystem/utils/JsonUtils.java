@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /** JSON utils */
 public class JsonUtils {
 
@@ -15,6 +17,9 @@ public class JsonUtils {
     /** serialize */
     public static String serialize(Object obj) {
         try {
+            if (obj==null) {
+                return "{}";
+            }
             ObjectMapper mapper = JsonMapper.builder()
                     .findAndAddModules()
                     .build();
@@ -46,5 +51,15 @@ public class JsonUtils {
             log.warn("CANNOT DESERIALIZE TYPE: " + type.getType().getTypeName() + ", reason: " + ex.getMessage(), ex);
             return null;
         }
+    }
+
+    /** */
+    public static Map<String, String> deserializeToMap(String jsonDefinition) {
+        return deserialize(jsonDefinition, new TypeReference<Map<String, String>>() {});
+    }
+
+    /** */
+    public static Map<String, Object> deserializeToMapOfObjects(String jsonDefinition) {
+        return deserialize(jsonDefinition, new TypeReference<Map<String, Object>>() {});
     }
 }

@@ -12,6 +12,6 @@ public interface AgentThreads extends DistService {
     /** get number of threads */
     int getThreadsCount();
     /** get information about managed threads in Dist system */
-    DistThreadsInfo getThreadsInfo();
+    DistThreadsInfo getInfo();
 
 }

@@ -2,11 +2,11 @@ package com.distsystem.api.info;
 
 public class AgentApiInfo {
 
-    private String apiType;
-    private int webApiPort;
-    private long handledRequestsCount;
-    private long handledRequestsTime;
-    private long handledRequestsErrors;
+    private final String apiType;
+    private final int webApiPort;
+    private final long handledRequestsCount;
+    private final long handledRequestsTime;
+    private final long handledRequestsErrors;
 
     public AgentApiInfo(String apiType, int webApiPort, long handledRequestsCount, long handledRequestsTime, long handledRequestsErrors) {
         this.apiType = apiType;

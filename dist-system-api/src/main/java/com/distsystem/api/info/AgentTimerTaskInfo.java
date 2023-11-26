@@ -6,13 +6,13 @@ import java.time.LocalDateTime;
  * */
 public class AgentTimerTaskInfo {
 
-    private LocalDateTime createdDate;
-    private String name;
-    private long delayMs;
-    private long periodMs;
-    private long timerRunSeq;
-    private long errorsCount;
-    private long exceptionsCount;
+    private final LocalDateTime createdDate;
+    private final String name;
+    private final long delayMs;
+    private final long periodMs;
+    private final long timerRunSeq;
+    private final long errorsCount;
+    private final long exceptionsCount;
 
     public AgentTimerTaskInfo(LocalDateTime createdDate, String name, long delayMs, long periodMs, long timerRunSeq, long errorsCount, long exceptionsCount) {
         this.createdDate = createdDate;

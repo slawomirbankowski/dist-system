@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ResolverManager {
 
     /** list of resolvers for given value */
-    private List<Resolver> resolvers = new LinkedList<>();
+    private final List<Resolver> resolvers = new LinkedList<>();
 
     public ResolverManager() {
     }

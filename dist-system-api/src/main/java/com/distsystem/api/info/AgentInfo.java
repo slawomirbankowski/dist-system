@@ -12,24 +12,25 @@ import java.util.Set;
 /** information DTO about Agent - current state */
 public class AgentInfo implements Serializable {
 
-    private String agentGuid;
-    private String distName;
-    private String agentName;
-    private LocalDateTime createDate;
-    private boolean closed;
-    private Set<String> tags;
-    private List<String> components;
-    private AgentConfigReaderInfo configReader;
-    private AgentMessageProcessorInfo messageProcessor;
-    private AgentApisInfo apis;
+    private final String agentGuid;
+    private final String distName;
+    private final String agentName;
+    private final LocalDateTime createDate;
+    private final boolean closed;
+    private final Set<String> tags;
+    private final List<String> components;
+    private final AgentConfigReaderInfo configReader;
+    private final AgentMessageProcessorInfo messageProcessor;
+    private final AgentApisInfo apis;
     List<DistServiceInfo> services;
-    private AgentConnectorsInfo connectors;
-    private AgentRegistrationsInfo registrations;
-    private AgentTimerInfo timers;
-    private DistThreadsInfo threads;
-    private AgentDaosInfo daos;
-    private int eventsCount;
-    private int issuesCount;
+    private final AgentConnectorsInfo connectors;
+    private final AgentRegistrationsInfo registrations;
+    private final AgentTimerInfo timers;
+    private final DistThreadsInfo threads;
+    private final AgentDaosInfo daos;
+    private final int eventsCount;
+    private final int issuesCount;
+    private final List<DistConfigGroupInfo> configGroupInfos;
 
     public AgentInfo(String agentGuid,
                      String distName,
@@ -47,7 +48,8 @@ public class AgentInfo implements Serializable {
                      AgentTimerInfo timers,
                      DistThreadsInfo threads,
                      AgentDaosInfo daos,
-                     int eventsCount, int issuesCount) {
+                     int eventsCount, int issuesCount,
+                     List<DistConfigGroupInfo> configGroupInfos) {
         this.agentGuid = agentGuid;
         this.distName = distName;
         this.agentName = agentName;
@@ -66,6 +68,7 @@ public class AgentInfo implements Serializable {
         this.daos = daos;
         this.eventsCount = eventsCount;
         this.issuesCount = issuesCount;
+        this.configGroupInfos = configGroupInfos;
     }
 
     /** serialize this agent info */

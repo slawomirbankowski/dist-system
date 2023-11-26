@@ -6,6 +6,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentInfo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 /** interfaces for agent in distributed environment
@@ -23,14 +24,20 @@ import java.util.Set;
 public interface Agent extends DistService, IssueHandler {
     /** get unique ID of this agent */
     String getAgentGuid();
+    /** get total initialization agent time in milliseconds */
+    long getTotalInitializationTime();
     /** get short version ID of this agent GUID */
     String getAgentShortGuid();
+    /** get start time of this agent -  System.currentTimeMillis() */
+    long getAgentStartTime();
     /** get distributed group name */
     String getDistGroup();
     /** get distributed system name */
     String getDistName();
     /** get current agent name */
     String getAgentName();
+    /** get name of current environment */
+    String getEnvironmentName();
     /** get configuration for this agent */
     DistConfig getConfig();
     /** get high-level information about this agent */
@@ -45,6 +52,10 @@ public interface Agent extends DistService, IssueHandler {
     void initializeAgent();
     /** get date and time of creating this agent */
     LocalDateTime getCreateDate();
+    /** count all objects in agent - all services objects */
+    long countAgentObjects();
+    /** list all endpoints for all services */
+    List<String> listAllEndpoints();
     /** check if Agent configuration has given property by name */
     boolean hasConfigProperty(String propName);
     /** get secret generated or set for this agent */
@@ -52,24 +63,55 @@ public interface Agent extends DistService, IssueHandler {
     /** get component to read configuration from external sources */
     AgentConfigReader getConfigReader();
     /** get agent threads manager */
-    AgentThreads getAgentThreads();
+    AgentThreads getThreads();
     /** get agent timers manager */
-    AgentTimers getAgentTimers();
+    AgentTimers getTimers();
     /** get agent service manager */
-    AgentServices getAgentServices();
+    AgentServices getServices();
     /** get agent connector manager to manage direct connections to other agents, including sending and receiving messages */
-    AgentConnectors getAgentConnectors();
+    AgentConnectors getConnectors();
     /** get agent registration manager to register this agent in global repositories (different types: JDBC, Kafka, App, Elasticsearch, ... */
-    AgentRegistrations getAgentRegistrations();
+    AgentRegistrations getRegistrations();
     /** get agent events manager to add events and set callbacks */
-    AgentEvents getAgentEvents();
+    AgentEvents getEvents();
     /** get agent issuer manager add issues */
-    AgentIssues getAgentIssues();
+    AgentIssues getIssues();
     /** get agent DAOs manager for external connections to JDBC, Elasticsearch, Kafka, Redis */
     AgentDao getAgentDao();
     /** get WebAPI for this Agent */
-    AgentApi getAgentApi();
-
+    AgentApi getApi();
+    /** get authentication service for managing accounts and login into identity services */
+    AgentAuth getAuth();
+    /** get receiver service to get data from different sources */
+    Receiver getReceiver();
+    /** get cache connected with this Agent to have copy of */
+    Cache getCache();
+    /** get service for reports to create, update, remove or execute reports */
+    AgentReports getReports();
+    /** get service for storages */
+    Storages getStorages();
+    /** get service for managing spaces - shared spaces with objects that could be modified by any agent */
+    AgentSpace getSpace();
+    /** get service for security for managing priviliges, roles, objects */
+    AgentSecurity getSecurity();
+    /** get flow service for data flows */
+    AgentFlow getFlow();
+    /** get semaphores service for semaphores and mutexes */
+    AgentSemaphores getSemaphores();
+    /** get ML service for Machine Learning models */
+    AgentMachineLearning getMl();
+    /** get service for managing shared objects */
+    AgentObjects getObjects();
+    /** get monitor service */
+    AgentMonitor getMonitor();
+    /** get measure service */
+    AgentMeasure getMeasure();
+    /** get notification service to send notifications */
+    AgentNotification getNotification();
+    /** get schedule for service */
+    AgentSchedule getSchedule();
+    /** get service for version */
+    AgentVersion getVersion();
     /** create new message builder starting this agent */
     DistMessageBuilder createMessageBuilder();
     /** message send to agent(s) */
@@ -85,7 +127,9 @@ public interface Agent extends DistService, IssueHandler {
     DistMessageFull sendMessageAny(DistService fromService, DistServiceType toService, String method, Object message, DistCallbacks callbacks);
 
     /** register new config group */
-    DistConfigGroup registerConfigGroup(String groupName);
+    DistConfigGroup registerConfigGroup(String groupName, DistService parentService);
+    /** create new event and add it to events */
+    void addEvent(AgentEvent event);
 
     /** close all items in this agent */
     void close();

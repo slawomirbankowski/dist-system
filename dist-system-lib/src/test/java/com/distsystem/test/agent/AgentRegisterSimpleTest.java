@@ -28,16 +28,16 @@ public class AgentRegisterSimpleTest {
 
         assertNotNull(agent1, "Created agent should not be null");
 
-        log.info("======-----> Agents [1]: " + agent1.getAgentRegistrations().getAgents().size() + ", servers: " + agent1.getAgentServices().getServices().size());
-        assertEquals(1, agent1.getAgentServices().getServices().size(), "There should be 1 server");
-        assertEquals(0, agent1.getAgentRegistrations().getAgents().size(), "There should be 0 agents");
-        assertEquals(1, agent1.getAgentRegistrations().getRegistrationsCount(), "There should be 1 registration service");
+        log.info("======-----> Agents [1]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServices().size());
+        assertEquals(1, agent1.getServices().getServices().size(), "There should be 1 server");
+        assertEquals(0, agent1.getRegistrations().getAgents().size(), "There should be 0 agents");
+        assertEquals(1, agent1.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
 
         DistUtils.sleep(3000);
-        log.info("======-----> Agents [2]: " + agent1.getAgentRegistrations().getAgents().size() + ", servers: " + agent1.getAgentServices().getServices().size());
-        assertEquals(1, agent1.getAgentServices().getServices().size(), "There should be 1 server");
-        assertEquals(1, agent1.getAgentRegistrations().getAgents().size(), "There should be 1 agent");
-        assertEquals(1, agent1.getAgentRegistrations().getRegistrationsCount(), "There should be 1 registration service");
+        log.info("======-----> Agents [2]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServices().size());
+        assertEquals(1, agent1.getServices().getServices().size(), "There should be 1 server");
+        assertEquals(1, agent1.getRegistrations().getAgents().size(), "There should be 1 agent");
+        assertEquals(1, agent1.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
 
         agent1.close();
 

@@ -6,7 +6,7 @@ import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.AgentClientBase;
 import com.distsystem.dao.DaoKafkaBase;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentClient;
 import org.slf4j.Logger;
@@ -27,8 +27,13 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
     public AgentKafkaClient(Agent parentAgent, DistAgentServerRow srv) {
         super(parentAgent, srv);
         this.serverRow = srv;
-        this.connectedAgentGuid = srv.agentguid;
+        this.connectedAgentGuid = srv.getAgentGuid();
         initialize();
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
     }
     /** get type of client - socket, http, datagram, ... */
     public DistClientType getClientType() {
@@ -36,15 +41,15 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
     }
     /** get unified URL of this client */
     public String getUrl() {
-        return serverRow.serverurl;
+        return serverRow.getServerUrl();
     }
     /** initialize client - connecting or reconnecting */
     public boolean initialize() {
         try {
-            var params =  DaoParams.kafkaParams(serverRow.serverurl, numPartitions, replicationFactor);
+            var params =  DaoParams.kafkaParams(serverRow.getServerUrl(), numPartitions, replicationFactor);
             daoKafka = parentAgent.getAgentDao().getOrCreateDaoOrError(DaoKafkaBase.class, params);
             daoKafka.usedByComponent(this);
-            log.info("Created new KAFKA client for server: " + serverRow.servertype + ", url: " + serverRow.serverurl + ", host: " + serverRow.serverhost + ", port: " + serverRow.serverport);
+            log.info("Created new KAFKA client for server: " + serverRow.simpleInfo());
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
@@ -57,7 +62,7 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
 
     /** read configuration and re-initialize this component */
     public boolean componentReinitialize() {
-        // TODO: reinitialize this component
+        // TODO: reinitialize this component - re-create new Kafka client or something?
         return true;
     }
     /** send message to this client */
@@ -69,7 +74,7 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
             return true;
         } catch (Exception ex) {
             log.warn("Error while sending Datagram packet for client: " + clientGuid + ", reason: " + ex.getMessage(), ex);
-            parentAgent.getAgentIssues().addIssue("DatagramClient.send", ex);
+            parentAgent.getIssues().addIssue("DatagramClient.send", ex);
             return false;
         }
     }

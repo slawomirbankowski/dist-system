@@ -3,7 +3,7 @@ package com.distsystem.storage;
 import com.distsystem.api.*;
 import com.distsystem.api.enums.CacheStorageType;
 import com.distsystem.api.info.CacheObjectInfo;
-import com.distsystem.base.dtos.DistCacheItemRow;
+import com.distsystem.api.dtos.DistCacheItemRow;
 import com.distsystem.base.CacheStorageBase;
 import com.distsystem.dao.DaoJdbcBase;
 import com.distsystem.interfaces.Cache;

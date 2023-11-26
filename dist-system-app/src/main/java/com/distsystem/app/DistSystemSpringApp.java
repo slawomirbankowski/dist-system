@@ -23,7 +23,7 @@ public class DistSystemSpringApp {
     }
     public static void main(String[] args) {
         commandLineArguments = args;
-        log.info("STARTING DistSystem Spring REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getCacheGuid());
+        log.info("STARTING DistSystem Spring REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getGuid());
         SpringApplication.run(DistSystemSpringApp.class, args);
     }
     @Bean

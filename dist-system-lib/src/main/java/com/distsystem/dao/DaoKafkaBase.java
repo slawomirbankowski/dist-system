@@ -58,11 +58,20 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
         this.clientId = parentAgent.getAgentGuid();
         onInitialize();
     }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
+    }
     /** returns true if DAO is connected */
     public boolean isConnected() {
         return true;
     }
 
+    /** test DAO and returns items */
+    public Map<String, Object> testDao() {
+        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    }
     /** get URL of this DAO */
     public String getUrl() {
         return brokers;
@@ -223,7 +232,7 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
         receiver.setThread(thread);
         thread.setDaemon(true);
         thread.start();
-        parentAgent.getAgentThreads().registerThread(this, thread, "kafka-receiver-" + topicName);
+        parentAgent.getThreads().registerThread(this, thread, "kafka-receiver-" + topicName);
         KafkaReceiverImpl oldReceiver = consumersByTopic.put(topicName, receiver);
         if (oldReceiver != null) {
             oldReceiver.close();
