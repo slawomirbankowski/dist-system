@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="distagentmonitorCheck", keyName="monitorName", keyIsUnique=false)
 public class DistAgentMonitorCheckRow extends BaseRow {
 
     private final String monitorName;
@@ -15,10 +14,9 @@ public class DistAgentMonitorCheckRow extends BaseRow {
     private final String checkStatus;
     private final double checkValue;
     private final String checkOutput;
-
-    protected int isActive;
-    protected LocalDateTime createdDate;
-    protected LocalDateTime lastUpdatedDate;
+    protected final int isActive;
+    protected final LocalDateTime createdDate;
+    protected final LocalDateTime lastUpdatedDate;
 
     public DistAgentMonitorCheckRow(String monitorName, String agentGuid, String checkStatus, double checkValue, String checkOutput, LocalDateTime createdDate) {
         this.monitorName = monitorName;
@@ -74,10 +72,27 @@ public class DistAgentMonitorCheckRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] {monitorName, agentGuid, checkStatus, checkValue, checkOutput, createdDate };
+        return new Object[] { monitorName, agentGuid, checkStatus, checkValue, checkOutput, createdDate };
     }
+
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "monitorName";
+    }
+
+    /** if key is unique */
+    public static Boolean getKeyIsUnique() {
+        return false;
+    }
+
+    /** if key is unique */
+    public static String[] getUpdateColumns() {
+        return new String[] { "checkStatus", "checkValue", "checkOutput" };
+    }
+
     public Map<String, String> toMap() {
-        return Map.of("monitorName", monitorName,
+        return Map.of("", "",
+                "monitorName", monitorName,
                 "agentGuid", agentGuid,
                 "checkStatus", checkStatus,
                 "checkValue", ""+checkValue,

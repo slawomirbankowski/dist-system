@@ -8,6 +8,8 @@ import com.distsystem.interfaces.AgentReports;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /** Service to keep  execute, delete, schedule, edit reports.
  * Each report is connected to Storage, has query to be executed, list of columns, filters, formatters, readers.
  * Report can be executed with parameters for filters, column subset, maximum rows, maximum execution/delivery time,
@@ -32,6 +34,10 @@ public class AgentReportsImpl extends ServiceBase implements AgentReports {
     }
 
 
+    public List<String> getReportNames() {
+        // TODO: get report names
+        return parentAgent.getRegistrations().getRegistrationKeys();
+    }
 
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {

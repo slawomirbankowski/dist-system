@@ -78,4 +78,8 @@ public class DistAgentSettingRow extends BaseRow {
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "settingName";
+    }
 }

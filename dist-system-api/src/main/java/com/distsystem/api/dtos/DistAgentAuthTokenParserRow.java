@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="distagentauthrole", keyName="tokenParserName", keyIsUnique=true)
 public class DistAgentAuthTokenParserRow extends BaseRow {
 
     private final String tokenParserName;

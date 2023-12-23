@@ -2,12 +2,12 @@ package com.distsystem.api.dtos;
 
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoTable;
+import com.distsystem.utils.AdvancedMap;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="DistAgentReport", keyName="reportName", keyIsUnique=true)
 public class DistAgentReportRow extends BaseRow {
 
     private String reportName;
@@ -17,13 +17,11 @@ public class DistAgentReportRow extends BaseRow {
     private String storageName;
     private String columnList;
     private String filterList;
-
     protected int isActive;
     protected LocalDateTime createdDate;
     protected LocalDateTime lastUpdatedDate;
 
-
-    public DistAgentReportRow(String reportName, String reportDescription, String reportType, String reportQuery, String storageName, String columnList, String filterList, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+    public DistAgentReportRow(String reportName, String reportDescription, String reportType, String reportQuery, String storageName, String columnList, String filterList, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
         this.reportName = reportName;
         this.reportDescription = reportDescription;
         this.reportType = reportType;
@@ -31,8 +29,8 @@ public class DistAgentReportRow extends BaseRow {
         this.storageName = storageName;
         this.columnList = columnList;
         this.filterList = filterList;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentReportRow(String reportName, String reportDescription, String reportType, String reportQuery, String storageName, String columnList, String filterList) {
@@ -43,8 +41,8 @@ public class DistAgentReportRow extends BaseRow {
         this.storageName = storageName;
         this.columnList = columnList;
         this.filterList = filterList;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -64,6 +62,21 @@ public class DistAgentReportRow extends BaseRow {
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    public static DistAgentReportRow fromMap(Map<String, Object> map) {
+        AdvancedMap m = new AdvancedMap(map, true);
+        return new DistAgentReportRow(
+                m.getString("reportName", ""),
+                m.getString("reportDescription", ""),
+                m.getString("reportType", ""),
+                m.getString("reportQuery", ""),
+                m.getString("storageName", ""),
+                m.getString("columnList", ""),
+                m.getString("filterList", ""),
+                m.getInt("isActive", 1),
+                m.getLocalDateOrNow("createdDate"),
+                m.getLocalDateOrNow("lastUpdatedDate")
+        );
+    }
     public String getReportName() {
         return reportName;
     }

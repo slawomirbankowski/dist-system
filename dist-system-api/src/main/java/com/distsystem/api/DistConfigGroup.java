@@ -54,7 +54,7 @@ public class DistConfigGroup {
      * AGENT_SEMAPHORE_OBJECT_JDBC_URL, AGENT_SEMAPHORE_OBJECT_JDBC_DRIVER, AGENT_SEMAPHORE_OBJECT_JDBC_USER, AGENT_SEMAPHORE_OBJECT_JDBC_PASS
      * */
     public void calculateBuckets() {
-        log.info("Start calculating buckets for group, service: " + parentService.getServiceType().name() + ", config: " + parentConfig.getConfigGuid() + ", group: "  + groupName);
+        log.debug("Start calculating buckets for group, service: " + parentService.getServiceType().name() + ", config: " + parentConfig.getConfigGuid() + ", group: "  + groupName);
         List<DistConfigEntry> newEntries = parentConfig.getPropertiesStartsWith(groupName).entrySet().stream().flatMap(p -> {
             String fullName = p.getKey();
             String[] configKeyParts = fullName.split("_");
@@ -78,18 +78,18 @@ public class DistConfigGroup {
         entries.addAll(newEntries);
         newEntries.stream().collect(Collectors.groupingBy(x -> x.getConfigKey())).entrySet().stream().forEach(g -> {
             DistConfigBucket bucket = new DistConfigBucket(this, g.getKey(), g.getValue());
-            log.info("Configuration bucket group adding new bucket, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", bucketKey: " + g.getKey() + ", hash: " + bucket.getEntriesHash() + ", entries: " + g.getValue().size());
+            log.debug("Configuration bucket group adding new bucket, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", bucketKey: " + g.getKey() + ", hash: " + bucket.getEntriesHash() + ", entries: " + g.getValue().size());
             newBuckets.put(g.getKey(), bucket);
         });
         newBuckets.values().stream().forEach(bucket -> {
             parentService.initializeConfigBucket(bucket);
         });
-        log.info("Recalculated buckets, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", previous count: " + buckets.size() + ", new count: " + newBuckets.size());
+        log.debug("Recalculated buckets, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", previous count: " + buckets.size() + ", new count: " + newBuckets.size());
         // TODO: merge existing buckets with new ones
         // newBuckets with buckets, initialize all new buckets
         //parentService.initializeConfigBucket();
         buckets.putAll(newBuckets);
-        log.info("Calculated config group of configuration values for config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", all entries: " + newEntries.size() + ", all buckets: " + buckets.size());
+        log.debug("Calculated config group of configuration values for config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", all entries: " + newEntries.size() + ", all buckets: " + buckets.size());
     }
     /** get parent config for this group */
     public DistConfig getParentConfig() {

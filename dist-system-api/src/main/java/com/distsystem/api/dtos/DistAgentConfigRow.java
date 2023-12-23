@@ -21,14 +21,24 @@ public class DistAgentConfigRow extends BaseRow {
     private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
 
-    public DistAgentConfigRow(String agentGuid, String configName, String configValue, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
+    public DistAgentConfigRow(String configGuid, String agentGuid, String configName, String configValue, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
+        this.configGuid = configGuid;
+        this.agentGuid = agentGuid;
+        this.configName = configName;
+        this.configValue = configValue;
+        this.isActive = isActive;
+        this.createdDate = createdDate;
+        this.lastUpdatedDate = lastUpdatedDate;
+    }
+
+    public DistAgentConfigRow(String agentGuid, String configName, String configValue) {
         this.configGuid = DistUtils.generateCustomGuid("config");
         this.agentGuid = agentGuid;
         this.configName = configName;
         this.configValue = configValue;
         this.isActive = 1;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
+        this.createdDate = LocalDateTime.now();
+        this.lastUpdatedDate = createdDate;
     }
     public String getAgentGuid() {
         return agentGuid;
@@ -56,7 +66,7 @@ public class DistAgentConfigRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, configName, configValue, createdDate, lastUpdatedDate };
+        return new Object[] { configGuid, agentGuid, configName, configValue, isActive, createdDate, lastUpdatedDate };
     }
 
     /** get name of key attribute */
@@ -74,9 +84,11 @@ public class DistAgentConfigRow extends BaseRow {
     public static DistAgentConfigRow fromMap(Map<String, Object> map) {
         AdvancedMap m = new AdvancedMap(map, true);
         return new DistAgentConfigRow(
+                m.getStringOrEmpty("configGuid"),
                 m.getStringOrEmpty("agentguid"),
                 m.getStringOrEmpty("configname"),
                 m.getStringOrEmpty("configvalue"),
+                m.getIntOrZero("isActive"),
                 m.getLocalDateOrNow("createddate"),
                 m.getLocalDateOrNow("lastupdateddate")
         );

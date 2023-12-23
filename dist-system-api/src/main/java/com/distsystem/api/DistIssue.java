@@ -61,7 +61,7 @@ public class DistIssue {
 
     /** convert this rich object to serializable row to be sent or stored */
     public DistAgentIssueRow toRow() {
-        return new DistAgentIssueRow(createDate, guid, parent.getAgent().getAgentGuid(), methodName, ex.getClass().getName(), ex.getMessage(), "", params);
+        return new DistAgentIssueRow(guid, parent.getAgent().getAgentGuid(), methodName, ex.getClass().getName(), ex.getMessage(), DistUtils.serializeException(ex), parent.getAgent().getSerializer().serializeToString(params));
     }
     public static String ISSUE_INTERNAL_EXCEPTION = "ISSUE_INTERNAL_EXCEPTION";
     public static String ISSUE_ALREADY_CLOSED = "ISSUE_ALREADY_CLOSED";

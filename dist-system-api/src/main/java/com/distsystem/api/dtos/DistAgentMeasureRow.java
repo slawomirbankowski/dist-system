@@ -12,7 +12,7 @@ public class DistAgentMeasureRow extends BaseRow {
     private final String measureName;
     private final String measureType;
     private final String measureParameters;
-
+    /** 0 - object is not active, 1 - object is active */
     protected int isActive;
     protected LocalDateTime createdDate;
     protected LocalDateTime lastUpdatedDate;
@@ -62,4 +62,8 @@ public class DistAgentMeasureRow extends BaseRow {
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "measureName";
+    }
 }

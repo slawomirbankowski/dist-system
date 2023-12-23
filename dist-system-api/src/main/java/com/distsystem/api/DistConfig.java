@@ -462,14 +462,14 @@ public class DistConfig {
     /** names of storages and class names for these storages in package distsystem.storage */
     public static String AGENT_CACHE_STORAGE_VALUE_HASHMAP = "InternalHashMapCacheStorage";
     public static String AGENT_CACHE_STORAGE_VALUE_WEAKHASHMAP = "InternalWeakHashMapCacheStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_PRIORITYQUEUE = "InternalWithTtlAndPriority";
+    public static String AGENT_CACHE_STORAGE_VALUE_PRIORITYQUEUE = "InternalWithTtlAndPriorityCacheStorage";
     public static String AGENT_CACHE_STORAGE_VALUE_REDIS = "RedisCacheStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_MONGO = "MongodbStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_CASSANDRA = "CassandraStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_KAFKA = "KafkaStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_LOCAL_DISK = "LocalDiskStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH = "ElasticsearchCacheStorage";
-    public static String AGENT_CACHE_STORAGE_VALUE_JDBC = "JdbcStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_MONGO = "MongodbCacheStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_CASSANDRA = "CassandraCacheStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_KAFKA = "KafkaCacheStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_LOCAL_DISK = "LocalDiskCacheStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_ELASTICSEARCH = "ElasticsearchCacheCacheStorage";
+    public static String AGENT_CACHE_STORAGE_VALUE_JDBC = "JdbcCacheStorage";
 
     /** CACHE STORAGE - settings for JDBC storage */
     public static String AGENT_CACHE_STORAGE_JDBC_URL = "AGENT_CACHE_STORAGE_JDBC_URL";

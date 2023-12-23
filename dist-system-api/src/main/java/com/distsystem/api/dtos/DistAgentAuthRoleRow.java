@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="distagentauthrole", keyName="roleName", keyIsUnique=true)
 public class DistAgentAuthRoleRow extends BaseRow {
 
     private final String roleName;
@@ -19,8 +18,6 @@ public class DistAgentAuthRoleRow extends BaseRow {
     private final int isActive;
     private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
-
-    // create table distagentauthrole(rolename text not null, roledescription text, roleattributes text, isactive int not null, createddate timestamp not null)
 
     public DistAgentAuthRoleRow(String roleName, String roleDescription, String roleAttributes, int isActive, LocalDateTime createdDate) {
         this.roleName = roleName;

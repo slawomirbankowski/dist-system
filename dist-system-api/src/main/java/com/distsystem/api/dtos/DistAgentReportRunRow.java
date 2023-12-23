@@ -2,12 +2,12 @@ package com.distsystem.api.dtos;
 
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoTable;
+import com.distsystem.utils.AdvancedMap;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="DistAgentReportRunRow", keyName="runGuid", keyIsUnique=true)
 public class DistAgentReportRunRow extends BaseRow {
 
     private String runGuid;
@@ -20,11 +20,11 @@ public class DistAgentReportRunRow extends BaseRow {
     private long columnsCount;
     private long contentSize;
     private String contentPath;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
-    public DistAgentReportRunRow(String runGuid, String reportName, String reportParams, String formatName, LocalDateTime runDate, String runStatus, long rowsCount, long columnsCount, long contentSize, String contentPath, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+    public DistAgentReportRunRow(String runGuid, String reportName, String reportParams, String formatName, LocalDateTime runDate, String runStatus, long rowsCount, long columnsCount, long contentSize, String contentPath, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
         this.runGuid = runGuid;
         this.reportName = reportName;
         this.reportParams = reportParams;
@@ -35,8 +35,8 @@ public class DistAgentReportRunRow extends BaseRow {
         this.columnsCount = columnsCount;
         this.contentSize = contentSize;
         this.contentPath = contentPath;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentReportRunRow(String runGuid, String reportName, String reportParams, String formatName, LocalDateTime runDate, String runStatus, long rowsCount, long columnsCount, long contentSize, String contentPath) {
@@ -50,8 +50,8 @@ public class DistAgentReportRunRow extends BaseRow {
         this.columnsCount = columnsCount;
         this.contentSize = contentSize;
         this.contentPath = contentPath;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -109,6 +109,27 @@ public class DistAgentReportRunRow extends BaseRow {
 
     public Object[] toInsertRow() {
         return new Object[] { runGuid, reportName, reportParams, formatName, runDate, runStatus, rowsCount, columnsCount, contentSize, contentPath, createdDate, isActive, lastUpdatedDate };
+    }
+
+    // String runGuid, String reportName, String reportParams, String formatName, LocalDateTime runDate, String runStatus, long rowsCount, long columnsCount, long contentSize, String contentPath,
+    // int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate
+    public static DistAgentReportRunRow fromMap(Map<String, Object> map) {
+        AdvancedMap m = new AdvancedMap(map, true);
+        return new DistAgentReportRunRow(
+                m.getStringOrEmpty("runGuid"),
+                m.getStringOrEmpty("reportName"),
+                m.getStringOrEmpty("reportParams"),
+                m.getStringOrEmpty("formatName"),
+                m.getLocalDateOrNow("runDate"),
+                m.getStringOrEmpty("runStatus"),
+                m.getLongOrZero("rowsCount"),
+                m.getLongOrZero("columnsCount"),
+                m.getLongOrZero("columnsCount"),
+                m.getStringOrEmpty("contentSize"),
+                m.getInt("isActive", 1),
+                m.getLocalDateOrNow("createdDate"),
+                m.getLocalDateOrNow("lastUpdatedDate")
+        );
     }
     public Map<String, String> toMap() {
         Map<String, String> m = Map.of("", "");

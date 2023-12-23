@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="DistAgentAuthAccount", keyName="accountName", keyIsUnique=true)
 public class DistAgentAuthAccountRow extends BaseRow {
 
     private final String accountName;
@@ -19,9 +18,6 @@ public class DistAgentAuthAccountRow extends BaseRow {
     private final int isActive;
     private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
-
-    // create table distagentauthaccount(accountname text not null, domainname text not null, accountattributes text not null, isactive int not null, createddate timestamp not null)
-
     public DistAgentAuthAccountRow(String accountName, String domainName, String accountAttributes, int isActive, LocalDateTime createdDate) {
         this.accountName = accountName;
         this.domainName = domainName;
@@ -66,11 +62,19 @@ public class DistAgentAuthAccountRow extends BaseRow {
     public Object[] toInsertRow() {
         return new Object[] { accountName, domainName, accountAttributes, isActive, createdDate };
     }
-
+    public Object[] toUpdateRow() {
+        return new Object[] { accountAttributes, lastUpdatedDate, accountName };
+    }
     /** get name of key attribute */
     public static String getKeyAttributeName() {
         return "accountName";
     }
+
+    /** if key is unique */
+    public static String[] getUpdateColumns() {
+        return new String[] { "accountAttributes" };
+    }
+
     public Map<String, String> toMap() {
         return Map.of("type", "DistAgentAuthAccountRow",
                 "accountName", accountName,

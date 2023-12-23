@@ -115,10 +115,21 @@ public class DistFactory {
         return DistFactory
                 .buildEmptyFactory()
                 .withUniverseNameDefault()
+                .withAgentNameGenerated()
+                .withCommonProperties()
+                .withSerializerDefault()
+                .withWebApiDefaultPort()
+                .withServerSocketDefaultPort()
+                .withServerDatagramPortDefaultValue()
+                .withServerHttpPortDefault()
                 .withCacheStorageHashMap()
+                .withTimerStorageClean(30000)
+                .withTimerRegistrationPeriod(30000)
+                .withTimerServerPeriod(30000)
                 .withMaxIssues(DistConfig.AGENT_CACHE_ISSUES_MAX_COUNT_VALUE)
                 .withMaxEvents(DistConfig.AGENT_CACHE_EVENTS_MAX_COUNT_VALUE)
-                .withCacheMaxObjectsAndItems(DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS_VALUE, DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS_VALUE);
+                .withCacheMaxObjectsAndItems(DistConfig.AGENT_CACHE_MAX_LOCAL_OBJECTS_VALUE, DistConfig.AGENT_CACHE_MAX_LOCAL_ITEMS_VALUE)
+                .withEnvironmentVariables();
     }
 
     /** build factory based on properties */
@@ -233,6 +244,10 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_NAME, name);
         return this;
     }
+    /** generate agent name from host*/
+    public DistFactory withAgentNameGenerated() {
+        return withAgentName("A_" + DistUtils.getCurrentHostName() + "_" + DistUtils.generateShortGuid());
+    }
     /** */
     public DistFactory withAgentParentApplication(String applicationName) {
         props.setProperty(DistConfig.AGENT_PARENT_APPLICATION, applicationName);
@@ -247,6 +262,7 @@ public class DistFactory {
         });
         return this;
     }
+
     /** add common properties for this cache/machine/agent/address/path */
     public DistFactory withCommonProperties() {
         props.setProperty(DistConfig.AGENT_GLOBAL_GUID, DistUtils.getGuid());
@@ -441,6 +457,12 @@ public class DistFactory {
                 DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_PARTITIONS_DEFAULT_VALUE,
                 DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION_DEFAULT_VALUE);
     }
+
+    public DistFactory withRegistrationKafkaFromEnvironment(String brokers, String topicName) {
+        return withRegistrationKafka(brokers, topicName,
+                DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_PARTITIONS_DEFAULT_VALUE,
+                DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION_DEFAULT_VALUE);
+    }
     public DistFactory withRegistrationKafka(String brokers) {
         return withRegistrationKafka(brokers, DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_TOPIC_DEFAULT_VALUE);
     }
@@ -495,6 +517,10 @@ public class DistFactory {
     /** define port for HTTP communication between agents */
     public DistFactory withServerHttpPort(int port) {
         props.setProperty(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT, ""+port);
+        return this;
+    }
+    public DistFactory withServerHttpPortDefault() {
+        props.setProperty(DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT, ""+DistConfig.AGENT_CONNECTORS_SERVER_HTTP_PORT_DEFAULT_VALUE);
         return this;
     }
     /** define port for DATAGRAM/ UDP communication between agents */
@@ -590,6 +616,13 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_REDIS);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_URL, url);
         props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_PORT, ""+port);
+        return this;
+    }
+    /** add cache storage as Redis */
+    public DistFactory withCacheStorageRedis(String url, String port) {
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGES, withCacheExistingStorageList() + "," + DistConfig.AGENT_CACHE_STORAGE_VALUE_REDIS);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_URL, url);
+        props.setProperty(DistConfig.AGENT_CACHE_STORAGE_REDIS_PORT, port);
         return this;
     }
     /** add cache storage as Mongodb */

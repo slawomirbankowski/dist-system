@@ -56,49 +56,36 @@ public class RegistrationJdbc extends RegistrationBase {
         onInitialize();
         return true;
     }
-
-
     /** if needed - create SQL agent table */
     private void tryCreateAgentTable() {
-        var agentRegisterTable = dao.executeSelectQuery(dialect.selectTable(), new Object[] { JdbcTables.distagentregister.name() });
-        if (agentRegisterTable.size() == 0) {
-            log.info("Try to create agent registering table in JDBC, dialect: " + dialect.dialectName);
-            dao.executeAnyQuery(dialect.createAgentRegister());
-            dao.executeAnyQuery(dialect.createAgentRegisterIndex());
-        }
-        var agentServerTable = dao.executeSelectQuery(dialect.selectTable(), new Object[] {JdbcTables.distagentserver.name() });
-        if (agentServerTable.size() == 0) {
-            log.info("Try to create distagentserver table in JDBC, dialect: " + dialect.dialectName);
-            dao.executeAnyQuery(dialect.createAgentServer());
-            dao.executeAnyQuery(dialect.createAgentServerIndex());
-        }
-        var agentServiceTable = dao.executeSelectQuery(dialect.selectTable(), new Object[] {JdbcTables.distagentservice.name() });
-        if (agentServiceTable.size() == 0) {
-            log.info("Try to create distagentservice table in JDBC, dialect: " + dialect.dialectName);
-            dao.executeAnyQuery(dialect.createAgentService());
-            dao.executeAnyQuery(dialect.createAgentServiceIndex());
-        }
-        var agentConfigTable = dao.executeSelectQuery(dialect.selectTable(), new Object[] {JdbcTables.distagentconfig.name() });
-        if (agentConfigTable.size() == 0) {
-            log.info("Try to create distagentconfig table in JDBC, dialect: " + dialect.dialectName);
-            dao.executeAnyQuery(dialect.createAgentConfig());
-            dao.executeAnyQuery(dialect.createAgentConfigIndex());
-        }
-        var agentIssueTable = dao.executeSelectQuery(dialect.selectTable(), new Object[] {JdbcTables.distagentissue.name() });
-        if (agentIssueTable.size() == 0) {
-            log.info("Try to create distagentissue table in JDBC, dialect: " + dialect.dialectName);
-            dao.executeAnyQuery(dialect.createAgentIssue());
-        }
-
-
-
-
-
-
-
-
-
-
+        dao.checkAndCreateModel(DaoModel.authAccount);
+        dao.checkAndCreateModel(DaoModel.authDomain);
+        dao.checkAndCreateModel(DaoModel.authIdentity);
+        dao.checkAndCreateModel(DaoModel.authKey);
+        dao.checkAndCreateModel(DaoModel.authRole);
+        dao.checkAndCreateModel(DaoModel.authTokenParser);
+        dao.checkAndCreateModel(DaoModel.cacheItem);
+        dao.checkAndCreateModel(DaoModel.configInit);
+        dao.checkAndCreateModel(DaoModel.config);
+        dao.checkAndCreateModel(DaoModel.dao);
+        dao.checkAndCreateModel(DaoModel.event);
+        dao.checkAndCreateModel(DaoModel.issue);
+        dao.checkAndCreateModel(DaoModel.measure);
+        dao.checkAndCreateModel(DaoModel.monitorCheck);
+        dao.checkAndCreateModel(DaoModel.monitor);
+        dao.checkAndCreateModel(DaoModel.notification);
+        dao.checkAndCreateModel(DaoModel.query);
+        dao.checkAndCreateModel(DaoModel.register);
+        dao.checkAndCreateModel(DaoModel.report);
+        dao.checkAndCreateModel(DaoModel.reportRun);
+        dao.checkAndCreateModel(DaoModel.resource);
+        dao.checkAndCreateModel(DaoModel.schedule);
+        dao.checkAndCreateModel(DaoModel.scheduleExecution);
+        dao.checkAndCreateModel(DaoModel.server);
+        dao.checkAndCreateModel(DaoModel.service);
+        dao.checkAndCreateModel(DaoModel.setting);
+        dao.checkAndCreateModel(DaoModel.space);
+        dao.checkAndCreateModel(DaoModel.storage);
     }
     /** get normalized URL for this registration */
     public String getUrl() {
@@ -114,9 +101,9 @@ public class RegistrationJdbc extends RegistrationBase {
     protected AgentConfirmation onAgentRegister(AgentRegister register) {
         // register this agent in JDBC
         log.info("Registering new agent in JDBC, GUID: " + this.parentAgent.getAgentGuid() + ", dialect: " + dialect.dialectName);
-        dao.executeAnyQuery(dialect.insertAgentRegister(), new Object[] {register.getAgentGuid(), register.getHostName(), register.getHostIp(), register.getPort(), register.getCreateDate(), register.getLastPingDate(), 0, 1});
+        dao.executeInsertRowForModel(DaoModel.register, register.toRegister());
         parentAgent.getConfig().getHashMap(false).entrySet().stream().forEach(cfg -> {
-            dao.executeUpdateQuery(dialect.insertAgentConfig(), new Object[] { register.getAgentGuid(), cfg.getKey(), cfg.getValue(), register.getCreateDate(), register.getCreateDate() });
+            dao.executeInsertRowForModel(DaoModel.config, new DistAgentConfigRow(register.getAgentGuid(), cfg.getKey(), cfg.getValue()));
         });
         return new AgentConfirmation(register.getAgentGuid(), true, false, 0, List.of());
     }
@@ -160,11 +147,10 @@ public class RegistrationJdbc extends RegistrationBase {
             return false;
         }
     }
-
     /** add issue for registration */
     public void addIssue(DistIssue issue) {
         try {
-            dao.executeUpdateQuery(dialect.insertAgentIssue(), new Object[] { parentAgent.getAgentGuid(), issue.getMethodName(), issue.getExceptionMessage(), "", "", new java.util.Date() });
+            dao.executeInsertRowForModel(DaoModel.issue, issue.toRow());
         } catch (Exception ex) {
             log.warn("Cannot register issue at JDBC, reason: " + ex.getMessage());
         }
@@ -174,8 +160,7 @@ public class RegistrationJdbc extends RegistrationBase {
         try {
             log.info("Registering server in JDBC, dialect: " + dialect.dialectName + ", server: " + serv.getServerGuid());
             // distagentserver(agentguid text, servertype text, serverhost text, serverip text, serverport int, serverurl text, createddate timestamp, isactive int, lastpingdate timestamp)
-            dao.executeUpdateQuery(dialect.insertAgentServer(),
-                    serv.toInsertRow());
+            dao.executeInsertRowForModel(DaoModel.server, serv);
         } catch (Exception ex) {
             log.warn("Cannot register server at JDBC, reason: " + ex.getMessage(), ex);
             addIssueToAgent("addServer", ex);
@@ -194,12 +179,12 @@ public class RegistrationJdbc extends RegistrationBase {
     }
     /** get all communication servers */
     public  List<DistAgentServerRow> getServers() {
-        return dao.executeSelectQuery(dialect.selectAgentServersActive(), new Object[0], x -> DistAgentServerRow.fromMap(x));
+        return dao.executeSelectAllModel(DaoModel.server, 100);
     }
     /** ping given server by GUID */
     public boolean serverPing(DistAgentServerRow serv) {
         dao.executeUpdateQuery(dialect.pingAgentServer(),
-                new Object[] { serv.getAgentGuid(), serv.getServerGuid() });
+               new Object[] { serv.getAgentGuid(), serv.getServerGuid() });
         return true;
     }
     /** set active servers with last ping date before given date as inactive */
@@ -210,26 +195,23 @@ public class RegistrationJdbc extends RegistrationBase {
                 new Object[] { deleteBeforeDate });
         return true;
     }
-
     /** get agents from registration services */
     public  List<DistAgentRegisterRow> getAgents() {
-        return dao.executeSelectQuery(dialect.selectAgentServersActive(), new Object[0], x -> DistAgentRegisterRow.fromMap(x));
+        return dao.executeSelectAllModel(DaoModel.register, 1000);
     }
-
     /** get list of active agents from JDBC table */
     public List<DistAgentRegisterRow> getAgentsActive() {
-        return dao.executeSelectQuery(dialect.selectActiveAgentRegisters(), new Object[0], x -> DistAgentRegisterRow.fromMap(x));
+        return dao.executeSelectAllActiveModel(DaoModel.register, 1000);
     }
     /** register service */
     public void registerService(DistAgentServiceRow service) {
         log.info("Registering service in JDBC registration, service: " + service.getServiceGuid() + ", agent: " + service.getAgentGuid() + ", JDBC: " + jdbcUrl);
-        // insert into distagentservice(agentguid, serviceguid, servicetype, createddate, isactive, lastpingdate) values (?, ?, ?, ?, ?, ?)
-        dao.executeAnyQuery(dialect.insertAgentService(), service.getObjectRow());
+        dao.executeInsertRowForModel(DaoModel.service, service);
     }
 
     /** get all shared storages */
     public List<DistAgentStorageRow> getStorages() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.storage, 1000);
     }
     /** get all shared storage names */
     public List<String> getStorageNames() {
@@ -245,8 +227,8 @@ public class RegistrationJdbc extends RegistrationBase {
     }
 
     /** get all shared reports */
-    public List<DistAgentStorageRow> getReports() {
-        return List.of();
+    public List<DistAgentReportRow> getReports() {
+        return dao.executeSelectAllActiveModel(DaoModel.report, 1000);
     }
     /** get all shared report names */
     public List<String> getReportNames() {
@@ -267,7 +249,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all monitors */
     public List<DistAgentMonitorRow> getMonitors() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.monitor, 1000);
     }
     /** get all monitor names */
     public List<String> getMonitorNames() {
@@ -288,7 +270,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all notifications */
     public List<DistAgentNotificationRow> getNotifications() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.notification, 1000);
     }
     /** add notification */
     public boolean addNotification(DistAgentNotificationRow notif) {
@@ -297,7 +279,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all schedules */
     public List<DistAgentScheduleRow> getSchedules() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.schedule, 1000);
     }
     /** add schedule */
     public boolean addSchedule(DistAgentScheduleRow schedule) {
@@ -310,7 +292,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all spaces */
     public List<DistAgentSpaceRow> getSpaces() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.space, 1000);
     }
     /** get all space names */
     public List<String> getSpaceNames() {
@@ -331,7 +313,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all measures */
     public List<DistAgentMeasureRow> getMeasures() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.measure, 1000);
     }
     /** get all measure names */
     public List<String> getMeasureNames() {
@@ -344,10 +326,11 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all queries */
     public List<DistAgentQueryRow> getQueries() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.query, 1000);
     }
     /** get all query names */
     public List<String> getQueryNames() {
+
         return List.of();
     }
     /** get query by name */
@@ -355,7 +338,8 @@ public class RegistrationJdbc extends RegistrationBase {
         return Optional.empty();
     }
     /** add or edit query */
-    public boolean addQuery(DistAgentQueryRow measure) {
+    public boolean addQuery(DistAgentQueryRow query) {
+        dao.executeInsertRowForModel(DaoModel.query, query);
         return false;
     }
 
@@ -383,7 +367,7 @@ public class RegistrationJdbc extends RegistrationBase {
 
     /** get all settings */
     public List<DistAgentSettingRow> getSettings() {
-        return List.of();
+        return dao.executeSelectAllActiveModel(DaoModel.setting, 1000);
     }
     /** search for settings */
     public List<DistAgentSettingRow> searchSettings(String findStr) {
@@ -407,15 +391,11 @@ public class RegistrationJdbc extends RegistrationBase {
         return false;
     }
 
-
-
-
-
     /** close current connector */
     @Override
     protected void onClose() {
         log.info("Closing JDBC registration object, unregistering agent");
-        dao.executeSelectQuery(dialect.removeAgentRegister(), new Object[0]);
+        // dao.executeSelectQuery(dialect.removeAgentRegister(), new Object[0]);
     }
 
 }

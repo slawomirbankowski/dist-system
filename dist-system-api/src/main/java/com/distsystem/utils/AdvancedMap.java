@@ -2,10 +2,7 @@ package com.distsystem.utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /** advanced read-only map with special GET features
@@ -33,6 +30,15 @@ public class AdvancedMap {
     public String getStringOrEmpty(String key) {
         return getString(key, "");
     }
+
+    public String getStringOrNull(String key) {
+        Object v = map.get(key);
+        if (v!=null) {
+            return v.toString();
+        } else {
+            return null;
+        }
+    }
     public long getLong(String key, long defaultValue) {
         return DistUtils.parseLong(map.getOrDefault(key, defaultValue).toString(), defaultValue);
     }
@@ -58,6 +64,22 @@ public class AdvancedMap {
         return defaultValue;
     }
 
+    public LocalDateTime getLocalDateOrNull(String key) {
+        try {
+            Object v = map.get(key);
+            if (v==null) {
+                return null;
+            } else if (LocalDateTime.class.isInstance(v)) {
+                return (LocalDateTime)v;
+            } else if (Date.class.isInstance(v)) {
+                return DistUtils.dateToLocalDateTime((Date)v);
+            } else {
+                return LocalDateTime.parse(v.toString());
+            }
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
+    }
     public LocalDateTime getLocalDateOrNow(String key) {
         try {
             return LocalDateTime.parse(getString(key, LocalDateTime.now().toString()));

@@ -155,7 +155,7 @@ public class RegistrationApplication extends RegistrationBase {
     }
 
     /** get all shared reports */
-    public List<DistAgentStorageRow> getReports() {
+    public List<DistAgentReportRow> getReports() {
         return List.of();
     }
     /** get all shared report names */
@@ -164,6 +164,7 @@ public class RegistrationApplication extends RegistrationBase {
     }
     /** get report by name */
     public Optional<DistAgentReportRow> getReportByName(String reportName) {
+
         return Optional.empty();
     }
     /** add report */

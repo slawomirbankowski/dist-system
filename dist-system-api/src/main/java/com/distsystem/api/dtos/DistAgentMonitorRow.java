@@ -7,15 +7,14 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="distagentmonitor", keyName="monitorName", keyIsUnique=true)
 public class DistAgentMonitorRow extends BaseRow {
 
     private String monitorName;
     private String monitorType;
     private String monitorUrl;
     private String monitorParams;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
     public DistAgentMonitorRow(String monitorName, String monitorType, String monitorUrl, String monitorParams, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
@@ -23,8 +22,8 @@ public class DistAgentMonitorRow extends BaseRow {
         this.monitorType = monitorType;
         this.monitorUrl = monitorUrl;
         this.monitorParams = monitorParams;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentMonitorRow(String monitorName, String monitorType, String monitorUrl, String monitorParams) {
@@ -32,8 +31,8 @@ public class DistAgentMonitorRow extends BaseRow {
         this.monitorType = monitorType;
         this.monitorUrl = monitorUrl;
         this.monitorParams = monitorParams;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -66,13 +65,14 @@ public class DistAgentMonitorRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { monitorName, monitorType, monitorUrl, monitorParams, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { monitorName, monitorType, monitorUrl, monitorParams, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("monitorName", monitorName,
                 "monitorType", monitorType,
                 "monitorUrl", monitorUrl,
                 "monitorParams", monitorParams,
+                "isActive", ""+isActive,
                 "createdDate", createdDate.toString(),
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }

@@ -181,6 +181,13 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             return 0;
         }
     }
+    public <T extends  BaseRow> int checkAndCreateModel(DaoModel<T> model) {
+        if (!checkDaoStructure(model.getTableName())) {
+            executeAnyQuery(model.getCreateTableQuery());
+            executeAnyQuery(model.getCreateTableIndexQuery());
+        }
+        return 1;
+    }
     /** execute any query on database */
     public int executeAnyQuery(String sql) {
         return executeAnyQuery(sql, new Object[0]);
@@ -246,6 +253,37 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             }, new LinkedList<T>());
         }
     }
+    /** execute SELECT query from resultset */
+    public <T> int executeSelectIterativeResultSet(String sql, Object[] params,
+                                                             BiFunction<Integer, ResultSet, T> convertMethod,
+                                                   Function<T, Boolean> onRow,
+                                                             int maxRows) {
+        if (sql == null || sql.isEmpty()) {
+            return 0;
+        } else {
+            return withConnection(conn -> {
+                int rowNum = 0;
+                try {
+                    PreparedStatement stat = createStatement(conn, sql);
+                    fillStatement(stat, params);
+                    boolean continueReading = true;
+                    ResultSet rs = stat.executeQuery();
+                    int colsCount = stat.getMetaData().getColumnCount();
+                    while (rs.next() && rowNum<maxRows && continueReading) {
+                        T row = convertMethod.apply(colsCount, rs);
+                        if (row != null) {
+                            continueReading = onRow.apply(row);
+                            rowNum++;
+                        }
+                    }
+                    return rowNum;
+                } catch (SQLException ex) {
+                    log.warn("Cannot execute query for SQL: " + sql + ", reason: " + ex.getMessage());
+                    return rowNum;
+                }
+            }, 0);
+        }
+    }
     /** execute SELECT query from Map */
     public <T> LinkedList<T> executeSelectQuery(String sql, Object[] params, Function<Map<String, Object>, T> convertMethod, int maxRows) {
         return executeSelectQueryResultSet(sql, params, (colsCount, rs) -> {
@@ -260,9 +298,19 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             }
         }, maxRows);
     }
+
+    /** execute SELECT query from Map */
+    public <T> LinkedList<T> executeSelectQuery(String sql, Object[] params, Function<Map<String, Object>, T> convertMethod) {
+        return executeSelectQuery(sql, params, convertMethod, Integer.MAX_VALUE);
+    }
     /** */
     public LinkedList<Map<String, Object>> executeSelectQuery(String sql, Object[] params, int maxRows) {
         return executeSelectQuery(sql, params, x -> x, maxRows);
+    }
+
+    /** */
+    public LinkedList<Map<String, Object>> executeSelectQuery(String sql, Object[] params) {
+        return executeSelectQuery(sql, params, Integer.MAX_VALUE);
     }
     /** execute SELECT query from resultset */
     public LinkedList<Map<String, Object>> executeSelectQuery(String sql, int maxRows) {
@@ -273,6 +321,10 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         return executeSelectQuery(sql, Integer.MAX_VALUE);
     }
 
+    /** execute SELECT query from Map */
+    public <T> List<T> executeSelectQueryFromOptionMap(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod) {
+        return executeSelectQuery(sql, params, convertMethod, Integer.MAX_VALUE).stream().flatMap(Optional::stream).collect(Collectors.toList());
+    }
     /** */
     public AdvancedMap executeSelectQuerySingle(String sql, int maxRows) {
         LinkedList<Map<String, Object>> rows = executeSelectQuery(sql, new Object[0], maxRows);
@@ -304,13 +356,19 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public <T> Optional<T> executeSelectQueryFirstRow(String sql, Function<Map<String, Object>, T> convertMethod) {
         return executeSelectQuery(sql, EMPTY_OBJECT_TAB, convertMethod, 1).stream().findFirst();
     }
-    /** execute SELECT query and convert from map to given type */
-    public <T> List<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod, int maxRows) {
-        return executeSelectQuery(sql, params, convertMethod, maxRows).stream().flatMap(x -> x.stream()).collect(Collectors.toList());
+
+    /** select query and convert to given type */
+    public <T> boolean executeSelectQueryFirstExists(String sql, Function<Map<String, Object>, T> convertMethod) {
+        return executeSelectQuery(sql, EMPTY_OBJECT_TAB, convertMethod, 1).stream().findFirst().isPresent();
     }
 
     /** execute SELECT query and convert from map to given type */
-    public <T> List<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod) {
+    public <T> Optional<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod, int maxRows) {
+        return executeSelectQuery(sql, params, convertMethod, maxRows).stream().flatMap(x -> x.stream()).findFirst();
+    }
+
+    /** execute SELECT query and convert from map to given type */
+    public <T> Optional<T> executeSelectQueryOptional(String sql, Object[] params, Function<Map<String, Object>, Optional<T>> convertMethod) {
         return executeSelectQueryOptional(sql, params, convertMethod, Integer.MAX_VALUE);
     }
 
@@ -319,6 +377,15 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         return executeSelectQuery(model.getSelectAllQuery(), new Object[0], map -> model.convert(map), maxRows);
     }
 
+    /** get all rows for given model */
+    public <X extends BaseRow> LinkedList<X> executeSelectAllActiveModel(DaoModel<X> model, int maxRows) {
+        return executeSelectQuery(model.getSelectAllActiveQuery(), new Object[0], map -> model.convert(map), maxRows);
+    }
+
+    /** get all rows for given model */
+    public <X extends BaseRow> LinkedList<X> executeSelectAllModel(DaoModel<X> model) {
+        return executeSelectAllModel(model, 10000);
+    }
     /** get the latest rows for given model */
     public <X extends BaseRow> List<X> executeSelectLatestRowsModel(DaoModel<X> model, int n) {
         return executeSelectQueryResultSet(model.getSelectLimitQuery(n), new Object[0], (colsCount, rs) -> model.fromResultSet(rs), n);
@@ -327,6 +394,10 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public <X extends BaseRow> Optional<X> executeSelectForNameModelFirst(DaoModel<X> model, String objectName) {
         return executeSelectQuery(model.getSelectForNameQuery(), new Object[] { objectName }, map -> model.convert(map), 1).stream().findFirst();
     }
+    /** get first row for given model and object name */
+    public <X extends BaseRow> boolean executeSelectForNameModelExists(DaoModel<X> model, String objectName) {
+        return executeSelectQuery(model.getSelectForNameQuery(), new Object[] { objectName }, map -> model.convert(map), 1).stream().findFirst().isPresent();
+    }
     /** get rows for given model for given object name */
     public <X extends BaseRow> List<X> executeSelectForNameModelAll(DaoModel<X> model, String objectName, int maxRows) {
         return executeSelectQuery(model.getSelectForNameQuery(), new Object[] { objectName }, map -> model.convert(map), maxRows);
@@ -334,7 +405,6 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public <X extends BaseRow> List<X> executeSelectForNameModelAll(DaoModel<X> model, String objectName) {
         return executeSelectForNameModelAll(model, objectName, Integer.MAX_VALUE);
     }
-
     /** */
     public List<Object> executeSelectQuerySingleColumn(String sql, Object[] params, String colName, int maxRows) {
         return executeSelectQuery(sql, params, row -> row.getOrDefault(colName, ""), maxRows);
@@ -343,9 +413,6 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public List<String> executeSelectQuerySingleColumnString(String sql, Object[] params, String colName, int maxRows) {
         return executeSelectQuery(sql, params, row -> row.getOrDefault(colName, "").toString(), maxRows);
     }
-
-
-
 
 
 
@@ -368,31 +435,37 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         }
     }
     /** insert full object to given table name */
-    public <X extends BaseRow> int executeInsertForModel(DaoModel<X> model, List<X> objs) {
+    public <X extends BaseRow> int executeInsertRowForModel(DaoModel<X> model, X obj) {
+        return executeUpdateQuery(model.getInsertQuery(), obj.toInsertRow());
+    }
+    /** insert full object to given table name */
+    public <X extends BaseRow> int executeInsertRowsForModel(DaoModel<X> model, List<X> objs) {
         if (objs.isEmpty()) {
             return 0;
         } else {
-            //executeUpdateQuery();
-            Object sampleObj = objs.get(0);
             String sql = model.getInsertQuery();
-            log.debug("SAVING objects to DB, count: " + objs.size() +  "; SQL: " + sql);
-            //Field[] fields = sampleObj.getClass().getDeclaredFields();
-            //L//ist<Object[]> params = objs.stream().map(o -> DistUtils.getValuesForFields(o, fields)).collect(Collectors.toList());
-
-            objs.forEach(row -> {
-                row.toInsertRow();
-
-            });
-            return 1; //executeUpdateQuery(sql, params);
+            if (sql == null || sql.isEmpty()) {
+                return -1;
+            } else {
+                return withConnection(conn -> {
+                    try {
+                        int updCnt = 0;
+                        log.debug("INSERT QUERY, table: " + model.getTableName() + ", objects count: " + objs.size() + ", sql: " + sql);
+                        PreparedStatement st = createStatement(conn, sql);
+                        for (X p : objs) {
+                            fillStatement(st, p.toInsertRow());
+                            updCnt += st.executeUpdate();
+                        }
+                        st.close();
+                        return updCnt;
+                    } catch (SQLException ex) {
+                        log.warn("Exception while executing SQL: " + sql + ", reason: " + ex.getMessage());
+                        return -1;
+                    }
+                }, -1);
+            }
         }
     }
-
-
-
-
-
-
-
 
 
 

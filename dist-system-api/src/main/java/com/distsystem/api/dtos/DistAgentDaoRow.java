@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="distagentdao", keyName="daoGuid", keyIsUnique=false)
 public class DistAgentDaoRow extends BaseRow {
 
     private final String daoGuid;
@@ -24,15 +23,15 @@ public class DistAgentDaoRow extends BaseRow {
     private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
 
-    public DistAgentDaoRow(String agentGuid, String daoKey, String daoType, String daoUrl, String structureList, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+    public DistAgentDaoRow(String agentGuid, String daoKey, String daoType, String daoUrl, String structureList, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
         this.daoGuid = DistUtils.generateCustomGuid("");
         this.agentGuid = agentGuid;
         this.daoKey = daoKey;
         this.daoType = daoType;
         this.daoUrl = daoUrl;
         this.structureList = structureList;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentDaoRow(String agentGuid, String daoKey, String daoType, String daoUrl, String structureList) {
@@ -109,8 +108,8 @@ public class DistAgentDaoRow extends BaseRow {
                 m.getStringOrEmpty("daotype"),
                 m.getStringOrEmpty("daourl"),
                 m.getStringOrEmpty("structurelist"),
-                m.getLocalDateOrNow("createddate"),
                 m.getInt("isactive", 1),
+                m.getLocalDateOrNow("createddate"),
                 m.getLocalDateOrNow("lastupdateddate")
         );
     }
