@@ -58,11 +58,20 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
         this.clientId = parentAgent.getAgentGuid();
         onInitialize();
     }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
+    }
     /** returns true if DAO is connected */
     public boolean isConnected() {
         return true;
     }
 
+    /** test DAO and returns items */
+    public Map<String, Object> testDao() {
+        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    }
     /** get URL of this DAO */
     public String getUrl() {
         return brokers;
@@ -79,6 +88,13 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             parentAgent.addIssue("DaoKafkaBase.onInitialize", ex);
         }
     }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** get all topics */
     public Collection<String> getDaoStructures() {
         return getTopics();
@@ -216,7 +232,7 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
         receiver.setThread(thread);
         thread.setDaemon(true);
         thread.start();
-        parentAgent.getAgentThreads().registerThread(this, thread, "kafka-receiver-" + topicName);
+        parentAgent.getThreads().registerThread(this, thread, "kafka-receiver-" + topicName);
         KafkaReceiverImpl oldReceiver = consumersByTopic.put(topicName, receiver);
         if (oldReceiver != null) {
             oldReceiver.close();
@@ -251,8 +267,7 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             return null;
         }
     }
-    /** close current Kafka producer, admin client, consumers */
-    public boolean close() {
+    public boolean closeDao() {
         log.info("Closing Kafka DAO for brokers: " + brokers + ", consumers: " + consumersByTopic.size());
         try {
             closed = true;
@@ -264,6 +279,10 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
             log.warn("Cannot close Kafka DAO, brokers: " + brokers + ", consumers: " + consumersByTopic.size() +", reason: " + ex.getMessage(), ex);
             return false;
         }
+    }
+    /** close current Kafka producer, admin client, consumers */
+    protected void onClose() {
+        closeDao();
     }
 
 }
@@ -364,7 +383,7 @@ class KafkaReceiverImpl implements Runnable, KafkaReceiver {
                 working = false;
             } catch (Exception ex) {
                 log.warn("Exception while running receiver thread for Kafka topic: " + topicName +  ", reason: " + ex.getMessage());
-                dao.getParentAgent().addIssue("KafkaReceiver.run", ex);
+                dao.getAgent().addIssue("KafkaReceiver.run", ex);
             }
             totalIterations.incrementAndGet();
         }
@@ -377,7 +396,7 @@ class KafkaReceiverImpl implements Runnable, KafkaReceiver {
             log.info("Kafka consumer closed for topic: " + topicName);
         } catch (Exception ex) {
             log.warn("Cannot close consumer, reason: " + ex.getMessage());
-            dao.getParentAgent().addIssue("KafkaReceiver.close", ex);
+            dao.getAgent().addIssue("KafkaReceiver.close", ex);
         }
     }
 

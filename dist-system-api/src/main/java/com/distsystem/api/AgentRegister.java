@@ -1,6 +1,6 @@
 package com.distsystem.api;
 
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +49,8 @@ public class AgentRegister {
         this.active = active;
     }
     public DistAgentRegisterRow toAgentRegisterRow() {
-        return new DistAgentRegisterRow(createDate, agentGuid, hostName, hostIp, port, lastPingDate, (active)?1:0);
+        // String registerGuid, String agentGuid, String hostName, String hostip, int portnumber, LocalDateTime lastpingdate, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate
+        return new DistAgentRegisterRow(agentGuid, hostName, hostIp, port);
     }
 
     public void updatePingDate() {
@@ -87,6 +88,9 @@ public class AgentRegister {
         return agents;
     }
 
+    public DistAgentRegisterRow toRegister() {
+        return new DistAgentRegisterRow(agentGuid, hostName, hostIp, port);
+    }
     @Override
     public java.lang.String toString() {
         return "AGENT_REGISTER,agentGuid=" + agentGuid + ",hostName=" + hostName + ",port=" + port;

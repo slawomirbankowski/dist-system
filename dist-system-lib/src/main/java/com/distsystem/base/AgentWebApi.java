@@ -1,6 +1,7 @@
 package com.distsystem.base;
 
 import com.distsystem.api.info.AgentApiInfo;
+import com.distsystem.interfaces.Agent;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -13,9 +14,14 @@ import java.util.concurrent.atomic.AtomicLong;
  *  POST /cache/initialize-single-storage/com.distsystem.storages.JdbcStorage
  *  DELETE /cache/objects/key_to_be_cleared
  * */
-public abstract class AgentWebApi {
+public abstract class AgentWebApi extends AgentableBase {
     /** sequence for requests - GLOBAL ONE !!!, this is counting all API requests for WebSimpleApi */
     public static final AtomicLong requestSeq = new AtomicLong();
+
+    /** */
+    public AgentWebApi(Agent parentAgent) {
+        super(parentAgent);
+    }
 
     /** get type of this API */
     public abstract String getApiType();
@@ -25,7 +31,13 @@ public abstract class AgentWebApi {
     public abstract int getPort();
     /** start this API */
     public abstract void startApi();
-    /** close this API */
-    public abstract void close();
+    /** check this Web API */
+    public abstract boolean check();
+    /** get number of requests */
+    public abstract long getHandledRequestsCount();
+    /** get total time of requests */
+    public abstract long getHandledRequestsTime();
+    /** get count of errors in requests */
+    public abstract long getHandledRequestsErrors();
 
 }

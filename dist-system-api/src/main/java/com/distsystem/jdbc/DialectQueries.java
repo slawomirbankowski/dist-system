@@ -51,7 +51,41 @@ public enum DialectQueries {
     createAgentServiceIndex,
     insertAgentService,
     selectAgentService,
-    deleteAgentService
+    deleteAgentService,
+
+    createConfigInit,
+    selectConfigInit,
+
+    // auth - account
+    createDistAgentAuthAccount,
+    createDistAgentAuthAccountIndex,
+    insertDistAgentAuthAccount,
+    selectDistAgentAuthAccount,
+    selectDistAgentAuthAccountForName,
+    deleteDistAgentAuthAccount,
+    disableDistAgentAuthAccount,
+    // auth - domain
+    createDistAgentAuthDomain,
+    createDistAgentAuthDomainIndex,
+    insertDistAgentAuthDomain,
+    selectDistAgentAuthDomain,
+    // auth - identity
+    createDistAgentAuthIdentity,
+    insertDistAgentAuthIdentity,
+    selectDistAgentAuthIdentity,
+    // auth - role
+    createDistAgentAuthRole,
+    insertDistAgentAuthRole,
+    selectDistAgentAuthRole,
+    // auth - key
+    createDistAgentAuthKey,
+    insertDistAgentAuthKey,
+    selectDistAgentAuthKey,
+    selectDistAgentAuthKeyForName,
+    // auth - token parser
+    createDistAgentAuthTokenParser,
+    insertDistAgentAuthTokenParser,
+    selectDistAgentAuthTokenParser
 
 
-    }
+}

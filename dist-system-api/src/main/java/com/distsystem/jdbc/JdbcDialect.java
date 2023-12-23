@@ -91,6 +91,39 @@ public class JdbcDialect {
     public String selectAgentService() { return getQueryOrEmpty(DialectQueries.selectAgentService); }
     public String deleteAgentService() { return getQueryOrEmpty(DialectQueries.deleteAgentService); }
 
+    public String createConfigInit() { return getQueryOrEmpty(DialectQueries.createConfigInit); }
+    public String selectConfigInit() { return getQueryOrEmpty(DialectQueries.selectConfigInit); }
+
+    public String createDistAgentAuthAccount() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthAccount); }
+    public String createDistAgentAuthAccountIndex() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthAccountIndex); }
+    public String insertDistAgentAuthAccount() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthAccount); }
+    public String selectDistAgentAuthAccount() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthAccount); }
+    public String selectDistAgentAuthAccountForName() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthAccountForName); }
+    public String deleteDistAgentAuthAccount() { return getQueryOrEmpty(DialectQueries.deleteDistAgentAuthAccount); }
+    public String disableDistAgentAuthAccount() { return getQueryOrEmpty(DialectQueries.disableDistAgentAuthAccount); }
+
+    public String createDistAgentAuthDomain() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthDomain); }
+    public String createDistAgentAuthDomainIndex() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthDomainIndex); }
+    public String insertDistAgentAuthDomain() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthDomain); }
+    public String selectDistAgentAuthDomain() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthDomain); }
+
+    public String createDistAgentAuthIdentity() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthIdentity); }
+    public String insertDistAgentAuthIdentity() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthIdentity); }
+    public String selectDistAgentAuthIdentity() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthIdentity); }
+
+    public String createDistAgentAuthRole() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthRole); }
+    public String insertDistAgentAuthRole() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthRole); }
+    public String selectDistAgentAuthRole() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthRole); }
+
+    public String createDistAgentAuthKey() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthKey); }
+    public String insertDistAgentAuthKey() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthKey); }
+    public String selectDistAgentAuthKey() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthKey); }
+    public String selectDistAgentAuthKeyForName() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthKeyForName); }
+
+    public String createDistAgentAuthTokenParser() { return getQueryOrEmpty(DialectQueries.createDistAgentAuthTokenParser); }
+    public String insertDistAgentAuthTokenParser() { return getQueryOrEmpty(DialectQueries.insertDistAgentAuthTokenParser); }
+    public String selectDistAgentAuthTokenParser() { return getQueryOrEmpty(DialectQueries.selectDistAgentAuthTokenParser); }
+
     /** all supported dialects for databases */
     private static final Map<String, JdbcDialect> dialects = createDialectsMap();
     /** */

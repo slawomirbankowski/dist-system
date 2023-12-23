@@ -1,9 +1,7 @@
 package com.distsystem.interfaces;
 
-import com.distsystem.api.auth.AuthAccount;
-import com.distsystem.api.auth.AuthCredentials;
-import com.distsystem.api.auth.AuthLoginResult;
-import com.distsystem.api.auth.AuthPriviligesSet;
+import com.distsystem.api.auth.*;
+import com.distsystem.api.dtos.DistAgentAuthAccountRow;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +11,11 @@ import java.util.Optional;
 public interface AgentAuth extends DistService {
 
     /** login to Dist system with credentials - login and password, email and password, clientid and clientsecret*/
-    AuthLoginResult login(AuthCredentials credentials);
+    AuthLoginResults login(AuthCredentials credentials);
     /** find account by name */
-    Optional<AuthAccount> findAccount(String accountName);
+    Optional<DistAgentAuthAccountRow> findAccount(String accountName);
     /** find account by name */
-    List<AuthAccount> searchAccounts(String searchString);
+    List<DistAgentAuthAccountRow> searchAccounts(String searchString);
     /** get set of priviliges for selected account */
     AuthPriviligesSet getPrivileges(String accountName);
 

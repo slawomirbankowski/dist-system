@@ -8,6 +8,7 @@ import com.distsystem.utils.DistUtils;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 /** interface for message sent by dist service to another service between agent
  * message should be serialized and sent using known servers-clients like Socket, Datagram, Kafka, HTTP, ...
@@ -19,27 +20,27 @@ public class DistMessage implements Serializable {
     /** date and time of creation of this message */
     private LocalDateTime createdDate = LocalDateTime.now();
     /** type of message - this could be welcome, system, request, response, noOperation, ... */
-    private DistMessageType messageType;
+    private final DistMessageType messageType;
     /** source agent for this message - this is UID of source agent */
-    private String fromAgent;
+    private final String fromAgent;
     /** source service for this message */
-    private DistServiceType fromService;
+    private final DistServiceType fromService;
     /** UID of destination agent OR any mass-pointer for agent like broadcast, random, round-robin, first, last-connected */
-    private String toAgent;
+    private final String toAgent;
     /** destination service to receive this message */
-    private DistServiceType toService;
+    private final DistServiceType toService;
     /** method to execute at given service */
-    private String requestMethod;
+    private final String requestMethod;
     /** */
-    private String responseMethod;
+    private final String responseMethod;
     /** serializable object of this message */
-    private Object message;
+    private final Object message;
     /** status */
-    private DistMessageStatus status;
+    private final DistMessageStatus status;
     /** tags to help catalog this message, tags are comma-separated string table */
-    private String tags;
+    private final String tags;
     /** end of validity for this message, after that time timeout would be called from callbacks and message would be deleted */
-    private LocalDateTime validTill;
+    private final LocalDateTime validTill;
 
     /** creates new message */
     DistMessage(String messageUid, LocalDateTime createdDate, DistMessageType messageType, String fromAgent, DistServiceType fromService, String toAgent, DistServiceType toService, String requestMethod, String responseMethod, Object message, String tags, LocalDateTime validTill, DistMessageStatus status) {
@@ -195,6 +196,25 @@ public class DistMessage implements Serializable {
         return "FROM: " + fromAgent + "/" + fromService.name() + "/" + responseMethod + ", TO: " + toAgent + "/" + toService.name() + "/" + requestMethod + ", type: " + messageType.name() + ", status: " + status.name() + ", UID: " + messageUid;
     }
 
+    public Map<String, String> toMap() {
+        Map<String, String> map = Map.of();
+        map.putAll(Map.of("messageUid", messageUid,
+                "createdDate", createdDate.toString(),
+                "messageType", messageType.name(),
+                "fromAgent", fromAgent,
+                "fromService", fromService.name(),
+                "tags", tags
+        ));
+        map.putAll(Map.of("toAgent", toAgent,
+                "toService", toService.name(),
+                "requestMethod", requestMethod,
+                "responseMethod", responseMethod,
+                "message", ""+message,
+                "status", status.name(),
+                "validTill", validTill.toString()
+        ));
+        return map;
+    }
     /** returns message with callbacks */
     public DistMessageFull withCallbacks(DistCallbacks callbacks) {
         return new DistMessageFull(this, callbacks);
@@ -204,6 +224,10 @@ public class DistMessage implements Serializable {
         return new DistMessageFull(this, DistCallbacks.defaultCallbacks);
     }
 
+    /** get simple object for this message */
+    public DistMessageSimple toSimple() {
+        return new DistMessageSimple(messageUid, createdDate, messageType.name(), fromAgent, fromService.name(), toAgent, toService.name(), requestMethod, responseMethod, status.name(), tags, validTill);
+    }
 
     public static LocalDateTime getValidTillDefault() {
         return LocalDateTime.now().plusHours(24);

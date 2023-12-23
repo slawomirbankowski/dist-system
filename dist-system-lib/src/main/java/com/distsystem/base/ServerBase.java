@@ -1,12 +1,11 @@
 package com.distsystem.base;
 
-import com.distsystem.agent.impl.Agentable;
+import com.distsystem.api.ServiceObjectParams;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentServerInfo;
 import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.DistConfig;
-import com.distsystem.base.dtos.DistAgentServerRow;
-import com.distsystem.interfaces.Agent;
+import com.distsystem.api.dtos.DistAgentServerRow;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.AgentServer;
 import com.distsystem.utils.DistUtils;
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** base class for any server in Agent to accept connections */
-public abstract class ServerBase extends Agentable implements AgentServer, AgentComponent {
+public abstract class ServerBase extends ServiceObjectBase implements AgentServer, AgentComponent {
 
     /** GUID of server */
     protected final String serverGuid = DistUtils.generateServerGuid(this.getClass().getSimpleName());
@@ -25,8 +24,8 @@ public abstract class ServerBase extends Agentable implements AgentServer, Agent
     protected AtomicLong receivedMessages = new AtomicLong();
 
     /** creates new base server with set agent */
-    public ServerBase(Agent parentAgent) {
-        super(parentAgent);
+    public ServerBase(ServiceObjectParams params) {
+        super(params);
         parentAgent.addComponent(this);
     }
 
@@ -48,10 +47,6 @@ public abstract class ServerBase extends Agentable implements AgentServer, Agent
     @Override
     public DistConfig getConfig() {
         return parentAgent.getConfig();
-    }
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
     /** get information about this server */

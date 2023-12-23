@@ -45,10 +45,26 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
         onInitialize();
     }
 
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
+    }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: implement reinitialization
+        return true;
+    }
+
     /** returns true if DAO is connected */
     public boolean isConnected() {
         return getClusterInfo().size() == 1;
     }
+
+    /** test DAO and returns items */
+    public Map<String, Object> testDao() {
+        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    }
+
     /** get URL of this DAO */
     public String getUrl() {
         return elasticUrl;
@@ -83,6 +99,7 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
             log.info("Connected to Elasticsearch, cluster nodes: " + cluInfo.size() + ", cluster info: " + cluInfo);
         } catch (Exception ex) {
             log.info("Cannot connect to Elasticsearch at URL:" + getResolvedUrl() + ", reason: " + ex.getMessage(), ex);
+            addIssueToAgent("onInitialize", ex);
         }
     }
     /** get all indices */
@@ -172,11 +189,12 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
                 .parseOutputTo(new TypeReference<ElasticDocumentDeleteInfo>() {});
     }
 
-
     /** close current Elasticsearch DAO */
-    public boolean close() {
-        return true;
+    protected void onClose() {
     }
 
+    public boolean closeDao() {
+        return true;
+    }
 
 }

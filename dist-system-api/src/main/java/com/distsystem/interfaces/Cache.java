@@ -20,13 +20,8 @@ public interface Cache extends DistService {
 
     /** get unique ID of this cache */
     String getCacheGuid();
-
-    /** get agent for communication with other services in distributed environment */
-    Agent getAgent();
-    /** get configuration for cache */
-    DistConfig getConfig();
     /** check if cache has been already closed and deinitialized */
-    boolean getClosed();
+    boolean isClosed();
     /** get information about all storages in this cache */
     List<StorageInfo> getStoragesInfo();
     /** get information about all storages in this cache */
@@ -39,6 +34,8 @@ public interface Cache extends DistService {
     /** get all keys for storages, each storage has unique key to identify  */
     Set<String> getStorageKeys();
 
+    /** set cache policy */
+    void setPolicy(CachePolicy policy);
     /** get all cache keys that contains given string
      * cache keys are searched in all storages
      * this might return only TOP X keys if there are by far too many keys in cache to be downloaded */
@@ -92,12 +89,12 @@ public interface Cache extends DistService {
     void addIssue(String methodName, Exception ex);
     /** get all recent events added to cache
      * only last X events are stored in cache */
-    Queue<CacheEvent> getEvents();
+    Queue<AgentEvent> getEvents();
 
     /** get info about cache */
     CacheInfo getCacheInfo();
     /** set new callback method for events for given type */
-    void setCallback(String eventType, Function<CacheEvent, String> callback);
+    void setCallback(String eventType, Function<AgentEvent, String> callback);
 
     <T> T withCache(String key, Supplier<? extends T> supplier, CacheMode mode, Set<String> groups);
     <T> T withCache(String key, Supplier<? extends T> supplier, Set<String> groups);

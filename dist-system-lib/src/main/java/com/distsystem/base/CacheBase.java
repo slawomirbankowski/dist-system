@@ -6,7 +6,6 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.CacheInfo;
 import com.distsystem.encoders.KeyEncoderNone;
 import com.distsystem.interfaces.Agent;
-import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.interfaces.CacheKeyEncoder;
 import com.distsystem.utils.CacheStats;
@@ -22,7 +21,7 @@ import java.util.function.Supplier;
  * to perform clean based on time
  * replace all cache with fresh objects
  * */
-public abstract class CacheBase extends ServiceBase implements Cache, AgentComponent {
+public abstract class CacheBase extends ServiceBase implements Cache {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(CacheBase.class);
@@ -44,25 +43,15 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     /** initialize current manager with properties
      * this is creating storages, connecting to storages
      * creating cache policy, create agent and connecting to other cache agents */
-    public CacheBase(Agent parentAgent, CachePolicy policy) {
+    public CacheBase(Agent parentAgent) {
         super(parentAgent);
-        this.policy = policy;
-        var stringPolicyItems = CachePolicyBuilder.empty().parse(parentAgent.getConfig().getProperty(DistConfig.CACHE_POLICY, "")).create().getItems();
-        policy.addItems(stringPolicyItems);
-        // add all callback functions
-        initializeEncoder();
-        initializeSerializer();
-        log.info("--------> Created new cache with GUID: " + guid + ", CONFIG: " + getConfig().getConfigGuid() + ", properties: " + getConfig().getProperties().size());
     }
+
     /** create new service UID for this service */
-    protected String createServiceUid() {
+    protected String createGuid() {
         return DistUtils.generateCacheGuid();
     }
 
-    @Override
-    public String getGuid() {
-        return guid;
-    }
     /** create new message builder starting this agent */
     public DistMessageBuilder createMessageBuilder() {
         return DistMessageBuilder.empty().fromService(this);
@@ -101,7 +90,7 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     public CacheInfo getCacheInfo() {
         return new CacheInfo(guid, createDate, cacheStats.checksCount(),
                 cacheStats.addedItemsCount(), closed,
-            getAgent().getAgentIssues().getIssues().size(), getAgent().getAgentEvents().getEvents().size(),
+            getAgent().getIssues().getIssues().size(), getAgent().getEvents().getEvents().size(),
             getItemsCount(), getObjectsCount(), getStoragesInfo());
     }
     /** get custom map of info about service */
@@ -110,15 +99,17 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     }
 
     /** initialize key encoder to encode secrets */
-    private void initializeEncoder() {
+    protected void initializeEncoder() {
         // initialize encoder for secrets and passwords in key
         keyEncoder = new KeyEncoderNone();
+        // TODO: finish initialization of encoder based on configuration
     }
 
     /** initialize serializer used for serialization of an object into byte[] or String to be saved in external storages */
-    private void initializeSerializer() {
-        String serializerDef = getConfig().getProperty(DistConfig.SERIALIZER_DEFINITION, DistConfig.SERIALIZER_DEFINITION_SERIALIZABLE_VALUE);
+    protected void initializeSerializer() {
+        String serializerDef = getConfig().getProperty(DistConfig.AGENT_SERIALIZER_DEFINITION, DistConfig.AGENT_SERIALIZER_DEFINITION_SERIALIZABLE_VALUE);
         //serializer = new ComplexSerializer(serializerDef);
+        // TODO: finish initialization of serializer based on configuration
     }
 
     /** add issue to cache manager to be revoked by parent
@@ -126,7 +117,7 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
      * internal error, not consistent state that is unknown and could be used by parent manager */
     public void addIssue(DistIssue issue) {
         cacheStats.addIssue();
-        getAgent().getAgentIssues().addIssue(issue);
+        getAgent().getIssues().addIssue(issue);
     }
     /** add issue with method and exception */
     public void addIssue(String methodName, Exception ex) {
@@ -134,12 +125,12 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     }
     /** add new event and distribute it to callback methods,
      * event could be useful information about change of cache status, new connection, refresh of cache, clean */
-    protected void addEvent(CacheEvent event) {
-        getAgent().getAgentEvents().addEvent(event);
+    protected void addEvent(AgentEvent event) {
+        getAgent().getEvents().addEvent(event);
     }
     /** set new callback method for events for given type */
-    public void setCallback(String eventType, Function<CacheEvent, String> callback) {
-        getAgent().getAgentEvents().setCallback(eventType, callback);
+    public void setCallback(String eventType, Function<AgentEvent, String> callback) {
+        getAgent().getEvents().setCallback(eventType, callback);
     }
     /** set object to cache */
     public CacheSetBack setCacheObject(String key, Object value, CacheMode mode) {
@@ -150,11 +141,11 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     }
     /** get all recent issues with cache */
     public Queue<DistIssue> getIssues() {
-        return getAgent().getAgentIssues().getIssues();
+        return getAgent().getIssues().getIssues();
     }
     /** get all recent events added to cache */
-    public Queue<CacheEvent> getEvents() {
-        return getAgent().getAgentEvents().getEvents();
+    public Queue<AgentEvent> getEvents() {
+        return getAgent().getEvents().getEvents();
     }
 
     public <T> T withCache(String key, Supplier<? extends T> supplier) {
@@ -176,8 +167,5 @@ public abstract class CacheBase extends ServiceBase implements Cache, AgentCompo
     public <T> T withCache(String key, Function<String, ? extends T> mapper, Set<String> groups) {
         return withCache(key, mapper, defaultMode, groups);
     }
-
-    /** check if cache has been already closed and deinitialized */
-    public boolean getClosed() { return closed; }
 
 }

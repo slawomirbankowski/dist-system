@@ -2,9 +2,9 @@ package com.distsystem.api.info;
 
 public class AgentMessageProcessorInfo {
 
-    private int messageProcessorMethodsCount;
-    private long receivedMessagesCount;
-    private long exceptionMessagesCount;
+    private final int messageProcessorMethodsCount;
+    private final long receivedMessagesCount;
+    private final long exceptionMessagesCount;
 
     public AgentMessageProcessorInfo(int messageProcessorMethodsCount, long receivedMessagesCount, long exceptionMessagesCount) {
         this.messageProcessorMethodsCount = messageProcessorMethodsCount;

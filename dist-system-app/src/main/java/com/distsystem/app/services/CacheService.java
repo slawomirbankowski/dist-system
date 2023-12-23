@@ -8,9 +8,7 @@ import com.distsystem.app.DistSystemApp;
 import com.distsystem.interfaces.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +24,6 @@ public class CacheService {
     /** list of local caches */
     private final HashMap<String, Cache> caches = new HashMap<>();
 
-    @Autowired
-    protected SpringApplication springApp;
-
     /** create cache service with initialization of default cache */
     public CacheService() {
         DistConfig cfg = DistFactory.buildDefaultFactory()
@@ -36,7 +31,7 @@ public class CacheService {
                 .withEnvironmentVariables()
                 .withCommonProperties()
                 .withCommandLineArguments(DistSystemApp.getCommandLineArguments())
-                .extractCacheConfig();
+                .extractConfig();
         initializeCache(new CacheRegister("default", cfg.getHashMap(true)));
     }
     /** initialize cache for given name */

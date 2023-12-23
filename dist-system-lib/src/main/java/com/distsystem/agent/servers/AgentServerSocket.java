@@ -1,10 +1,10 @@
 package com.distsystem.agent.servers;
 
 import com.distsystem.agent.clients.SocketServerClient;
+import com.distsystem.api.ServiceObjectParams;
 import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.DistConfig;
 import com.distsystem.base.ServerBase;
-import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentServer;
 import com.distsystem.utils.DistUtils;
 import org.slf4j.Logger;
@@ -32,9 +32,14 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
     private int workingPort;
 
     /** creates new server for communication based on socket */
-    public AgentServerSocket(Agent parentAgent) {
-        super(parentAgent);
+    public AgentServerSocket(ServiceObjectParams params) {
+        super(params);
         initialize();
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 5L + threads.size() + clients.size() + clientsByAgentGuid.size()*2L;
     }
 
     /** get type of clients to be connected to this server */
@@ -51,7 +56,7 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
     }
     public void initialize() {
         try {
-            workingPort = parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_SERVER_SOCKET_PORT, DistConfig.AGENT_SOCKET_PORT_VALUE_SEQ.incrementAndGet());;
+            workingPort = getConfigPropertyAsInt(DistConfig.PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet()); // parentAgent.getConfig().getPropertyAsInt(DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_PORT, DistConfig.AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ.incrementAndGet());;
             // open socket port
             log.info("Starting socket for incoming connections from other clients on port " + workingPort + ", server UID: " + serverGuid + ", agent: " + parentAgent.getAgentGuid());
             // create SocketServer and thread for accepting sockets
@@ -61,11 +66,17 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
             Thread mainThread = new Thread(this);
             mainThread.setDaemon(true);
             mainThread.start();
-            parentAgent.getAgentThreads().registerThread(this, mainThread, "socket-server-" + workingPort);
+            parentAgent.getThreads().registerThread(this, mainThread, "socket-server-" + workingPort);
             threads.add(mainThread);
         } catch (Exception ex) {
             log.warn("Cannot run socket server on port: " + workingPort + ", reason: " + ex.getMessage());
+            addIssueToAgent("initialize", ex);
         }
+    }
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: reinitialize this component
+        return true;
     }
     /** run in separated thread to accept new Sockets */
     public void run() {
@@ -77,19 +88,19 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
                     log.info("......... SERVER - New socket connected on port " + workingPort + ", creating client");
                     SocketServerClient client = new SocketServerClient(parentAgent, socket);
                     clients.add(client);
-                    parentAgent.getAgentConnectors().registerLocalClient(client);
+                    parentAgent.getConnectors().registerLocalClient(client);
                 }
             } catch (SocketTimeoutException ex) {
             } catch (Exception ex) {
                 log.error("!!!!! Unknown exception on Socket server working on port " + workingPort);
+                addIssueToAgent("run", ex);
             }
             DistUtils.sleep(2000);
         }
     }
 
 
-    @Override
-    public void close() {
+    protected void onClose() {
         // close socket server and all clients
         closed = true;
         threads.stream().forEach(th -> {
@@ -100,6 +111,7 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
             } catch (Exception ex) {
                 //
                 log.info("Cannot close thread: " + th.getName() + ", reason: " + ex.getMessage());
+                addIssueToAgent("onClose", ex);
             }
         });
         clients.stream().forEach(c -> {
@@ -110,6 +122,7 @@ public class AgentServerSocket extends ServerBase implements AgentServer, Runnab
             serverSocket.close();
         } catch (Exception ex) {
             log.warn("Cannot close socket server, reason: " + ex.getMessage());
+            addIssueToAgent("onClose", ex);
         }
     }
 }

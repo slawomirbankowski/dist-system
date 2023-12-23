@@ -4,18 +4,18 @@ import java.time.LocalDateTime;
 
 /** global information about dist-cache application */
 public class AppGlobalInfo {
-    private LocalDateTime localDateTime = LocalDateTime.now();
-    private LocalDateTime createdDate;
-    private String currentHostName;
-    private String currentHostAddress;
-    private String currentLocationPath;
-    private int activeThreadsCount;
-    public long freeMemory;
-    public long maxMemory;
-    public long totalMemory;
-    public long freeMemoryMb;
-    public long maxMemoryMb;
-    public long totalMemoryMb;
+    private final LocalDateTime localDateTime = LocalDateTime.now();
+    private final LocalDateTime createdDate;
+    private final String currentHostName;
+    private final String currentHostAddress;
+    private final String currentLocationPath;
+    private final int activeThreadsCount;
+    private final long freeMemory;
+    private final long maxMemory;
+    private final long totalMemory;
+    private final long freeMemoryMb;
+    private final long maxMemoryMb;
+    private final long totalMemoryMb;
 
     public AppGlobalInfo(LocalDateTime createdDate, String currentHostName, String currentHostAddress, String currentLocationPath, int activeThreadsCount, long freeMemory, long maxMemory, long totalMemory, long freeMemoryMb, long maxMemoryMb, long totalMemoryMb) {
         this.createdDate = createdDate;

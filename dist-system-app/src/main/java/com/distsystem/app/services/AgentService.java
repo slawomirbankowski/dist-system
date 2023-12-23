@@ -1,7 +1,10 @@
 package com.distsystem.app.services;
 
+import com.distsystem.DistFactory;
 import com.distsystem.api.*;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
+import com.distsystem.api.info.AgentInfo;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
+import com.distsystem.interfaces.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -9,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,22 +48,31 @@ public class AgentService {
 
     /** ping agent with status information - this could be done every 1 minute */
     public AgentPingResponse pingAgent(AgentPing pingObject) {
-
         return new AgentPingResponse(pingObject.getAgentGuid());
+    }
+
+    /** create or update local agent */
+    public AgentInfo createOrUpdateLocalAgent(AgentDefinition definition) {
+        log.info("Creating or updating local agent for GUID: " + definition.getAgentGuid() + ", with properties");
+        Agent agent = DistFactory.getAgent(definition.getAgentGuid());
+        if (agent == null) {
+            agent = DistFactory.getDefaultAgent(definition.toDistConfig());
+        }
+        return agent.getAgentInfo();
     }
     /** get list of all registered agents */
     public List<DistAgentRegisterRow> getAgents() {
         return agents.values().stream().map(x -> x.toSimplified()).collect(Collectors.toList());
     }
     /** get agent by ID */
-    public List<DistAgentRegisterRow> getAgentById(String id) {
+    public Optional<DistAgentRegisterRow> getAgentById(String id) {
         var agent = agents.get(id);
         if (agent == null) {
-
+            return Optional.empty();
         } else {
             // TODO: serialize single agent
+            return Optional.of(agent.toSimplified());
         }
-        return agents.values().stream().map(x -> x.toSimplified()).collect(Collectors.toList());
     }
     /** unregister agent */
     public AgentConfirmation unregisterAgent(String guid) {

@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 /** base interface for any component in Agent */
 public interface AgentComponent {
 
+    /** read configuration and re-initialize this component */
+    boolean componentReinitialize();
     /** get Agent of this component */
     Agent getAgent();
     /** get type of this component */

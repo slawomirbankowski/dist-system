@@ -5,7 +5,7 @@ import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.AgentClientBase;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentClient;
 import com.distsystem.interfaces.HttpCallable;
@@ -24,10 +24,14 @@ public class HttpClient extends AgentClientBase implements AgentClient {
     /** creates new HTTP client  */
     public HttpClient(Agent parentAgent, DistAgentServerRow srv) {
         super(parentAgent, srv);
-        this.url = srv.serverurl;
-        connectedAgentGuid = srv.agentguid;
-
+        this.url = srv.getServerUrl();
+        connectedAgentGuid = srv.getAgentGuid();
         initialize();
+    }
+
+    /** count objects in this agentable object including this object */
+    public long countObjectsAgentable() {
+        return 2L;
     }
     /** get type of client - socket, http, datagram, ... */
     public DistClientType getClientType() {
@@ -41,19 +45,23 @@ public class HttpClient extends AgentClientBase implements AgentClient {
     public boolean initialize() {
         try {
             httpConnectionHelper = HttpConnectionHelper.createHttpClient(url);
-            log.info("Creates new HTTP client for server: " + serverRow.servertype + ", url: " + serverRow.serverurl);
+            log.info("Creates new HTTP client for server: " + serverRow.simpleInfo());
             log.info("Initializing HTTP client for agent: " + parentAgent.getAgentGuid() + ", URL: " + url + ", client UID: " + clientGuid);
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
         } catch (Exception ex) {
-            parentAgent.getAgentIssues().addIssue("HttpClient.initialize", ex);
+            parentAgent.getIssues().addIssue("HttpClient.initialize", ex);
             log.warn("Cannot initialize client " + clientGuid + ", agent: " + this.parentAgent.getAgentGuid() + ", Exception at Start: "+ex.getMessage(), ex);
             return false;
         }
     }
-
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+        // TODO: reinitialize this component - probably nothing to be done here
+        return true;
+    }
     /** send message to this client */
     public boolean send(DistMessage msg) {
         try {
@@ -63,13 +71,13 @@ public class HttpClient extends AgentClientBase implements AgentClient {
             return res.isOk();
         } catch (Exception ex) {
             log.warn("ERROR WHILE SENDING DATA FOR CLIENT: " + clientGuid + ", reason: " + ex.getMessage(), ex);
-            parentAgent.getAgentIssues().addIssue("HttpClient.send", ex);
+            parentAgent.getIssues().addIssue("HttpClient.send", ex);
             return false;
         }
     }
 
     /** close this client */
-    public void close() {
+    protected void onClose() {
         log.info("Closing HTTP client for GUID: " + clientGuid);
         try {
             AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
@@ -77,7 +85,7 @@ public class HttpClient extends AgentClientBase implements AgentClient {
             send(closeMsg);
             working = false;
         } catch (Exception ex) {
-            parentAgent.getAgentIssues().addIssue("HttpClient.close", ex);
+            parentAgent.getIssues().addIssue("HttpClient.close", ex);
             log.info(" Error while closing HTTP client connection, reason: "+ex.getMessage());
 
         }

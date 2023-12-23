@@ -1,12 +1,13 @@
 package com.distsystem.serializers;
 
 import com.distsystem.interfaces.DistSerializer;
+import com.distsystem.utils.DistSerializerBase;
 
 import java.io.*;
 import java.util.Base64;
 
 /** serialize of classes that implements Serializable interface, this is using ObjectOutputStream */
-public class ObjectStreamSerializer implements DistSerializer {
+public class ObjectStreamSerializer extends DistSerializerBase implements DistSerializer {
 
     @Override
     public byte[] serialize(Object obj) {

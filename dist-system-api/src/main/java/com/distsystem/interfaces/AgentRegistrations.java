@@ -3,8 +3,8 @@ package com.distsystem.interfaces;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.api.DistIssue;
 import com.distsystem.api.info.AgentRegistrationsInfo;
-import com.distsystem.base.dtos.DistAgentRegisterRow;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentRegisterRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 
 import java.util.List;
 
@@ -13,10 +13,8 @@ import java.util.List;
  * registration services could be build based on different central technology like:
  * JDBC compliant database, Elasticsearch, Kafka, Redis, ...
  *  */
-public interface AgentRegistrations {
+public interface AgentRegistrations extends DistService {
 
-    /** create initial registration services */
-    void createRegistrations();
     /** register this server */
     void registerServer(DistAgentServerRow servDto);
 
@@ -29,6 +27,9 @@ public interface AgentRegistrations {
     /** get information infos about registration objects */
     List<AgentRegistrationInfo> getRegistrationInfos();
 
+    /** get all registrations */
+    List<Registration> getRegistrations();
+
     /** get all servers from registration services */
     List<DistAgentServerRow> getServers();
 
@@ -39,6 +40,5 @@ public interface AgentRegistrations {
     List<DistAgentRegisterRow> getAgents();
     /** add issue to registrations */
     void addIssue(DistIssue issue);
-    /** close registrations */
-    void close();
+
 }

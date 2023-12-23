@@ -4,10 +4,10 @@ import com.distsystem.api.enums.DistServiceType;
 
 /** class representing single method in service can can be called */
 public class ServiceMethod {
-    private DistServiceType service;
-    private String methodName;
-    private Class messageObject;
-    private Class responseObject;
+    private final DistServiceType service;
+    private final String methodName;
+    private final Class messageObject;
+    private final Class responseObject;
 
     public ServiceMethod(DistServiceType service, String methodName, Class messageObject, Class responseObject) {
         this.service = service;

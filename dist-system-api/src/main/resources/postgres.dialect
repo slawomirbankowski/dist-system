@@ -49,6 +49,37 @@ deleteAgentService=delete from distagentservice where serviceguid=?
 createAgentIssue=create table distagentissue(agentguid text, methodname text, exceptionmessage text, exceptiontext text, parameterslist text, createddate timestamp)
 insertAgentIssue=insert into distagentissue(agentguid, methodname, exceptionmessage, exceptiontext, parameterslist, createddate) values (?,?,?,?,?,?)
 
+createConfigInit=create table distagentconfiginit(distname text, configname text, configvalue text, configpriority int default 0, createddate timestamp default now())
+selectConfigInit=select * from distagentconfiginit where ? like distname
 
 
+createDistAgentAuthAccount=create table distagentauthaccount(accountname text not null, domainname text not null, accountattributes text not null, isactive int not null, createddate timestamp not null)
+createDistAgentAuthAccountIndex=create unique index idx_distagentauthaccount_accountname on distagentauthaccount(accountname)
+insertDistAgentAuthAccount=insert into distagentauthaccount(domainname, domaindescription, createddate, isactive) values (?, ?, ?, ?)
+selectDistAgentAuthAccount=select * from distagentauthaccount
+selectDistAgentAuthAccountForName=select * from distagentauthaccount where accountname=?
+deleteDistAgentAuthAccount=delete from distagentauthaccount where accountname=?
+disableDistAgentAuthAccount=update distagentauthaccount set isactive=0 where accountname=?
+
+createDistAgentAuthDomain=create table distagentauthdomain(domainname text not null, domaindescription text not null, domainattributes text not null, isactive int not null, createddate timestamp not null)
+createDistAgentAuthDomainIndex=create unique index idx_distagentauthdomain_domainname on distagentauthdomain(domainname)
+insertDistAgentAuthDomain=insert into distagentauthdomain(domainname, domaindescription, isactive, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthDomain=select * from distagentauthdomain
+
+createDistAgentAuthIdentity=create table distagentauthidentity(identityname text not null, identitytype text not null, identityattributes text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthIdentity=insert into distagentauthidentity(identityname, identitytype, identityattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthIdentity=select * from distagentauthidentity
+
+createDistAgentAuthRole=create table distagentauthrole(rolename text not null, roledescription text, roleattributes text, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthRole=insert into distagentauthrole(rolename, roledescription, roleattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthRole=select * from distagentauthrole
+
+createDistAgentAuthKey=create table distagentauthkey(keyname text not null, keytype text not null, keyvalue text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthKey=insert into distagentauthkey(keyname, keytype, keyvalue, isactive, createddate) values (?, ?, ?, ?, ?)
+selectDistAgentAuthKey=select * from distagentauthkey
+selectDistAgentAuthKeyForName=select * from distagentauthkey where keyname=?
+
+createDistAgentAuthTokenParser=create table distagentauthtokenparser(tokenparsername text not null, tokenparserattributes text not null, isactive int not null, createddate timestamp not null)
+insertDistAgentAuthTokenParser=insert into distagentauthtokenparser(tokenparsername, tokenparserattributes, createddate) values (?, ?, ?, ?)
+selectDistAgentAuthTokenParser=select * from distagentauthtokenparser
 

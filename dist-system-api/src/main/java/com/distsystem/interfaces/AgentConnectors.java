@@ -3,22 +3,24 @@ package com.distsystem.interfaces;
 import com.distsystem.api.info.AgentConnectorsInfo;
 import com.distsystem.api.DistMessage;
 import com.distsystem.api.DistMessageFull;
-import com.distsystem.base.dtos.DistAgentServerRow;
+import com.distsystem.api.dtos.DistAgentServerRow;
 
 import java.util.List;
 
 /** interface for agent connectors manager
  * this is to keep connections to other agents */
-public interface AgentConnectors {
+public interface AgentConnectors extends DistService {
 
-    /** open servers for communication  */
-    void openServers();
     /** check list of active servers and connect to the server if this is still not connected */
     void checkActiveServers(List<DistAgentServerRow> activeServers);
     /** get full information about connectors - servers, clients*/
     AgentConnectorsInfo getInfo();
     /** get count of servers */
     int getServersCount();
+    /** get all rows for current servers */
+    List<DistAgentServerRow> getServerRows();
+    /** check servers and returns info */
+    AgentConnectorsInfo serversCheckWithInfo();
     /** get all UIDs of servers */
     List<String> getServerKeys();
     /** get number of clients */
@@ -33,7 +35,5 @@ public interface AgentConnectors {
     void sendMessage(DistMessageFull msgCallbacks);
     /** mark response for this message, it is executing callbacks onResponse */
     void markResponse(DistMessage msg);
-    /** close this manager */
-    void close();
 
 }

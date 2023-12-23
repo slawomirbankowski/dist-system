@@ -1,13 +1,10 @@
 package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
-import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
-import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Receiver;
-import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
 
@@ -15,79 +12,70 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-/** service to receive messages to any listener */
-public class AgentReceiverService extends ServiceBase implements Receiver, AgentComponent {
-
-    /** all external methods to process messages */
-    protected Map<String, Function<DistMessage, DistMessage>> methodsToProcess = new HashMap<>();
-
-    /** processor class for Web API - instant synchronized API to be used directly with Agent service */
-    private final DistWebApiProcessor webApiProcessor = new DistWebApiProcessor()
-            .addHandlerGet("ping", (m, req) -> req.responseOkText("ping"))
-            .addHandlerGet("methods", (m, req) -> req.responseOkJson(JsonUtils.serialize(methodsToProcess.keySet())));
+/** service to receive messages to any custom listener */
+public class AgentReceiverService extends ServiceBase implements Receiver {
 
     /** */
     public AgentReceiverService(Agent parentAgent) {
         super(parentAgent);
+        parentAgent.getServices().registerService(this);
     }
 
-    @Override
-    public DistComponentType getComponentType() {
-        return DistComponentType.receiver;
+    /** count objects in this agentable object including this object */
+    public long countObjectsService() {
+        return 1L;
     }
-    /** get global unique ID of this service/component */
-    @Override
-    public String getGuid() {
-        return guid;
+
+    /** read configuration and re-initialize this component */
+    protected boolean onReinitialize() {
+        // TODO: implement reinitialization
+        return true;
     }
+
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("method-names", (m, req) -> req.responseOkJsonSerialize(webApiProcessor.getMessageHandlerMethods()))
+                .addHandlerPost("send", (m, req) -> req.responseOkJsonSerialize(sendMessage(req.getContentAsString())));
+    }
+
     /** get custom map of info about service */
     public Map<String, String> getServiceInfoCustomMap() {
-        return Map.of("methodsCount", ""+methodsToProcess.size(),
-                "methodNames", String.join(",", methodsToProcess.keySet()));
+        return Map.of("methodsCount", ""+webApiProcessor.getMessageHandlersCount(),
+                "methodNames", String.join(",", webApiProcessor.getMessageHandlerMethods()));
     }
     /** register new method to process received messages */
     public void registerReceiverMethod(String method, Function<DistMessage, DistMessage> methodToProcess) {
-        methodsToProcess.put(method, methodToProcess);
+        webApiProcessor.registerReceiverMethod(method, methodToProcess);
     }
     /** get number of receiver methods */
     public int getMethodsCount() {
-        return methodsToProcess.size();
+        return webApiProcessor.getMessageHandlersCount();
+    }
+
+    /** send message to another receiver*/
+    public Map<String, String> sendMessage(String messageJson) {
+        DistMessageFull msg = DistMessageFull.fromJson(messageJson);
+        DistMessageFull response = parentAgent.sendMessage(msg);
+        return response.getMessage().toMap();
     }
     /** send message to another receiver*/
-    public void send(String agentUid, String method, Object obj) {
+    public DistMessageFull send(String agentUid, String method, Object obj) {
         DistMessageFull msg = DistMessageBuilder.empty()
                 .toDestination(agentUid, DistServiceType.receiver, method)
                 .withObject(obj)
                 .build();
-        parentAgent.sendMessage(msg);
+        return parentAgent.sendMessage(msg);
     }
     @Override
     public DistServiceType getServiceType() {
         return DistServiceType.receiver;
     }
-    /** process message using registered */
-    @Override
-    public DistMessage processMessage(DistMessage msg) {
-        Function<DistMessage, DistMessage> methodToProcess = methodsToProcess.get(msg.getMethod());
-        if (methodToProcess == null) {
-            return msg.methodNotFound();
-        } else {
-            try {
-                return methodToProcess.apply(msg);
-            } catch (Exception ex) {
-                return msg.exception(ex);
-            }
-        }
-    }
-    @Override
-    public AgentWebApiResponse handleRequest(AgentWebApiRequest request) {
-        return webApiProcessor.handleRequest(request);
-    }
-    @Override
-    protected String createServiceUid() {
-        return DistUtils.generateCacheGuid();
-    }
 
+    /** update configuration of this Service */
+    public void updateConfig(DistConfig newCfg) {
+        // TODO: update configuration of this service
+    }
     @Override
     protected void onClose() {
     }

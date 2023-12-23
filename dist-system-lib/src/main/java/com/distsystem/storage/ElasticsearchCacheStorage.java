@@ -21,9 +21,8 @@ public class ElasticsearchCacheStorage extends CacheStorageBase {
     private String elasticUser;
     private String elasticPass;
     private String elasticIndex;
-
     /** DAO to Elasticsearch for CRUD operations */
-    private final DaoElasticsearchBase dao;
+    private DaoElasticsearchBase dao;
 
     /** default header for Elasticsearch requests */
     private Map<String, String> header;
@@ -31,10 +30,13 @@ public class ElasticsearchCacheStorage extends CacheStorageBase {
     /** init Elasticsearch storage */
     public ElasticsearchCacheStorage(Cache cache) {
         super(cache);
-        elasticsearchUrl = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_ELASTICSEARCH_URL, "http://localhost:9200");
-        elasticUser = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_ELASTICSEARCH_USER, "");
-        elasticPass = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_ELASTICSEARCH_PASS, "");
-        elasticIndex = cache.getConfig().getProperty(DistConfig.CACHE_STORAGE_ELASTICSEARCH_INDEX, DistConfig.CACHE_STORAGE_ELASTICSEARCH_INDEX_DEFAULT_VALUE);
+        initialize();
+    }
+    private void initialize() {
+        elasticsearchUrl = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_URL, "http://localhost:9200");
+        elasticUser = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_USER, "");
+        elasticPass = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_PASS, "");
+        elasticIndex = cache.getConfig().getProperty(DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_INDEX, DistConfig.AGENT_CACHE_STORAGE_ELASTICSEARCH_INDEX_DEFAULT_VALUE);
         if (!elasticUser.isEmpty()) {
             header = Map.of("Content-Type", "application/json", "Authorization", DistUtils.getBasicAuthValue(elasticUser, elasticPass));
         } else {
@@ -44,6 +46,13 @@ public class ElasticsearchCacheStorage extends CacheStorageBase {
         dao = cache.getAgent().getAgentDao().getOrCreateDaoOrError(DaoElasticsearchBase.class, DaoParams.elasticsearchParams(elasticsearchUrl, elasticUser, elasticPass));
         dao.usedByComponent(this);
         dao.createIndicesWithCheck(Set.of(elasticIndex));
+    }
+
+    /** read configuration and re-initialize this component */
+    public boolean componentReinitialize() {
+
+        // TODO: reinitialize this component
+        return true;
     }
     /** Elasticsearch is external storage */
     public boolean isInternal() { return false; }

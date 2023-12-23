@@ -2,10 +2,9 @@ package com.distsystem.utils;
 
 import com.distsystem.api.info.AppGlobalInfo;
 import com.distsystem.api.CacheObject;
+import com.distsystem.api.info.DistThreadInfo;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,12 +32,13 @@ public class DistUtils {
     }
 
     /** unique global ID of this cache utils */
-    private static final String cacheGuid = UUID.randomUUID().toString();
-    /** get unique ID of cache */
-    public static String getCacheGuid() {
-        return cacheGuid;
+    private static final String guid = UUID.randomUUID().toString();
+    /** get unique ID */
+    public static String getGuid() {
+        return guid;
     }
 
+    /** get name of current host */
     public static String getCurrentHostName() {
         try {
             return java.net.InetAddress.getLocalHost().getHostName();
@@ -46,8 +46,7 @@ public class DistUtils {
             return "localhost";
         }
     }
-
-
+    /** get IP of current host */
     public static String getCurrentHostAddress() {
         try {
             return java.net.InetAddress.getLocalHost().getHostAddress();
@@ -55,6 +54,7 @@ public class DistUtils {
             return "localhost";
         }
     }
+    /** get location path of running agent process */
     public static String getCurrentLocationPath() {
         try {
             return new java.io.File(".").getCanonicalPath();
@@ -97,7 +97,9 @@ public class DistUtils {
     public static String generateServerGuid(String servType) {
         return "SRV_" +  hostName  + "_T" + servType + "_" + UUID.randomUUID().toString().substring(0, 8);
     }
-
+    public static String generateServiceGuid(String servType, String parentAgentShortGuid) {
+        return servType + "_" +  hostName  + "_" + parentAgentShortGuid + "_" + UUID.randomUUID().toString().substring(0, 8);
+    }
     private static final AtomicLong clientGuidSeq = new AtomicLong();
     public static String generateClientGuid(String clientType) {
         return "CL_" + clientType + "_H" + hostName + "_DT" + getDateTimeYYYYMMDDHHmmss() + "_X" + clientGuidSeq.incrementAndGet() + "_" + UUID.randomUUID().toString().substring(0, 8);
@@ -165,7 +167,14 @@ public class DistUtils {
             return null;
         }
     }
-
+    /** create map based on keys and values */
+    public static Map<String, String> createMap(String... keysAndValues) {
+        Map<String, String> m = new HashMap<>();
+        for (int i=0; i<keysAndValues.length-1; i+=2) {
+            m.put(keysAndValues[i], keysAndValues[i+1]);
+        }
+        return m;
+    }
     public static long parseLong(String str, long defaultValue) {
         try {
             return Long.parseLong(str);
@@ -187,7 +196,13 @@ public class DistUtils {
             return defaultValue;
         }
     }
-
+    public static boolean parseBoolean(String str, boolean defaultValue) {
+        try {
+            return Boolean.parseBoolean(str);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
     /** split String into name1=value1;name2=value2;name3=value3 */
     public static List<String[]> splitBySeparationEqual(String str, String splitChar, char equalsChar, boolean removeEmpty) {
         LinkedList<String[]> splitedItems = new LinkedList<>();
@@ -293,6 +308,19 @@ public class DistUtils {
         }
         return b.toString();
     }
+    public static String serializeException(Exception ex) {
+        if (ex==null) {
+            return "null";
+        }
+        StringBuilder b = new StringBuilder();
+        b.append(ex.getMessage());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        java.io.PrintStream pr = new PrintStream(baos);
+        ex.printStackTrace(pr);
+        byte[] bytes = baos.toByteArray();
+        var x = bytes[0];
+        return "";
+    }
     /** */
     public static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder(2 * hash.length);
@@ -345,6 +373,16 @@ public class DistUtils {
             // invalid class or incorrect class
         }
         return null;
+    }
+    /** */
+    public static List<DistThreadInfo> getAllThreads() {
+        return Thread.getAllStackTraces().entrySet().stream().map(t -> {
+            Thread th = t.getKey();
+            String threadName = th.getName();
+            threadName.lastIndexOf("-");
+            String threadPart = threadName;
+            return new DistThreadInfo(threadName, threadPart, th.getThreadGroup().getName(), th.getId(), th.getState().name(), th.getPriority(), th.isDaemon(), th.isAlive(), th.isInterrupted(), "");
+        }).toList();
     }
     public static final long MEGABYTE = 1024 * 1024;
 }

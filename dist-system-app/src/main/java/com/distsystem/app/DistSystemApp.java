@@ -1,46 +1,34 @@
 package com.distsystem.app;
 
+import com.distsystem.DistFactory;
+import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-/** entry for Spring application */
-@SpringBootApplication
-//@EnableSwagger2
 public class DistSystemApp {
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(DistSystemApp.class);
     private static String[] commandLineArguments;
 
+    /** */
     public static String[] getCommandLineArguments() {
         return commandLineArguments;
     }
+    /** start DistSystem */
     public static void main(String[] args) {
         commandLineArguments = args;
-        log.info("STARTING DistCache REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getCacheGuid());
-        SpringApplication.run(DistSystemApp.class, args);
-    }
-    @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-        return args -> {
-            //ctx.getApplicationName();
-            //ctx.getDisplayName();
-            //log.info("");
-            /*
-            String[] beanNames = ctx.getBeanDefinitionNames();
-            Arrays.sort(beanNames);
-            for (String beanName : beanNames) {
-                log.info(beanName);
-            }
-             */
-        };
+        log.info("STARTING DistSystem REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getGuid());
+        Agent agent = DistFactory.buildEmptyFactory()
+                .withCommonProperties()
+                .withEnvironmentVariables()
+                .withWebApiDefaultPort()
+                .withCommandLineArguments(args)
+                .createAgentInstance();
+        log.info("New agent initialized: " + agent.getAgentGuid() + ", now DistSystemApp would be waiting till agent will be killed");
+        agent.waitTillKill();
+        log.info("DistSystem has been killed, closing DistSystemApp now, good bye!");
     }
 
 }
