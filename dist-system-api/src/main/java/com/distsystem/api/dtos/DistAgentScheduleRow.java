@@ -2,6 +2,7 @@ package com.distsystem.api.dtos;
 
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoTable;
+import com.distsystem.utils.AdvancedMap;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class DistAgentScheduleRow extends BaseRow {
     private int isActive;
     private LocalDateTime lastUpdatedDate;
 
-    public DistAgentScheduleRow(String scheduleName, String scheduleType, String scheduleExpression, String scheduleParams, LocalDateTime scheduleStartDate, LocalDateTime scheduleEndDate, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+    public DistAgentScheduleRow(String scheduleName, String scheduleType, String scheduleExpression, String scheduleParams, LocalDateTime scheduleStartDate, LocalDateTime scheduleEndDate, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
         this.scheduleName = scheduleName;
         this.scheduleType = scheduleType;
         this.scheduleExpression = scheduleExpression;
@@ -51,10 +52,10 @@ public class DistAgentScheduleRow extends BaseRow {
         return new Object[] { scheduleName, scheduleType, scheduleExpression, scheduleParams, scheduleStartDate, scheduleEndDate, createdDate, isActive, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
-        return Map.of("monitorName", scheduleName,
-                "monitorType", scheduleType,
-                "monitorUrl", scheduleExpression,
-                "monitorParams", scheduleParams,
+        return Map.of("scheduleName", scheduleName,
+                "scheduleType", scheduleType,
+                "scheduleExpression", scheduleExpression,
+                "scheduleParams", scheduleParams,
                 "scheduleStartDate", scheduleStartDate.toString(),
                 "scheduleEndDate", scheduleEndDate.toString(),
                 "createdDate", createdDate.toString(),
@@ -62,6 +63,20 @@ public class DistAgentScheduleRow extends BaseRow {
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    public static DistAgentScheduleRow fromMap(Map<String, Object> map) {
+        AdvancedMap m = new AdvancedMap(map, true);
+        return new DistAgentScheduleRow(
+                m.getStringOrEmpty("scheduleName"),
+                m.getStringOrEmpty("scheduleType"),
+                m.getStringOrEmpty("scheduleExpression"),
+                m.getStringOrEmpty("scheduleParams"),
+                m.getLocalDateOrNow("scheduleStartDate"),
+                m.getLocalDateOrNow("scheduleEndDate"),
+                m.getInt("isActive", 1),
+                m.getLocalDateOrNow("createdDate"),
+                m.getLocalDateOrNow("lastUpdatedDate")
+        );
+    }
     public String getScheduleName() {
         return scheduleName;
     }
@@ -105,4 +120,11 @@ public class DistAgentScheduleRow extends BaseRow {
     public LocalDateTime getLastUpdatedDate() {
         return lastUpdatedDate;
     }
+
+
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "scheduleName";
+    }
+
 }

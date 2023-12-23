@@ -12,7 +12,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="DistAgentConfigInit", keyName="configGuid", keyIsUnique=true)
 public class DistAgentConfigInitRow extends BaseRow {
 
     private final String configGuid;

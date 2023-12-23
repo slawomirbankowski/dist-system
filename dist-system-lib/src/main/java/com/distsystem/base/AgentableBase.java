@@ -168,7 +168,7 @@ public abstract class AgentableBase implements Agentable {
         } else {
             touch();
             closed = true;
-            log.info("Closing Agentable object for GUID: " + guid);
+            log.debug("Closing Agentable object for GUID: " + guid);
             onClose();
         }
     }

@@ -1,6 +1,8 @@
 package com.distsystem.api;
 
+import com.distsystem.api.dtos.DistAgentEventRow;
 import com.distsystem.interfaces.Agentable;
+import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
 
@@ -9,10 +11,12 @@ public class AgentEvent {
 
     /** date and time of event */
     private final LocalDateTime createdDateTime = LocalDateTime.now();
+    private final String eventGuid = DistUtils.generateCustomGuid("event");
     private final Agentable parent;
     private final String method;
     private final String eventType;
     private final Object[] params;
+    private final String hostName = DistUtils.getCurrentHostName();
 
     public AgentEvent(Agentable parent, String method, String eventType, Object... params) {
         this.parent = parent;
@@ -43,12 +47,13 @@ public class AgentEvent {
     public Object[] getParams() {
         return params;
     }
+
     /** get event row from this event */
-    public AgentEventRow getEventRow() {
+    public DistAgentEventRow getEventRow() {
+        parent.getGuid();
+
         // TODO: add to event row service/agentable name and GUID of parent component that added this event
-        // parent.getAgentableName();
-        // parent.getGuid()
-        return new AgentEventRow(createdDateTime, parent.getClass().getName(), method, eventType);
+        return new DistAgentEventRow(eventGuid, createdDateTime, parent.getClass().getName(), parent.getGuid(), method, eventType, hostName);
     }
 
     /** create new event */

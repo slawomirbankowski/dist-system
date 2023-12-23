@@ -97,7 +97,7 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** read configuration and re-initialize this service */
     public boolean reinitialize() {
         createEvent("reinitialize");
-        log.info("Reinitialization of service in agent: " + parentAgent.getAgentGuid() + ", service: " + getServiceType().name() + ", UID: " + getGuid() + ", class: " + this.getClass().getName() + ", initializedCount: " + initializedCount.get());
+        log.debug("Reinitialization of service in agent: " + parentAgent.getAgentGuid() + ", service: " + getServiceType().name() + ", UID: " + getGuid() + ", class: " + this.getClass().getName() + ", initializedCount: " + initializedCount.get());
         initializedCount.incrementAndGet();
         boolean r = onReinitialize();
         initialized = true;
@@ -138,9 +138,9 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** register configuration group with buckets to initialize internal service objects */
     protected void registerConfigGroup(String groupName) {
         createEvent("registerConfigGroup", groupName);
-        log.info("Registering new configuration group for agent: " + parentAgent.getAgentGuid() + ", serviceType: " + getServiceType().name() + ", group: " + groupName);
+        log.debug("Registering new configuration group for agent: " + parentAgent.getAgentGuid() + ", serviceType: " + getServiceType().name() + ", group: " + groupName);
         if (configGroup != null) {
-            log.info("Registering new configuration group, there is already existing group, need to close, agent: " + parentAgent.getAgentGuid() + ", serviceType: " + getServiceType().name() + ", group: " + groupName);
+            log.debug("Registering new configuration group, there is already existing group, need to close, agent: " + parentAgent.getAgentGuid() + ", serviceType: " + getServiceType().name() + ", group: " + groupName);
             configGroup.close();
         }
         configGroup = parentAgent.registerConfigGroup(groupName, this);

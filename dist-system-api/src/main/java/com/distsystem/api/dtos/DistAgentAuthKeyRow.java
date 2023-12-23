@@ -3,6 +3,7 @@ package com.distsystem.api.dtos;
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoTable;
 import com.distsystem.utils.AdvancedMap;
+import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="DistAgentAuthKey", keyName="keyName", keyIsUnique=true)
 public class DistAgentAuthKeyRow extends BaseRow {
 
     private final String keyName;
@@ -77,7 +77,7 @@ public class DistAgentAuthKeyRow extends BaseRow {
     }
     /** get name of key attribute */
     public static String getKeyAttributeName() {
-        return "identityName";
+        return "keyName";
     }
     public static DistAgentAuthKeyRow fromMap(Map<String, Object> map) {
         AdvancedMap m = new AdvancedMap(map, true);

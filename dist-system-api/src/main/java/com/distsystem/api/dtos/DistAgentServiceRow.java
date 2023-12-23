@@ -18,10 +18,6 @@ public class DistAgentServiceRow extends BaseRow {
     private LocalDateTime lastPingDate;
     private LocalDateTime lastUpdatedDate;
 
-    /** */
-    public DistAgentServiceRow() {
-    }
-
     public DistAgentServiceRow(String agentGuid, String serviceGuid, String serviceType, LocalDateTime createdDate, int isActive, LocalDateTime lastPingDate) {
         this.agentGuid = agentGuid;
         this.serviceGuid = serviceGuid;
@@ -29,6 +25,7 @@ public class DistAgentServiceRow extends BaseRow {
         this.createdDate = createdDate;
         this.isActive = isActive;
         this.lastPingDate = lastPingDate;
+        this.lastUpdatedDate = createdDate;
     }
 
     public String getAgentGuid() {
@@ -64,7 +61,7 @@ public class DistAgentServiceRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, serviceGuid, serviceType, createdDate, isActive, lastPingDate };
+        return new Object[] { agentGuid, serviceGuid, serviceType, createdDate, isActive, lastPingDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "service",
@@ -76,4 +73,8 @@ public class DistAgentServiceRow extends BaseRow {
                 "lastpingdate", lastPingDate.toString());
     }
 
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "serviceGuid";
+    }
 }

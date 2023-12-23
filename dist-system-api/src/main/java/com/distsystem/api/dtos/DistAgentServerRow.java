@@ -11,7 +11,6 @@ import java.util.Map;
 /** row for JDBC table distagentregister
  * create table distagentserver(agentguid text, servertype text, serverhost text, serverip text, serverport int, serverurl text, createddate timestamp, isactive int, lastpingdate timestamp)
  * */
-@DaoTable(tableName="DistAgentServer", keyName="serverGuid", keyIsUnique=true)
 public class DistAgentServerRow extends BaseRow {
 
     private String agentGuid;
@@ -21,16 +20,13 @@ public class DistAgentServerRow extends BaseRow {
     private String serverIp;
     private int serverPort;
     private String serverUrl;
-    private LocalDateTime createdDate;
-    private int isActive;
-    private LocalDateTime lastPingDate;
     private String serverParams;
+    private LocalDateTime lastPingDate;
+    private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
-
     /** */
-    public DistAgentServerRow() {
-    }
     public DistAgentServerRow(String agentGuid, String serverGuid, String serverType, String serverHost, String serverIp, int serverPort, String serverUrl,
                               LocalDateTime createdDate, int isActive, LocalDateTime lastPingDate, String serverParams) {
         this.agentGuid = agentGuid;
@@ -40,10 +36,11 @@ public class DistAgentServerRow extends BaseRow {
         this.serverIp = serverIp;
         this.serverPort = serverPort;
         this.serverUrl = serverUrl;
-        this.createdDate = createdDate;
-        this.isActive = isActive;
         this.lastPingDate = lastPingDate;
         this.serverParams = serverParams;
+        this.isActive = isActive;
+        this.createdDate = createdDate;
+        this.lastUpdatedDate = createdDate;
     }
     public DistAgentServerRow(String agentGuid) {
         this.agentGuid = agentGuid;
@@ -53,10 +50,11 @@ public class DistAgentServerRow extends BaseRow {
         this.serverIp = "";
         this.serverPort = 0;
         this.serverUrl = "";
-        this.createdDate = LocalDateTime.now();
-        this.isActive = 1;
         this.lastPingDate = LocalDateTime.now();
         this.serverParams = "";
+        this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
+        this.lastUpdatedDate = LocalDateTime.now();
     }
     /** simple information about this server */
     public String simpleInfo() {
@@ -108,7 +106,7 @@ public class DistAgentServerRow extends BaseRow {
 
     public Object[] toInsertRow() {
         return new Object[] {agentGuid, serverGuid, serverType, serverHost, serverIp,
-                serverPort, serverUrl, createdDate, isActive, lastPingDate, serverParams};
+                serverPort, serverUrl, serverParams, lastPingDate, isActive, createdDate, lastPingDate };
     }
     public Map<String, String> toMap() {
         HashMap<String, String> map = new HashMap<>();
@@ -146,4 +144,10 @@ public class DistAgentServerRow extends BaseRow {
     public java.lang.String toString() {
         return "AGENTSERVER,agentguid=" + agentGuid + ",serverguid=" + serverGuid + "servertype=" + serverType;
     }
+
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "serverGuid";
+    }
+
 }

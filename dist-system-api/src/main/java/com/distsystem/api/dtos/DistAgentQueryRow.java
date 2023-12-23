@@ -13,24 +13,24 @@ public class DistAgentQueryRow extends BaseRow {
     private final String queryName;
     private String queryDefinition;
     private String queryParameters;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
     public DistAgentQueryRow(String queryName, String queryDefinition, String queryParameters, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
         this.queryName = queryName;
         this.queryDefinition = queryDefinition;
         this.queryParameters = queryParameters;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentQueryRow(String queryName, String queryDefinition, String queryParameters) {
         this.queryName = queryName;
         this.queryDefinition = queryDefinition;
         this.queryParameters = queryParameters;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -59,7 +59,7 @@ public class DistAgentQueryRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { queryName, queryDefinition, queryParameters, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { queryName, queryDefinition, queryParameters, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("queryName", queryName,

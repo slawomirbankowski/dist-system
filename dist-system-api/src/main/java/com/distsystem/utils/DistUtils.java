@@ -4,9 +4,7 @@ import com.distsystem.api.info.AppGlobalInfo;
 import com.distsystem.api.CacheObject;
 import com.distsystem.api.info.DistThreadInfo;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -309,6 +307,19 @@ public class DistUtils {
             b.append(",");
         }
         return b.toString();
+    }
+    public static String serializeException(Exception ex) {
+        if (ex==null) {
+            return "null";
+        }
+        StringBuilder b = new StringBuilder();
+        b.append(ex.getMessage());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        java.io.PrintStream pr = new PrintStream(baos);
+        ex.printStackTrace(pr);
+        byte[] bytes = baos.toByteArray();
+        var x = bytes[0];
+        return "";
     }
     /** */
     public static String bytesToHex(byte[] hash) {

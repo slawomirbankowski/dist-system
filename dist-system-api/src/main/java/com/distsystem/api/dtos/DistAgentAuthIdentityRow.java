@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="DistAgentAuthIdentity", keyName="identityName", keyIsUnique=true)
 public class DistAgentAuthIdentityRow extends BaseRow {
 
     private final String identityName;
@@ -63,8 +62,9 @@ public class DistAgentAuthIdentityRow extends BaseRow {
         return lastUpdatedDate;
     }
 
+    /** insert row for distagentauthidentity */
     public Object[] toInsertRow() {
-        return new Object[] { identityName, identityType, identityAttributes, isActive, createdDate };
+        return new Object[] {identityName,identityType,identityAttributes,isActive,createdDate,lastUpdatedDate};
     }
 
     public Map<String, String> toMap() {

@@ -13,24 +13,24 @@ public class DistAgentNotificationRow extends BaseRow {
     private final String notificationName;
     private String notificationType;
     private String notificationParams;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
     public DistAgentNotificationRow(String notificationName, String notificationType, String notificationParams, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
         this.notificationName = notificationName;
         this.notificationType = notificationType;
         this.notificationParams = notificationParams;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentNotificationRow(String notificationName, String notificationType, String notificationParams) {
         this.notificationName = notificationName;
         this.notificationType = notificationType;
         this.notificationParams = notificationParams;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -55,7 +55,7 @@ public class DistAgentNotificationRow extends BaseRow {
 
 
     public Object[] toInsertRow() {
-        return new Object[] { notificationName, notificationType, notificationParams, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { notificationName, notificationType, notificationParams, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("notificationName", notificationName,

@@ -19,15 +19,15 @@ public class DistAgentSpaceRow extends BaseRow {
     public DistAgentSpaceRow(String spaceName, String spaceOwner, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
         this.spaceName = spaceName;
         this.spaceOwner = spaceOwner;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentSpaceRow(String spaceName, String spaceOwner) {
         this.spaceName = spaceName;
         this.spaceOwner = spaceOwner;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
@@ -52,15 +52,19 @@ public class DistAgentSpaceRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { spaceName, spaceOwner, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { spaceName, spaceOwner, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "DistAgentSpaceRow",
                 "spaceName", spaceName,
                 "spaceOwner", spaceOwner,
-                "createdDate", createdDate.toString(),
                 "isActive", ""+isActive,
+                "createdDate", createdDate.toString(),
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    /** get name of key attribute */
+    public static String getKeyAttributeName() {
+        return "spaceName";
+    }
 }

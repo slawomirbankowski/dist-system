@@ -14,72 +14,100 @@ import java.util.Map;
 public class DistAgentRegisterRow extends BaseRow {
 
     private String registerGuid;
-    private LocalDateTime createDate;
     private String agentGuid;
     private String hostName;
     private String hostIp;
     private int portNumber;
     private LocalDateTime lastPingDate;
-
-    protected int isActive;
+    private long pingsCount;
+    private long agentsConnected;
+    private long threadsCount;
+    private long servicesCount;
+    private long serversCount;
+    private long clientsCount;
+    protected LocalDateTime closeDate;
+    private int isActive;
     protected LocalDateTime createdDate;
     protected LocalDateTime lastUpdatedDate;
 
-    private int active;
-
-    public DistAgentRegisterRow() {
-    }
-    public DistAgentRegisterRow(LocalDateTime createDate, String agentGuid, String hostName, String hostip, int portnumber, LocalDateTime lastpingdate, int active) {
-        this.registerGuid = DistUtils.generateCustomGuid("REGISTER");
-        this.createDate = createDate;
+    public DistAgentRegisterRow(String registerGuid, String agentGuid, String hostName, String hostip, int portnumber, LocalDateTime lastpingdate, LocalDateTime closeDate, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
+        this.registerGuid = registerGuid;
         this.agentGuid = agentGuid;
         this.hostName = hostName;
         this.hostIp = hostip;
         this.portNumber = portnumber;
         this.lastPingDate = lastpingdate;
-        this.active = active;
+        this.pingsCount = 0L;
+        this.agentsConnected = 0L;
+        this.threadsCount = 0L;
+        this.servicesCount = 0L;
+        this.serversCount = 0L;
+        this.clientsCount = 0L;
+        this.isActive = isActive;
+        this.closeDate = closeDate;
+        this.createdDate = createdDate;
+        this.lastUpdatedDate = lastUpdatedDate;
+    }
+    public DistAgentRegisterRow(String agentGuid, String hostName, String hostip, int portnumber) {
+        this.registerGuid = DistUtils.generateCustomGuid("REGISTER");
+        this.agentGuid = agentGuid;
+        this.hostName = hostName;
+        this.hostIp = hostip;
+        this.portNumber = portnumber;
+        this.lastPingDate = LocalDateTime.now();
+        this.pingsCount = 0L;
+        this.agentsConnected = 0L;
+        this.threadsCount = 0L;
+        this.servicesCount = 0L;
+        this.serversCount = 0L;
+        this.clientsCount = 0L;
+        this.closeDate = LocalDateTime.of(2049, 12, 31, 23, 59);
+        this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
+        this.lastUpdatedDate = LocalDateTime.now();
     }
 
     /** */
     public void deactivate() {
-        active = 0;
+        isActive = 0;
     }
     /** */
     public AgentSimplified toSimplified() {
         return new AgentSimplified(agentGuid, hostName, hostIp, portNumber, lastPingDate);
     }
     public Map<String, String> toMap() {
-        if (active ==0) {
+        if (isActive ==0) {
             return Map.of("type", "agent",
-                    "isactive", ""+ active,
+                    "isactive", ""+ isActive,
                     "agentguid", agentGuid,
                     "hostname", hostName,
                     "hostip", hostIp,
                     "portnumber", "" + portNumber,
                     "lastpingdate", lastPingDate.toString(),
-                    "createDate", createDate.toString(),
                     "closedate", LocalDateTime.now().toString());
         } else {
             return Map.of("type", "agent",
-                    "isactive", ""+ active,
+                    "isactive", ""+ isActive,
                     "agentguid", agentGuid,
                     "hostname", hostName,
                     "hostip", hostIp,
                     "portnumber", "" + portNumber,
-                    "lastpingdate", lastPingDate.toString(),
-                    "createDate", createDate.toString());
+                    "lastpingdate", lastPingDate.toString());
         }
     }
     public static DistAgentRegisterRow fromMap(Map<String, Object> map) {
         AdvancedMap m = new AdvancedMap(map, true);
         return new DistAgentRegisterRow(
-                m.getLocalDateOrNow("createDate"),
-                m.getString("agentguid", ""),
-                m.getString("hostname", ""),
-                m.getString("hostip", ""),
-                m.getInt("portnumber", 8085),
-                m.getLocalDateOrNow("lastpingdate"),
-                m.getInt("isactive", 1)
+                m.getString("registerGuid", ""),
+                m.getString("agentGuid", ""),
+                m.getString("hostName", ""),
+                m.getString("hostIp", ""),
+                m.getInt("portNumber", 8085),
+                m.getLocalDateOrNow("lastPingDate"),
+                m.getLocalDateOrNull("closeDate"),
+                m.getInt("isActive", 1),
+                m.getLocalDateOrNow("createdDate"),
+                m.getLocalDateOrNow("lastUpdatedDate")
         );
     }
     public void ping(LocalDateTime pingdate) {
@@ -101,36 +129,45 @@ public class DistAgentRegisterRow extends BaseRow {
         return lastPingDate;
     }
     public int getActive() {
-        return active;
+        return isActive;
     }
-
     public String getRegisterGuid() {
         return registerGuid;
     }
-
-    public LocalDateTime getCreateDate() {
-        return createDate;
-    }
-
-
-    public int getIsActive() {
-        return isActive;
-    }
-
-
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
-
-
     public LocalDateTime getLastUpdatedDate() {
         return lastUpdatedDate;
     }
 
-    public Object[] toInsertRow() {
-        return new Object[] { registerGuid, createDate, agentGuid, hostName, hostIp, portNumber, lastPingDate, active };
+    public long getPingsCount() {
+        return pingsCount;
+    }
+    public long getAgentsConnected() {
+        return agentsConnected;
+    }
+    public long getThreadsCount() {
+        return threadsCount;
+    }
+    public long getServicesCount() {
+        return servicesCount;
+    }
+    public long getServersCount() {
+        return serversCount;
+    }
+    public long getClientsCount() {
+        return clientsCount;
+    }
+    public int getIsActive() {
+        return isActive;
     }
 
+    public Object[] toInsertRow() {
+        return new Object[] { registerGuid, agentGuid, hostName, hostIp, portNumber, lastPingDate,
+                pingsCount, agentsConnected, threadsCount, servicesCount, serversCount, clientsCount,
+                closeDate, isActive, createdDate, lastUpdatedDate };
+    }
 
     public String toString() {
         return "agentguid=" + agentGuid + ", hostname=" + hostName + ", hostip=" + hostIp + ", portnumber=" + portNumber + ", lastpingdate=" + lastPingDate + "";

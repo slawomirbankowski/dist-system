@@ -27,6 +27,9 @@ public interface AgentRegistrations extends DistService {
     /** get information infos about registration objects */
     List<AgentRegistrationInfo> getRegistrationInfos();
 
+    /** get all registrations */
+    List<Registration> getRegistrations();
+
     /** get all servers from registration services */
     List<DistAgentServerRow> getServers();
 

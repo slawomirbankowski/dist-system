@@ -206,7 +206,7 @@ public class RegistrationKafka extends RegistrationBase {
     }
 
     /** get all shared reports */
-    public List<DistAgentStorageRow> getReports() {
+    public List<DistAgentReportRow> getReports() {
         return List.of();
     }
     /** get all shared report names */

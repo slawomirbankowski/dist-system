@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  *
  * */
-@DaoTable(tableName="DistAgentAuthDomain", keyName="domainName", keyIsUnique=true)
 public class DistAgentAuthDomainRow extends BaseRow {
 
     private final String domainName;
@@ -62,8 +61,9 @@ public class DistAgentAuthDomainRow extends BaseRow {
         return lastUpdatedDate;
     }
 
+    /** insert row for distagentauthdomain */
     public Object[] toInsertRow() {
-        return new Object[] { domainName, domainDescription, domainAttributes, isActive, createdDate };
+        return new Object[] {domainName,domainDescription,domainAttributes,isActive,createdDate,lastUpdatedDate};
     }
 
     public Map<String, String> toMap() {
