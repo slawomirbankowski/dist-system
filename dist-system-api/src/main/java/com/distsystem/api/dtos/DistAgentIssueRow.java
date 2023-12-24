@@ -92,7 +92,10 @@ public class DistAgentIssueRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { issueGuid, agentGuid, methodName, exceptionClass, exceptionMessage, exceptionSerialized, JsonUtils.serialize(params)};
+        return new Object[] { issueGuid, agentGuid, methodName, exceptionClass, exceptionMessage,
+                exceptionSerialized, JsonUtils.serialize(params),
+                isActive, createdDate, lastUpdatedDate
+        };
     }
 
 

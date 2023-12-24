@@ -1,6 +1,7 @@
 package com.distsystem.interfaces;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.info.AgentDaoInfo;
 import com.distsystem.api.info.AgentDaoSimpleInfo;
 
@@ -22,6 +23,8 @@ public interface Dao {
     boolean closeDao();
     /** get info about DAO */
     AgentDaoInfo getInfo();
+    /** create row for DAO */
+    DistAgentDaoRow toRow();
     /** get simple info */
     AgentDaoSimpleInfo getSimpleInfo();
     /** get unique ID of this DAO */

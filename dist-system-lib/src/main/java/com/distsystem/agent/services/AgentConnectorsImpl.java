@@ -67,6 +67,10 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
         return DistServiceType.connectors;
     }
 
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Servers to direct communication between Agents.";
+    }
     /** count objects in this agentable object including this object */
     public long countObjectsService() {
         // TODO: calculate counts of objects

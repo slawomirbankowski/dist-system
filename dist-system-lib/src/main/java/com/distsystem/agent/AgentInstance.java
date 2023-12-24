@@ -14,6 +14,7 @@ import com.distsystem.serializers.ComplexSerializer;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistMessageProcessor;
 import com.distsystem.utils.DistWebApiProcessor;
+import com.distsystem.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +150,10 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     public DistServiceType getServiceType() {
         return DistServiceType.agent;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
     /** create new service UID for this service */
     protected String createGuid() {
         agentShortGuid = DistUtils.generateShortGuid();
@@ -160,7 +165,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** get row for registration services */
     public DistAgentServiceRow getServiceRow() {
-        return new DistAgentServiceRow(getAgentGuid(), getAgentGuid(), getServiceType().name(), createDate, (closed)?0:1, LocalDateTime.now());
+        return new DistAgentServiceRow(getAgentGuid(), getAgentGuid(), getServiceType().name(), JsonUtils.serialize(getServiceInfo()), createDate, (closed)?0:1, LocalDateTime.now());
     }
     /** get distributed group name */
     public String getDistGroup() {
@@ -190,6 +195,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
                 .addHandlerGet("agent-start-time", (m, req) -> req.responseOkText(""+agentStartTime))
                 .addHandlerGet("agent-name", (m, req) -> req.responseOkText(agentName))
                 .addHandlerGet("agent-short-guid", (m, req) -> req.responseOkText(""+agentShortGuid))
+                .addHandlerGet("services", (m, req) -> req.responseOkText(services.getServiceDescriptions()))
                 .addHandlerGet("endpoints", (m, req) -> req.responseOkJsonSerialize(listAllEndpoints()))
                 .addHandlerGet("endpoints-text", (m, req) -> req.responseOkText(listAllEndpoints().stream().collect(Collectors.joining("\n"))))
                 .addHandlerGet("info", createJsonHandler(param -> getAgentInfo()))
@@ -225,7 +231,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     /** list all endpoints for all services */
     public String welcomeMessage() {
         try {
-            String txt = new String(this.getClass().getResourceAsStream("/welcome.txt").readAllBytes());
+            String txt = new String(this.getClass().getResourceAsStream("/welcome.html").readAllBytes());
             return config.getResolverManager().resolve(txt);
         } catch (Exception ex) {
             log.info("Cannot read resource as stream, reason: " + ex.getMessage(), ex);
@@ -546,6 +552,8 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** get single value for a key */
     public Optional<String> getValue(String key) {
+        log.info("Resolve using agent, key: " + key);
+
         return Optional.of(webApiProcessor.handleSimpleRequest(key).getContent());
     }
     /** get all known keys */

@@ -40,6 +40,10 @@ public class AgentStoragesImpl extends ServiceBase implements Storages {
     public DistServiceType getServiceType() {
         return DistServiceType.storage;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
     /** read configuration and re-initialize this component */
     protected boolean onReinitialize() {
         registerConfigGroup(DistConfig.AGENT_STORAGE_OBJECT);

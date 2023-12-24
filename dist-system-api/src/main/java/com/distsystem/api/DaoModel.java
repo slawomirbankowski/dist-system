@@ -10,19 +10,24 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** model */
+/** model for DAO storage representing one entity */
 public class DaoModel<T extends BaseRow> {
     protected static final Logger log = LoggerFactory.getLogger(DaoModel.class);
 
+    /** class of this entity that should be serialized into single row*/
     private final Class<T> modelClass;
+    /** name of table or storage object to keep these rows */
     private final String tableName;
+    /** name of key column that should be unique to get objects */
     private final String keyName;
 
+    /** JDBC SQL query to get all rows from DB table */
     private final String selectAllQuery;
     private final String selectAllActiveQuery;
     private final String selectAllDescQuery;
     private final String selectByNameQuery;
     private final String insertQuery;
+    private final String insertQueryNoConflict;
     private final String updateByKeyQuery;
 
     private boolean keyIsUnique;
@@ -34,7 +39,6 @@ public class DaoModel<T extends BaseRow> {
 
     public DaoModel(Class<T> modelClass) {
         this.modelClass = modelClass;
-        log.info("modelClass: " + modelClass.getName());
         this.columns = calculateColumns(modelClass);
         this.columnTypes = Map.of();
         this.columnList = columns.stream().collect(Collectors.joining(","));
@@ -56,6 +60,7 @@ public class DaoModel<T extends BaseRow> {
         this.selectByNameQuery = "select * from " + tableName + " where " + keyName + "=?";
         String questionList = columns.stream().map(x -> "?").collect(Collectors.joining(","));
         this.insertQuery = "insert into " + tableName + "(" + columnList + ") values (" + questionList + ")";
+        this.insertQueryNoConflict = insertQuery + " on conflict do nothing";
         this.updateByKeyQuery = "update " + tableName + " set columns...=? where " + keyName + "=?";
         this.deleteOldQuery = "delete from " + tableName + " where createdDate<?";
         this.deleteByKeyQuery = "delete from " + tableName + " where " + keyName + "=?";
@@ -123,6 +128,9 @@ public class DaoModel<T extends BaseRow> {
     }
     public String getInsertQuery() {
         return insertQuery;
+    }
+    public String getInsertQueryNoConflict() {
+        return insertQueryNoConflict;
     }
     public String getDeleteOldQuery() {
         return deleteOldQuery;
@@ -232,6 +240,7 @@ public class DaoModel<T extends BaseRow> {
     public static final DaoModel<DistAgentEventRow> event = new DaoModel<>(DistAgentEventRow.class);
     public static final DaoModel<DistAgentIssueRow> issue = new DaoModel<>(DistAgentIssueRow.class);
     public static final DaoModel<DistAgentMeasureRow> measure = new DaoModel<>(DistAgentMeasureRow.class);
+    public static final DaoModel<DistAgentMemoryRow> memory = new DaoModel<>(DistAgentMemoryRow.class);
     public static final DaoModel<DistAgentMonitorCheckRow> monitorCheck = new DaoModel<>(DistAgentMonitorCheckRow.class);
     public static final DaoModel<DistAgentMonitorRow> monitor = new DaoModel<>(DistAgentMonitorRow.class);
     public static final DaoModel<DistAgentNotificationRow> notification = new DaoModel<>(DistAgentNotificationRow.class);
@@ -248,14 +257,12 @@ public class DaoModel<T extends BaseRow> {
     public static final DaoModel<DistAgentSpaceRow> space = new DaoModel<>(DistAgentSpaceRow.class);
     public static final DaoModel<DistAgentStorageRow> storage = new DaoModel<>(DistAgentStorageRow.class);
 
-    public static final List<DaoModel> allModels = List.of(authAccount, authDomain, authIdentity, authKey, authRole);
-
     private static List<DaoModel> gatherAllModels() {
         return Arrays.stream(DaoModel.class.getDeclaredFields())
                 .filter(f -> f.getType().getSimpleName().equals("DaoModel") && Modifier.isStatic(f.getModifiers()))
                 .flatMap(f -> {
                     try {
-                        log.warn("Field, name=" + f.getName() + ", m=" + f.getModifiers() + ", t=" + f.getType().getName() + ", TABLE=" + ((DaoModel)f.get(null)).getTableName());
+                        log.debug("Field, name=" + f.getName() + ", m=" + f.getModifiers() + ", t=" + f.getType().getName() + ", TABLE=" + ((DaoModel)f.get(null)).getTableName());
                         return Optional.of(((DaoModel)f.get(null))).stream();
                     } catch (Exception ex) {
                         log.warn("Exception: " + ex.getMessage());

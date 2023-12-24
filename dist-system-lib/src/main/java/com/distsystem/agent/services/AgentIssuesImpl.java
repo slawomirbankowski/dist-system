@@ -38,6 +38,10 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
     public DistServiceType getServiceType() {
         return DistServiceType.issues;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Keep all issues like errors, exceptions from Agent.";
+    }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {

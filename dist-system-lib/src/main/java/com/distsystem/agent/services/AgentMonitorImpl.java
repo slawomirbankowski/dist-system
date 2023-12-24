@@ -29,6 +29,10 @@ public class AgentMonitorImpl extends ServiceBase implements AgentMonitor {
     public DistServiceType getServiceType() {
         return DistServiceType.monitor;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {

@@ -1,4 +1,4 @@
-package com.distsystem.test.custom;
+package com.distsystem.test.custom.utils;
 
 import com.distsystem.api.enums.DistClientType;
 import com.distsystem.api.enums.DistMessageType;

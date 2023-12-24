@@ -24,6 +24,8 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     private final HashMap<String, DistService> services = new HashMap<>();
     /** policy to add cache Objects to storages and changing mode, ttl, priority, tags */
     protected CachePolicy policy;
+    private DistWebApiProcessor emptyServiceWebApiProcessor = new DistWebApiProcessor("")
+            .addHandlerGet("", (m, req) -> req.responseOkText(parentAgent.welcomeMessage()));
 
     /** creates service manager for agent with parent agent assigned */
     public AgentServicesImpl(Agent parentAgent) {
@@ -95,6 +97,10 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     /** get types of registered services */
     public List<String> getServiceTypes() {
         return services.keySet().stream().sorted().toList();
+    }
+    /** get description of all registered services */
+    public String getServiceDescriptions() {
+        return services.values().stream().map(s -> s.getServiceType().name() + " - " + s.getServiceDescription()).collect(Collectors.joining("\n"));
     }
     /** initialize all known services */
     public List<String> initializeAllPossible() {
@@ -188,11 +194,13 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
         DistService service = services.get(request.getServiceName());
         if (service != null) {
             return service.handleRequest(request);
-        } else if (request.getServiceName().equals("")) {
-            return parentAgent.handleRequest(request);
         } else {
-            //  no service found, returning 404
-            return new AgentWebApiResponse(404, AgentWebApiRequest.headerText, "No service for name: " + request.getServiceName());
+            if (request.getServiceName().equals("")) {
+                return emptyServiceWebApiProcessor.handleRequest(request);
+            } else {
+                //  no service found, returning 404
+                return new AgentWebApiResponse(404, AgentWebApiRequest.headerText, "No service for name: " + request.getServiceName());
+            }
         }
     }
     /** close */
@@ -202,6 +210,10 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     @Override
     public DistServiceType getServiceType() {
         return DistServiceType.services;
+    }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
     }
 
 }

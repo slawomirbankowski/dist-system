@@ -143,6 +143,8 @@ public class DistFactory {
         return buildPropertiesFactory(cacheCfg.getProperties());
     }
 
+    /** unique identifier for factory */
+    private final String distFactoryGuid = DistUtils.generateCustomTimeGuid("factory");
     /** cache properties for factory */
     private final Properties props = new Properties();
     /** callbacks for events - methods (values) to call when there is event of given type (keys) */
@@ -180,7 +182,7 @@ public class DistFactory {
     public Agent createAgentInstance() {
         Runtime rt = Runtime.getRuntime();
         long memoryBefore = rt.maxMemory()-rt.freeMemory();
-        log.info("New Agent to be created...., free: " + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory());
+        log.info("New Agent to be created...., factory GUID: " + distFactoryGuid+ ", free: " + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory());
         long startTime = System.currentTimeMillis();
         DistConfig config = new DistConfig(props, resolver);
         AgentInstance agent = new AgentInstance(config, callbacks, serializers, policy, daos);
@@ -194,6 +196,7 @@ public class DistFactory {
     }
     /** set type and name of the environment */
     public DistFactory withEnvironment(DistEnvironmentType envType, String envName) {
+        log.debug("Set environment for DistFactory, factory GUID: " + distFactoryGuid+ ", envType:" + envType.name());
         props.setProperty(DistConfig.AGENT_ENVIRONMENT_TYPE, envType.name());
         props.setProperty(DistConfig.AGENT_ENVIRONMENT_NAME, envName);
         return this;
@@ -205,7 +208,7 @@ public class DistFactory {
 
     /** add all ENV variables to agent configuration */
     public DistFactory withEnvironmentVariables() {
-        log.debug("Adding ENV variables " + System.getenv().size() + " to DistConfig");
+        log.debug("Adding ENV variables for DistFactory, factory GUID: " + distFactoryGuid+ ", ENV size:" + System.getenv().size());
         for (Map.Entry<String, String> e : System.getenv().entrySet()) {
             props.setProperty(e.getKey(), e.getValue());
         }
@@ -213,6 +216,7 @@ public class DistFactory {
     }
     /** add new command line arguments to Dist properties */
     public DistFactory withCommandLineArguments(String[] args) {
+        log.debug("Adding CMD line arguments for DistFactory, guid: " + distFactoryGuid + ", arguments: " + args.length);
         String currentProperty = null;
         List<String> currentValues = new LinkedList<>();
         for (int i=0; i<args.length; i++) {
@@ -231,6 +235,7 @@ public class DistFactory {
     }
     /** add friendly name for this distributed system - it would be any name that would be visible in logs, via REST endpoints */
     public DistFactory withUniverseName(String name) {
+        log.debug("Set universe name to DistFactory, guid: " + distFactoryGuid + ", name: " + name);
         props.setProperty(DistConfig.AGENT_UNIVERSE, name);
         return this;
     }
@@ -241,6 +246,7 @@ public class DistFactory {
     /** add friendly name for this agent - it would be any name that would be visible in logs, via REST endpoints
      * name should be unique, but it is not a must */
     public DistFactory withAgentName(String name) {
+        log.debug("Set agent name to DistFactory, guid: " + distFactoryGuid + ", name: " + name);
         props.setProperty(DistConfig.AGENT_NAME, name);
         return this;
     }
@@ -250,11 +256,13 @@ public class DistFactory {
     }
     /** */
     public DistFactory withAgentParentApplication(String applicationName) {
+        log.debug("Set application name to DistFactory, guid: " + distFactoryGuid + ", name: " + applicationName);
         props.setProperty(DistConfig.AGENT_PARENT_APPLICATION, applicationName);
         return this;
     }
     /** script with all agent properties */
     public DistFactory withScript(String multiLineSettingsScript) {
+        log.debug("Set Script name to DistFactory, guid: " + distFactoryGuid + ", size: " + multiLineSettingsScript.length());
         Arrays.stream(multiLineSettingsScript.split("\\n")).forEach(line -> {
             DistUtils.splitBySeparationEqual(line, ";", '=', true).forEach(nameValue -> {
                 props.setProperty(nameValue[0], nameValue[1]);
@@ -265,6 +273,7 @@ public class DistFactory {
 
     /** add common properties for this cache/machine/agent/address/path */
     public DistFactory withCommonProperties() {
+        log.debug("Add common properties to DistFactory, guid: " + distFactoryGuid + ", host: " + DistUtils.getCurrentHostName());
         props.setProperty(DistConfig.AGENT_GLOBAL_GUID, DistUtils.getGuid());
         props.setProperty(DistConfig.AGENT_HOST_NAME, DistUtils.getCurrentHostName());
         props.setProperty(DistConfig.AGENT_HOST_ADDRESS, DistUtils.getCurrentHostAddress());
@@ -275,9 +284,11 @@ public class DistFactory {
     /** add simple property */
     public DistFactory withProperty(String name, String value) {
         props.setProperty(name, value);
+        log.debug("Add single property to DistFactory, guid: " + distFactoryGuid + ", name: " + name);
         return this;
     }
     public DistFactory withProperties(Properties initialFactoryProperties) {
+        log.debug("Add many properties to DistFactory, guid: " + distFactoryGuid + ", size: " + initialFactoryProperties.size());
         for (Map.Entry<Object, Object> e: initialFactoryProperties.entrySet()) {
             props.setProperty(e.getKey().toString(), e.getValue().toString());
         }
@@ -285,6 +296,7 @@ public class DistFactory {
     }
     /** with map of properties */
     public DistFactory withMap(Map<String, String> initialFactoryProperties) {
+        log.debug("Add Map with properties to DistFactory, guid: " + distFactoryGuid + ", size: " + initialFactoryProperties.size());
         for (Map.Entry<String, String> e: initialFactoryProperties.entrySet()) {
             props.setProperty(e.getKey(), e.getValue());
         }
@@ -292,12 +304,14 @@ public class DistFactory {
     }
     /** add JSON with properties */
     public DistFactory withJson(String jsonDefinition) {
+        log.debug("Add JSON with properties map to DistFactory, guid: " + distFactoryGuid + ", size: " + jsonDefinition.length());
         Map<String, String> map = JsonUtils.deserialize(jsonDefinition, new TypeReference<Map<String, String>>() {});
         return withMap(map);
     }
     /** add properties from file with properties format */
     public DistFactory withPropertiesFile(String propertiesFile) {
         try {
+            log.debug("Add file with properties map to DistFactory, guid: " + distFactoryGuid + ", fileName: " + propertiesFile);
             Properties propFromFile = new Properties();
             propFromFile.load(new java.io.FileReader(propertiesFile));
             props.putAll(propFromFile);
@@ -311,6 +325,7 @@ public class DistFactory {
     /** load properties from URL in properties format */
     public DistFactory withPropertiesUrl(String urlWithProperties) {
         try {
+            log.debug("Add URL with properties map to DistFactory, guid: " + distFactoryGuid + ", URL: " + urlWithProperties);
             Properties propFromUrl = new Properties();
             URL conn = new URL(urlWithProperties);
             propFromUrl.load(conn.openConnection().getInputStream());
@@ -323,30 +338,42 @@ public class DistFactory {
 
     /** with resolver to resolve values form String  */
     public DistFactory withResolver(Resolver r) {
+        log.debug("Add resolver to DistFactory, guid: " + distFactoryGuid + ", resolver: " + r.getClass().getName());
         resolver.addResolver(r);
         return this;
     }
     public DistFactory withResolverFromMap(Map<String, String> map) {
+        log.debug("Add resolver from Map to DistFactory, guid: " + distFactoryGuid + ", map size: " + map.size());
         resolver.addResolver(new MapResolver(map));
         return this;
     }
     public DistFactory withResolverFromMethod(Function<String, Optional<String>> method) {
+        log.debug("Add resolver from Method to DistFactory, guid: " + distFactoryGuid + ", method class " + method.getClass().getName());
         resolver.addResolver(new MethodResolver(method));
         return this;
     }
     public DistFactory withResolverFromKeyValue(Map<String, String> map) {
+        log.debug("Add resolver from KeyValue to DistFactory, guid: " + distFactoryGuid + ", map size: " + map.size());
         resolver.addResolver(new MapResolver(map));
         return withResolverFromMap(Map.of());
     }
     /** set tags to Agent for better identification */
     public DistFactory withAgentTags(Set<String> tags) {
+        log.debug("Set tags name to DistFactory, guid: " + distFactoryGuid + ", tags: " + tags.size());
         props.setProperty(DistConfig.AGENT_TAGS, String.join(";", tags));
         return this;
     }
 
     /** define port for Web Api */
     public DistFactory withWebApiPort(int port) {
+        log.debug("Set Web API port to DistFactory, guid: " + distFactoryGuid + ", port: " + port);
         props.setProperty(DistConfig.AGENT_API_PORT, ""+port);
+        return this;
+    }
+    /** define port for Web Api */
+    public DistFactory withWebApiPort(String port) {
+        log.debug("Set Web API port to DistFactory, guid: " + distFactoryGuid + ", port: " + port);
+        props.setProperty(DistConfig.AGENT_API_PORT, port);
         return this;
     }
     /** set Web API port to default value */
@@ -356,12 +383,14 @@ public class DistFactory {
 
     /** set default serializers */
     public DistFactory withSerializerDefault() {
+        log.debug("Set default serializer to DistFactory, guid: " + distFactoryGuid);
         props.setProperty(DistConfig.AGENT_SERIALIZER_DEFINITION, DistConfig.AGENT_SERIALIZER_DEFINITION_SERIALIZABLE_VALUE);
         serializers.putAll(ComplexSerializer.parseSerializers(DistConfig.AGENT_SERIALIZER_DEFINITION_SERIALIZABLE_VALUE));
         return this;
     }
     /** definition of serializer from String */
     public DistFactory withSerializer(String serializerDefinition) {
+        log.debug("Set serializer to DistFactory, guid: " + distFactoryGuid + ", definition: " + serializerDefinition);
         serializers.putAll(ComplexSerializer.parseSerializers(serializerDefinition));
         props.setProperty(DistConfig.AGENT_SERIALIZER_DEFINITION, serializerDefinition);
         return this;
@@ -392,20 +421,24 @@ public class DistFactory {
 
     /** add DAO for given name with JDBC url, driver, user and password */
     public DistFactory withDaoJdbc(String name, String url, String driver, String user, String pass) {
+        log.debug("Set JDBC DAO to DistFactory, guid: " + distFactoryGuid + ", name: " + name + ", url: " + url);
         daos.put(name, DaoParams.jdbcParams(url, driver, user, pass));
         return this;
     }
     public DistFactory withDaoElastic(String name, String url, String user, String pass) {
+        log.debug("Set Elasticsearch DAO to DistFactory, guid: " + distFactoryGuid + ", name: " + name + ", url: " + url);
         daos.put(name, DaoParams.elasticsearchParams(url, user, pass));
         return this;
     }
     public DistFactory withDaoKafka(String name, String brokers, String topicName, int numPartitions, short replicationFactor) {
+        log.debug("Set Kafka DAO to DistFactory, guid: " + distFactoryGuid + ", name: " + name + ", brokers: " + brokers);
         daos.put(name, DaoParams.kafkaParams(brokers, numPartitions, replicationFactor));
         return this;
     }
 
     /** add registration method as JDBC */
     public DistFactory withRegistrationJdbc(String url, String driver, String user, String pass) {
+        log.debug("Set JDBC Registration to DistFactory, guid: " + distFactoryGuid + ", url: " + url);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_URL, url);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_DRIVER, driver);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_USER, user);
@@ -415,6 +448,7 @@ public class DistFactory {
 
     /** add registration method as JDBC */
     public DistFactory withRegistrationJdbcFromEnv() {
+        log.debug("Set JDBC Registration from ENV to DistFactory, guid: " + distFactoryGuid);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_URL, "${JDBC_URL}");
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_DRIVER, "${JDBC_DRIVER}");
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_JDBC_USER, "${JDBC_USER}");
@@ -423,6 +457,7 @@ public class DistFactory {
     }
     /** add URL for Dist standalone application */
     public DistFactory withRegisterApplication(String cacheAppUrl) {
+        log.debug("Set APP Registration to DistFactory, guid: " + distFactoryGuid + ", url: " + cacheAppUrl);
         props.setProperty(DistConfig.AGENT_CACHE_APPLICATION_URL, cacheAppUrl);
         return this;
     }
@@ -433,12 +468,14 @@ public class DistFactory {
     }
     /** add registration with Elasticsearch */
     public DistFactory withRegistrationElasticsearch(String url, String user, String pass) {
+        log.debug("Set Elasticsearch Registration to DistFactory, guid: " + distFactoryGuid + ", url: " + url);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_URL, url);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_USER, user);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_PASS, pass);
         return this;
     }
     public DistFactory withRegistrationElasticsearchFromEnvironment() {
+        log.debug("Set Elasticsearch Registration from ENV to DistFactory, guid: " + distFactoryGuid);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_URL, "${ELASTICSEARCH_URL}");
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_USER, "${ELASTICSEARCH_USER}");
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_ELASTICSEARCH_PASS, "${ELASTICSEARCH_PASS}");
@@ -446,10 +483,20 @@ public class DistFactory {
     }
     /** add registration through Kafka topic */
     public DistFactory withRegistrationKafka(String brokers, String topicName, int numPartitions, short replicationFactor) {
+        log.debug("Set Kafka Registration to DistFactory, guid: " + distFactoryGuid + ", brokers: " + brokers);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_BROKERS, brokers);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_TOPIC, topicName);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_PARTITIONS, ""+numPartitions);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION, ""+replicationFactor);
+        return this;
+    }
+    /** add registration through Kafka topic */
+    public DistFactory withRegistrationKafka(String brokers, String topicName, String numPartitions, String replicationFactor) {
+        log.debug("Set Kafka Registration to DistFactory, guid: " + distFactoryGuid + ", brokers: " + brokers);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_BROKERS, brokers);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_TOPIC, topicName);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_PARTITIONS, numPartitions);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION, replicationFactor);
         return this;
     }
     public DistFactory withRegistrationKafka(String brokers, String topicName) {
@@ -467,8 +514,15 @@ public class DistFactory {
         return withRegistrationKafka(brokers, DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_TOPIC_DEFAULT_VALUE);
     }
     public DistFactory withRegistrationMongodb(String host, int port) {
+        log.debug("Set MongoDB Registration to DistFactory, guid: " + distFactoryGuid + ", host: " + host);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_HOST, host);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PORT, ""+port);
+        return this;
+    }
+    public DistFactory withRegistrationMongodb(String host, String port) {
+        log.debug("Set MongoDB Registration to DistFactory, guid: " + distFactoryGuid + ", host: " + host);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_HOST, host);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PORT, port);
         return this;
     }
     /** add times to inactivate other agents that have no ping for more than time declared,
@@ -477,6 +531,11 @@ public class DistFactory {
     public DistFactory withRegisterCleanAfter(long inactivateWithoutPingMs, long deleteWithoutPingMs) {
         props.setProperty(DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER, ""+inactivateWithoutPingMs);
         props.setProperty(DistConfig.AGENT_CONNECTORS_DELETE_AFTER, ""+deleteWithoutPingMs);
+        return this;
+    }
+    public DistFactory withRegisterCleanAfter(String inactivateWithoutPingMs, String deleteWithoutPingMs) {
+        props.setProperty(DistConfig.AGENT_CONNECTORS_INACTIVATE_AFTER, inactivateWithoutPingMs);
+        props.setProperty(DistConfig.AGENT_CONNECTORS_DELETE_AFTER, deleteWithoutPingMs);
         return this;
     }
     public DistFactory withRegisterCleanAfterDefault() {
@@ -500,7 +559,13 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_REPLICATION, ""+replication);
         return this;
     }
-
+    public DistFactory withAuthStorageKafka(String brokers, String topic, String partitions, String replication) {
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_BROKERS, brokers);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_TOPIC, topic);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_PARTITIONS, partitions);
+        props.setProperty(DistConfig.AGENT_AUTH_STORAGE_KAFKA_REPLICATION, replication);
+        return this;
+    }
     /** define port for Socket communication */
     public DistFactory withServerSocketPort(int port) {
         props.setProperty(DistConfig.AGENT_CONNECTORS_SERVER_SOCKET_PORT, ""+port);

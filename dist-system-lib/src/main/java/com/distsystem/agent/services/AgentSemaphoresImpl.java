@@ -60,6 +60,10 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     public DistServiceType getServiceType() {
         return DistServiceType.semaphores;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
     /** lock semaphore */
     public synchronized boolean lock(String semaphoreName, long maxWaitingTime) {
         createEvent("lock");

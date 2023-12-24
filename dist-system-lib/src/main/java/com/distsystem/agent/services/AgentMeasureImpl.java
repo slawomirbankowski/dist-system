@@ -29,6 +29,10 @@ public class AgentMeasureImpl extends ServiceBase implements AgentMeasure {
     public DistServiceType getServiceType() {
         return DistServiceType.measure;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {

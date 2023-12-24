@@ -155,9 +155,10 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             return withConnection(conn -> {
                 try {
                     int updCnt = 0;
-                    log.debug("UPDATE QUERY, sql: " + sql + ", parameters count: " + params.size());
+                    log.debug("UPDATE QUERY, sql: " + sql + ", objects count: " + params.size());
                     PreparedStatement st = createStatement(conn, sql);
                     for (Object[] p : params) {
+                        log.debug("----> UPDATE QUERY, object params: " + p.length);
                         fillStatement(st, p);
                         updCnt += st.executeUpdate();
                     }
@@ -438,6 +439,9 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public <X extends BaseRow> int executeInsertRowForModel(DaoModel<X> model, X obj) {
         return executeUpdateQuery(model.getInsertQuery(), obj.toInsertRow());
     }
+    public <X extends BaseRow> int executeInsertRowForModelNoConflict(DaoModel<X> model, X obj) {
+        return executeUpdateQuery(model.getInsertQueryNoConflict(), obj.toInsertRow());
+    }
     /** insert full object to given table name */
     public <X extends BaseRow> int executeInsertRowsForModel(DaoModel<X> model, List<X> objs) {
         if (objs.isEmpty()) {
@@ -529,7 +533,7 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             if (obj instanceof java.util.Date) {
                 st.setTimestamp(i, new Timestamp(((java.util.Date) obj).getTime()));
             } else if (obj instanceof LocalDateTime) {
-                st.setTimestamp(i, new Timestamp(((LocalDateTime) obj).toEpochSecond(ZoneOffset.UTC)));
+                st.setTimestamp(i, Timestamp.valueOf((LocalDateTime) obj));
             } else {
                 st.setObject(i, obj);
             }

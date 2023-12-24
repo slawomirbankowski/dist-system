@@ -3,6 +3,7 @@ package com.distsystem.api;
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
+/** web api event */
 public class AgentWebApiEvent {
 
     private long requestSeq;

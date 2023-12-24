@@ -25,6 +25,10 @@ public class AgentSecurityImpl extends ServiceBase implements AgentSecurity {
     public DistServiceType getServiceType() {
         return DistServiceType.security;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
 
     /** update configuration of this Service */

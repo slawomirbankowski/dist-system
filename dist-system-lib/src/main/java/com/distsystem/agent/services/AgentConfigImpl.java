@@ -43,6 +43,10 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return DistServiceType.config;
     }
 
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Configuration reader service from various storages.";
+    }
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {
     }
@@ -52,7 +56,7 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()))
                 .addHandlerGet("keys", (m, req) -> req.responseOkJsonSerialize(getReaderKeys()))
-                .addHandlerGet("resolve", (m, req) -> req.responseOkText(resolveWithManager(req.getParamOne())))
+                .addHandlerGet("resolve", (m, req) -> req.responseOkText(resolveWithManager(req.getContentAsString())))
                 .addHandlerGet("property", (m, req) -> req.responseOkText(getProperty(req.getParamOne())))
                 .addHandlerPost("property", (m, req) -> req.responseOkText(setProperty(req.getParamOne(), req.getParamTwo())))
                 .addHandlerPost("properties", (m, req) -> req.responseOkJsonSerialize(setProperties(req.getContentAsString())))
@@ -70,6 +74,7 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
     }
     /** resolve given value info full value */
     protected String resolveWithManager(String value) {
+        log.info("Resolve value with ResolveManager, value: " + value);
         return getConfig().getResolverManager().resolve(value);
     }
     /** set single property and recalculate */

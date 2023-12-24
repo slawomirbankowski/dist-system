@@ -1,12 +1,14 @@
 package com.distsystem.base;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentDaoInfo;
 import com.distsystem.api.info.AgentDaoSimpleInfo;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Dao;
+import com.distsystem.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +75,11 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
     public AgentDaoInfo getInfo() {
         return new AgentDaoInfo(createDate, params.getKey(), params.getDaoType(), getUrl(), isConnected(), getDaoStructures());
     }
-
+    /** create row for DAO */
+    public DistAgentDaoRow toRow() {
+        return new DistAgentDaoRow(parentAgent.getAgentGuid(), guid, params.getDaoType().name(),
+                getUrl(), JsonUtils.serialize(getDaoStructures()));
+    }
     /** close this object */
     protected void onClose() {
         log.info("Closing object, nothing to be done here");

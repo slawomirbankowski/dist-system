@@ -13,15 +13,17 @@ public class DistAgentServiceRow extends BaseRow {
     private String agentGuid;
     private String serviceGuid;
     private String serviceType;
+    String serviceInfoJson;
     private LocalDateTime createdDate;
     private int isActive;
     private LocalDateTime lastPingDate;
     private LocalDateTime lastUpdatedDate;
 
-    public DistAgentServiceRow(String agentGuid, String serviceGuid, String serviceType, LocalDateTime createdDate, int isActive, LocalDateTime lastPingDate) {
+    public DistAgentServiceRow(String agentGuid, String serviceGuid, String serviceType, String serviceInfoJson, LocalDateTime createdDate, int isActive, LocalDateTime lastPingDate) {
         this.agentGuid = agentGuid;
         this.serviceGuid = serviceGuid;
         this.serviceType = serviceType;
+        this.serviceInfoJson = serviceInfoJson;
         this.createdDate = createdDate;
         this.isActive = isActive;
         this.lastPingDate = lastPingDate;
@@ -55,19 +57,27 @@ public class DistAgentServiceRow extends BaseRow {
         return lastPingDate;
     }
 
+    public String getServiceInfoJson() {
+        return serviceInfoJson;
+    }
+
+    public void setServiceInfoJson(String serviceInfoJson) {
+        this.serviceInfoJson = serviceInfoJson;
+    }
 
     public LocalDateTime getLastUpdatedDate() {
         return lastUpdatedDate;
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, serviceGuid, serviceType, createdDate, isActive, lastPingDate, lastUpdatedDate };
+        return new Object[] { agentGuid, serviceGuid, serviceType, serviceInfoJson, createdDate, isActive, lastPingDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "service",
                 "agentguid", agentGuid,
                 "serviceguid", serviceGuid,
                 "servicetype", serviceType,
+                "serviceInfoJson", serviceInfoJson,
                 "isactive", "" + isActive,
                 "createddate", createdDate.toString(),
                 "lastpingdate", lastPingDate.toString());

@@ -20,6 +20,8 @@ public class DistWebApiProcessor {
     protected static final Logger log = LoggerFactory.getLogger(DistWebApiProcessor.class);
     /** */
     private final DistServiceType servType;
+    /** */
+    private final String servName;
     /** key -> method with name like GET:/agent/info
      * value - method to process this Web Api Request */
     private final HashMap<String, AgentWebApiMethod> requestMethodHandlers = new HashMap<>();
@@ -32,6 +34,11 @@ public class DistWebApiProcessor {
 
     public DistWebApiProcessor(DistServiceType servType) {
         this.servType = servType;
+        this.servName = servType.name();
+    }
+    public DistWebApiProcessor(String servType) {
+        this.servType = DistServiceType.custom;
+        this.servName = servType;
     }
     /** get current number of request handler registered */
     public long getRequestHandlersCount() {
@@ -39,13 +46,13 @@ public class DistWebApiProcessor {
     }
     /** produce handler key from request method and service method */
     private String getHandlerKey(String requestMethod, String serviceMethod) {
-        return requestMethod + ":/" + servType.name() + "/" + serviceMethod;
+        return requestMethod + ":/" + servName + "/" + serviceMethod;
     }
     /** merge with another web api processor */
     public DistWebApiProcessor merge(DistWebApiProcessor processor) {
         int currentHandlers = requestMethodHandlers.size();
         requestMethodHandlers.putAll(processor.requestMethodHandlers);
-        log.trace("Merging processor with additional handlers, service: " + servType.name() + ", current handlers: " + currentHandlers +" with: " + processor.requestMethodHandlers.size() + ", final: " + requestMethodHandlers.size() + ", new keys: " + processor.requestMethodHandlers.keySet());
+        log.trace("Merging processor with additional handlers, service: " + servName + ", current handlers: " + currentHandlers +" with: " + processor.requestMethodHandlers.size() + ", final: " + requestMethodHandlers.size() + ", new keys: " + processor.requestMethodHandlers.keySet());
         return this;
     }
     /** register new method to process received messages */
@@ -109,7 +116,7 @@ public class DistWebApiProcessor {
             return res;
         } else {
             addEvent(req.getReqSeq(), req.getMethod(), req.getServiceMethod(), false, -1, 0);
-            return req.responseNotFoundMethod("Cannot find method in service: " + this.servType.name() + ", full key: " + fullMethodName + ", existing methods: " + getAllHandlersAsString());
+            return req.responseNotFoundMethod("Cannot find method in service: " + this.servType.name() + ", method: " + req.getMethod() + ", full key: " + fullMethodName + ", existing methods: " + getAllHandlersAsString());
         }
     }
     /** process message - find method and execute it */

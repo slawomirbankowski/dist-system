@@ -48,7 +48,10 @@ public class AgentApiImpl extends ServiceBase implements AgentApi {
     public DistServiceType getServiceType() {
         return DistServiceType.api;
     }
-
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Web API interface to access Agent through HTTP/HTTPs requests.";
+    }
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {
     }

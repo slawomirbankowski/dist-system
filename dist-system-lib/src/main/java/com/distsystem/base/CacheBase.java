@@ -61,6 +61,10 @@ public abstract class CacheBase extends ServiceBase implements Cache {
     public DistServiceType getServiceType() {
         return DistServiceType.cache;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Distributed cache with key-value storages.";
+    }
 
     /** get type of this component */
     public DistComponentType getComponentType() {

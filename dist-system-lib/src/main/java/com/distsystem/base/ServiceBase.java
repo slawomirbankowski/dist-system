@@ -218,7 +218,7 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** get row for registration services */
     public DistAgentServiceRow getServiceRow() {
         // String agentguid, String serverguid, String servicetype, LocalDateTime createddate, int isactive, LocalDateTime lastpingdate
-        return new DistAgentServiceRow(parentAgent.getAgentGuid(), getGuid(), getServiceType().name(), createDate, (closed)?0:1, LocalDateTime.now());
+        return new DistAgentServiceRow(parentAgent.getAgentGuid(), getGuid(), getServiceType().name(), JsonUtils.serialize(getServiceInfo()), createDate, (closed)?0:1, LocalDateTime.now());
     }
     /** add component to this service */
     public final void addComponent(AgentComponent component) {

@@ -54,6 +54,10 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     public DistServiceType getServiceType() {
         return DistServiceType.daos;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Data Access Object service to manage external connections and clients.";
+    }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {
@@ -159,6 +163,10 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     public List<AgentDaoInfo> getDaoInfos() {
         log.info("!!!!!!!!!!!!!!!!!!!! DAO info - current daos: " + daos.size());
         return daos.values().stream().map(d -> d.getInfo()).toList();
+    }
+    /** get all DAOs for all types */
+    public List<Dao> getAllDaos() {
+        return daos.values().stream().toList();
     }
     /** get DAO for key and class */
     public <T extends Dao> Optional<T> getOrCreateDao(Class<T> daoClass, DaoParams params) {

@@ -29,6 +29,10 @@ public class AgentNotificationImpl extends ServiceBase implements AgentNotificat
     public DistServiceType getServiceType() {
         return DistServiceType.notification;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {

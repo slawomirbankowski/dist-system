@@ -19,6 +19,8 @@ public interface DistService {
     LocalDateTime getCreateDate();
     /** get type of service: cache, measure, report, flow, space, ... */
     DistServiceType getServiceType();
+    /** get description of this service */
+    String getServiceDescription();
     /** get info object for configuration group used by this service */
     DistConfigGroupInfo getConfigGroupInfo();
     /** get info object for configuration group used by this service */
