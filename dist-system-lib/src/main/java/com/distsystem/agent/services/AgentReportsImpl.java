@@ -32,6 +32,10 @@ public class AgentReportsImpl extends ServiceBase implements AgentReports {
     public DistServiceType getServiceType() {
         return DistServiceType.report;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
 
     public List<String> getReportNames() {

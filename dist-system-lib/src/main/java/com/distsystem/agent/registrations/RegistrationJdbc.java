@@ -340,12 +340,13 @@ public class RegistrationJdbc extends RegistrationBase {
     /** add or edit query */
     public boolean addQuery(DistAgentQueryRow query) {
         dao.executeInsertRowForModel(DaoModel.query, query);
-        return false;
+        return true;
     }
 
     /** add DAO row */
-    public boolean addDao(DistAgentDaoRow dao) {
-        return false;
+    public boolean addDao(DistAgentDaoRow daoRow) {
+        dao.executeInsertRowForModel(DaoModel.dao, daoRow);
+        return true;
     }
 
     /** get all global resources for given type */

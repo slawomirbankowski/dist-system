@@ -6,7 +6,8 @@ Then, Agent is opening Servers for communication with other clients.
 Next, Agent is opening Web API for custom connections.
 The last - Agent is checking other Agent connected to Registration Services and
 
-Current agent is running on ${}
+Current agent is running on localhost.
+
 Each Agent has:
 - Registrations - global repository of agents, servers, clients, issues, events, configurations
 - Connectors - clients and servers to connect to other agents
@@ -24,10 +25,12 @@ Each Agent has:
 Agent is registering to
 
 ### Services
-Agent might be having many
+Agent might be having many services:
+${GET:/agent/services}
 
 ### API
 List of API endpoints:
+
 
 ### Cache
 Cache can be fully configured how to keep objects:

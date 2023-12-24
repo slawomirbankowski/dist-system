@@ -28,6 +28,10 @@ public class AgentSpaceImpl extends ServiceBase implements AgentSpace {
     public DistServiceType getServiceType() {
         return DistServiceType.space;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {

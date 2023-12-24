@@ -29,6 +29,10 @@ public class AgentMachineLearningImpl extends ServiceBase implements AgentMachin
     public DistServiceType getServiceType() {
         return DistServiceType.ml;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {

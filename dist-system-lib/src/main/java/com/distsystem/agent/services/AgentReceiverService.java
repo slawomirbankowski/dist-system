@@ -71,6 +71,10 @@ public class AgentReceiverService extends ServiceBase implements Receiver {
     public DistServiceType getServiceType() {
         return DistServiceType.receiver;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {

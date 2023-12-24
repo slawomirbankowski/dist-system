@@ -41,6 +41,8 @@ public interface AgentDao extends DistService {
     Map<String, Object> daoTest(String daoGuid);
     /** get DAO info objects for all initialized DAOs*/
     List<AgentDaoInfo> getDaoInfos();
+    /** get all DAOs for all types */
+    List<Dao> getAllDaos();
     /** register a function to produce DAO object for given key and parameters */
     void registerDaoProducer(String className, Function<DaoParams, Dao> producer);
     /** register a function to produce DAO object for given key and parameters */

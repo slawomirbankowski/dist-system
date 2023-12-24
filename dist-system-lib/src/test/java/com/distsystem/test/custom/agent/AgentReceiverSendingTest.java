@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.DistUtils;
+import com.distsystem.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,33 +20,30 @@ public class AgentReceiverSendingTest {
 
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
+                .withEnvironmentVariables()
                 .withWebApiPort(9999)
-                .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
+                .withRegistrationJdbcFromEnv()
                 .withServerSocketPort(9901)
-                .withTimerStorageClean(1000)
-                .withTimerRegistrationPeriod(1000)
-                .withTimerServerPeriod(1000)
+                .withTimerStorageClean(30000)
+                .withTimerRegistrationPeriod(30000)
+                .withTimerServerPeriod(30000)
                 .createAgentInstance();
-
-        Cache cache = agent1.getCache();
-        cache.getAgent();
-        agent1.getAgentInfo();
 
         Agent agent2 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
+                .withEnvironmentVariables()
                 .withWebApiPort(9998)
-                .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
-                        "cache_user", "${JDBC_PASS}")
+                .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withServerSocketPort(9902)
-                .withTimerStorageClean(1000)
-                .withTimerRegistrationPeriod(1000)
-                .withTimerServerPeriod(1000)
+                .withTimerStorageClean(30000)
+                .withTimerRegistrationPeriod(30000)
+                .withTimerServerPeriod(30000)
                 .createAgentInstance();
-
-
         int maxTime = 3;
         for (int t=0; t<maxTime; t++) {
-            log.info("TIME IS RUNNING................................ minutes: " + t + " of " + maxTime);
+            log.info("TIME IS RUNNING...... minutes: " + t + " of " + maxTime);
+            log.info(".............................. Agent1: " + JsonUtils.serialize(agent1.getAgentInfo()));
+            log.info(".............................. Agent2: " + JsonUtils.serialize(agent2.getAgentInfo()));
             DistUtils.sleep(60000);
         }
 

@@ -46,6 +46,8 @@ public interface Agent extends DistService, IssueHandler {
     Set<String> getAgentTags();
     /** get serializer/deserializer helper to serialize/deserialize objects when sending through connectors or saving to external storages */
     DistSerializer getSerializer();
+    /** get welcome message from Agent in text format */
+    String welcomeMessage();
     /** returns true if agent has been already closed */
     boolean isClosed();
     /** initialize agent - server, application, jdbc, kafka */

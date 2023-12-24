@@ -23,6 +23,8 @@ public interface AgentServices extends DistService {
 
     /** get number of services */
     int getServicesCount();
+    /** get description of all registered services */
+    String getServiceDescriptions();
     /** get keys of registered services */
     List<String> getServiceKeys();
     /** get types of registered services */

@@ -3,6 +3,7 @@ package com.distsystem.api;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+/** */
 public class AgentWebApiMethod {
 
     /** full key for this Web API method - GET:/service/method */

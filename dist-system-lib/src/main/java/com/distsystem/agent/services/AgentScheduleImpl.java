@@ -29,6 +29,10 @@ public class AgentScheduleImpl extends ServiceBase implements AgentSchedule {
     public DistServiceType getServiceType() {
         return DistServiceType.schedule;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {

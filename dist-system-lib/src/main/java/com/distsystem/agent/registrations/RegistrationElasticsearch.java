@@ -51,6 +51,7 @@ public class RegistrationElasticsearch extends RegistrationBase {
         log.info("Initializing of Elasticsearch registration with URL: " + elasticUrl + ", agent: " + parentAgent.getAgentGuid());
         elasticDao = parentAgent.getAgentDao().getOrCreateDaoOrError(DaoElasticsearchBase.class, DaoParams.elasticsearchParams(elasticUrl, elasticUser, elasticPass));
         elasticDao.usedByComponent(this);
+        elasticDao.toRow();
         // check connection to Elasticsearch, if needed - create index with default name
         log.info("Connected to Elasticsearch, url: " + elasticUrl + ", indices: " + elasticDao.getIndices().size() + ", agent: " + parentAgent.getAgentGuid());
         elasticDao.createIndicesWithCheck(Set.of(registerIndexName, serverIndexName, issueIndexName, serviceIndexName));

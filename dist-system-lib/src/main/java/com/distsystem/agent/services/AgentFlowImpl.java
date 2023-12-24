@@ -29,6 +29,10 @@ public class AgentFlowImpl extends ServiceBase implements AgentFlow {
     public DistServiceType getServiceType() {
         return DistServiceType.flow;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Flow service to control streams and data flows.";
+    }
 
 
     /** get custom map of info about service */

@@ -50,6 +50,10 @@ public class AgentEventsImpl extends ServiceBase implements AgentEvents {
     public DistServiceType getServiceType() {
         return DistServiceType.events;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Service to register events from Agent to check what was happening.";
+    }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {

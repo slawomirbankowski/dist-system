@@ -21,7 +21,7 @@ public class AgentRegisterJdbcTest {
 
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
-                .withWebApiPort(9999)
+                .withWebApiDefaultPort()
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withServerSocketPort(9901)
                 .withTimerStorageClean(1000)
@@ -32,8 +32,7 @@ public class AgentRegisterJdbcTest {
         Agent agent2 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
-                .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
-                        "cache_user", "${JDBC_PASS}")
+                .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withServerSocketPort(9902)
                 .withTimerStorageClean(1000)
                 .withTimerRegistrationPeriod(1000)

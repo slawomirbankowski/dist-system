@@ -42,6 +42,10 @@ public class AgentTimersImpl extends ServiceBase implements AgentTimers {
     public DistServiceType getServiceType() {
         return DistServiceType.timers;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {

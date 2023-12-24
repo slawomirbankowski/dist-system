@@ -1,4 +1,4 @@
-package com.distsystem.test.custom;
+package com.distsystem.test.custom.utils;
 
 import com.distsystem.api.DaoModel;
 import org.junit.jupiter.api.Test;

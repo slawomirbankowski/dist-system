@@ -24,6 +24,7 @@ public enum DistServiceType {
     flow, // flow of rows in distributed environment
     issues, // issues in current agent
     measure, // measures in distributed environment
+    memory, // register memory used by agent
     ml, // ML manager to create ML models
     monitor, // monitors to check external hosts, services, 
     notification,

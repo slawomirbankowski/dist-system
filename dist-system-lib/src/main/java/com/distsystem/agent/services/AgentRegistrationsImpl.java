@@ -1,6 +1,7 @@
 package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
+import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.api.info.AgentRegistrationsInfo;
@@ -51,6 +52,10 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
     /** get type of service: cache, measure, report, flow, space, ... */
     public DistServiceType getServiceType() {
         return DistServiceType.registrations;
+    }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
     }
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {
@@ -172,6 +177,7 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
             pingAllRegistrations();
             checkActiveAgents();
             removeInactiveAgents();
+            saveDaos();
             // TODO: connect to all nearby agents, check statuses
             log.debug("AGENT REGISTRATION summary for guid: " + parentAgent.getAgentGuid() + ", registrations: " + registrations.size() + ", connected agents: " + agents.size() + ", registeredServers: " + registeredServers.size());
             return true;
@@ -241,6 +247,17 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
                 reg.serverPing(srv);
             });
             reg.serversCheck(inactivateBeforeDate, deleteBeforeDate);
+        });
+    }
+
+    /** save all DAOs */
+    private void saveDaos() {
+        List<DistAgentDaoRow> daoRows = parentAgent.getAgentDao().getAllDaos().stream().map(d -> d.toRow()).collect(Collectors.toList());
+        log.info("Save all DAOs in all registration objects, daos: " + daoRows.size() +", registrations: " + registrations.size());
+        registrations.values().stream().forEach(reg -> {
+            daoRows.forEach(daoRow -> {
+                reg.addDao(daoRow);
+            });
         });
     }
     /** register this agent to all available connectors

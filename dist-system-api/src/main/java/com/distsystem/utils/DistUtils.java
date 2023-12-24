@@ -313,13 +313,16 @@ public class DistUtils {
             return "null";
         }
         StringBuilder b = new StringBuilder();
+        b.append(ex.getClass().getName());
+        b.append("\n");
         b.append(ex.getMessage());
+        b.append("\n");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.PrintStream pr = new PrintStream(baos);
         ex.printStackTrace(pr);
         byte[] bytes = baos.toByteArray();
-        var x = bytes[0];
-        return "";
+        b.append(new String(bytes));
+        return b.toString();
     }
     /** */
     public static String bytesToHex(byte[] hash) {

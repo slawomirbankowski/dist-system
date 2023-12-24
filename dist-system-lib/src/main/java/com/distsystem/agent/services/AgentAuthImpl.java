@@ -126,6 +126,10 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
         return DistServiceType.auth;
     }
 
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "Authentication and authorization for Agent services and external distributed clients.";
+    }
     /** get custom map of info about service */
     @Override
     public Map<String, String> getServiceInfoCustomMap() {

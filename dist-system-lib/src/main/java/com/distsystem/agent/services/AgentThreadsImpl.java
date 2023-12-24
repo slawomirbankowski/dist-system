@@ -39,6 +39,10 @@ public class AgentThreadsImpl extends ServiceBase implements AgentThreads {
     public DistServiceType getServiceType() {
         return DistServiceType.threads;
     }
+    /** get description of this service */
+    public String getServiceDescription() {
+        return "";
+    }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
     public void updateConfig(DistConfig newCfg) {
