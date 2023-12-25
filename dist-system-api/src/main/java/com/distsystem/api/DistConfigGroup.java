@@ -47,8 +47,11 @@ public class DistConfigGroup {
     }
     /** get info about this group */
     public DistConfigGroupInfo getInfo() {
+        log.info("Get info for ConfigGroup: " + groupName);
         // DistConfigGroupInfo(String groupName, List<String> bucketKeys, List<String> entries)
-        return new DistConfigGroupInfo(groupName, buckets.keySet().stream().map(DistConfigBucketKey::toString).collect(Collectors.toList()), entries.stream().map(DistConfigEntry::getFullConfig).collect(Collectors.toList()));
+        return new DistConfigGroupInfo(groupName,
+                buckets.keySet().stream().map(DistConfigBucketKey::toString).collect(Collectors.toList()),
+                entries.stream().map(DistConfigEntry::getFullConfig).collect(Collectors.toList()));
     }
     /** calculate buckets from all entries - each bucket has many configuration values for the same instance and type, example:
      * AGENT_SEMAPHORE_OBJECT_JDBC_URL, AGENT_SEMAPHORE_OBJECT_JDBC_DRIVER, AGENT_SEMAPHORE_OBJECT_JDBC_USER, AGENT_SEMAPHORE_OBJECT_JDBC_PASS

@@ -18,7 +18,6 @@ public class DistAgentDaoRow extends BaseRow {
     private final String daoType;
     private final String daoUrl;
     private final String structureList;
-
     private final int isActive;
     private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
@@ -82,7 +81,7 @@ public class DistAgentDaoRow extends BaseRow {
 
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, daoKey, daoType, daoUrl, structureList, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { daoGuid, agentGuid, daoKey, daoType, daoUrl, structureList, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "DistAgentDaoRow",

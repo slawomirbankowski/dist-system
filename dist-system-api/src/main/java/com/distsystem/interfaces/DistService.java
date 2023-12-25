@@ -2,6 +2,7 @@ package com.distsystem.interfaces;
 
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentServiceSimpleInfo;
 import com.distsystem.api.info.DistConfigGroupInfo;
 import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.utils.DistWebApiProcessor;
@@ -55,6 +56,8 @@ public interface DistService {
     String getGuid();
     /** get basic information about service */
     DistServiceInfo getServiceInfo();
+    /** get simple information about service */
+    AgentServiceSimpleInfo getServiceSimpleInfo();
     /** get row for registration services */
     DistAgentServiceRow getServiceRow();
     /** get configuration for cache */

@@ -15,6 +15,7 @@ import java.util.function.Function;
 /** service to receive messages to any custom listener */
 public class AgentReceiverService extends ServiceBase implements Receiver {
 
+
     /** */
     public AgentReceiverService(Agent parentAgent) {
         super(parentAgent);
@@ -61,6 +62,7 @@ public class AgentReceiverService extends ServiceBase implements Receiver {
     }
     /** send message to another receiver*/
     public DistMessageFull send(String agentUid, String method, Object obj) {
+        touch("send");
         DistMessageFull msg = DistMessageBuilder.empty()
                 .toDestination(agentUid, DistServiceType.receiver, method)
                 .withObject(obj)

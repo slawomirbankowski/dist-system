@@ -28,7 +28,7 @@ public class DistSystemApp {
                 .createAgentInstance();
         log.info("New agent initialized: " + agent.getAgentGuid() + ", now DistSystemApp would be waiting till agent will be killed");
         agent.waitTillKill();
-        log.info("DistSystem has been killed, closing DistSystemApp now, good bye!");
+        log.info("DistSystem has been killed with agent: " + agent.getAgentGuid() + ", closing DistSystemApp now, good bye!");
     }
 
 }

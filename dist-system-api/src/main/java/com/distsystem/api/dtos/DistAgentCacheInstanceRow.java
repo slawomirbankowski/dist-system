@@ -10,7 +10,7 @@ import java.util.Map;
  * */
 public class DistAgentCacheInstanceRow extends BaseRow {
 
-    /** key of this object stored in cache */
+    /** */
     private final String cacheInstanceGuid;
     private final String agentGuid;
     private final long objectsCount;
@@ -22,7 +22,7 @@ public class DistAgentCacheInstanceRow extends BaseRow {
         this.cacheInstanceGuid = cacheInstanceGuid;
         this.agentGuid = agentGuid;
         this.objectsCount = objectsCount;
-        this.isActive = 1;
+        this.isActive = isActive;
         this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }

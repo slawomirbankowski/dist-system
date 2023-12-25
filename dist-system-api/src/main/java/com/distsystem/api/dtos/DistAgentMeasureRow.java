@@ -1,6 +1,7 @@
 package com.distsystem.api.dtos;
 
 import com.distsystem.api.BaseRow;
+import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map;
  * measure is list of values measured over time */
 public class DistAgentMeasureRow extends BaseRow {
 
+    private final String measureGuid;
     private final String measureName;
     private final String measureType;
     private final String measureParameters;
@@ -18,14 +20,23 @@ public class DistAgentMeasureRow extends BaseRow {
     protected LocalDateTime lastUpdatedDate;
 
     public DistAgentMeasureRow(String measureName, String measureType, String measureParameters, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+        this.measureGuid = DistUtils.generateCustomGuid("MEASURE");
         this.measureName = measureName;
         this.measureType = measureType;
         this.measureParameters = measureParameters;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
-
+    public DistAgentMeasureRow(String measureName, String measureType, String measureParameters) {
+        this.measureGuid = DistUtils.generateCustomGuid("MEASURE");
+        this.measureName = measureName;
+        this.measureType = measureType;
+        this.measureParameters = measureParameters;
+        this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
+        this.lastUpdatedDate = createdDate;
+    }
     public String getMeasureName() {
         return measureName;
     }
@@ -51,7 +62,7 @@ public class DistAgentMeasureRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { measureName, measureType, measureParameters, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { measureGuid, measureName, measureType, measureParameters, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("measureName", measureName,

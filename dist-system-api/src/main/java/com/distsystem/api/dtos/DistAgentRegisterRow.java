@@ -98,16 +98,16 @@ public class DistAgentRegisterRow extends BaseRow {
     public static DistAgentRegisterRow fromMap(Map<String, Object> map) {
         AdvancedMap m = new AdvancedMap(map, true);
         return new DistAgentRegisterRow(
-                m.getString("registerGuid", ""),
-                m.getString("agentGuid", ""),
-                m.getString("hostName", ""),
-                m.getString("hostIp", ""),
-                m.getInt("portNumber", 8085),
-                m.getLocalDateOrNow("lastPingDate"),
-                m.getLocalDateOrNull("closeDate"),
-                m.getInt("isActive", 1),
-                m.getLocalDateOrNow("createdDate"),
-                m.getLocalDateOrNow("lastUpdatedDate")
+                m.getString("registerguid", ""),
+                m.getString("agentguid", ""),
+                m.getString("hostname", ""),
+                m.getString("hostip", ""),
+                m.getInt("portnumber", 8085),
+                m.getLocalDateOrNow("lastpingdate"),
+                m.getLocalDateOrNull("closedate"),
+                m.getInt("isactive", 1),
+                m.getLocalDateOrNow("createddate"),
+                m.getLocalDateOrNow("lastupdateddate")
         );
     }
     public void ping(LocalDateTime pingdate) {

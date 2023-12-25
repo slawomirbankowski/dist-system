@@ -63,7 +63,7 @@ public class DistAgentConfigInitRow extends BaseRow {
     }
 
     public Map<String, String> toMap() {
-        return Map.of("type", "DistAgentAuthDomainRow",
+        return Map.of("type", "DistAgentConfigInitRow",
                 "distName", distName,
                 "configName", configName,
                 "configValue", configValue);

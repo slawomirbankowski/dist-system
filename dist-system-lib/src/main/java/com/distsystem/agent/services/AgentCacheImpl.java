@@ -2,6 +2,7 @@ package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.CacheInfo;
 import com.distsystem.api.info.CacheObjectInfo;
 import com.distsystem.api.info.StorageInfo;
 import com.distsystem.api.info.StorageInfos;
@@ -69,7 +70,7 @@ public class AgentCacheImpl extends CacheBase {
     }
     /** set cache policy */
     public void setPolicy(CachePolicy policy) {
-        this.policy = policy;
+        touch("setPolicy");
         this.policy = policy;
         var stringPolicyItems = CachePolicyBuilder.empty().parse(parentAgent.getConfig().getProperty(DistConfig.AGENT_CACHE_POLICY, "")).create().getItems();
         policy.addItems(stringPolicyItems);
@@ -107,6 +108,17 @@ public class AgentCacheImpl extends CacheBase {
         return storages.values().stream()
                 .map(CacheStorageBase::getStorageInfo)
                 .collect(Collectors.toList());
+    }
+
+    /** get info about cache */
+    public CacheInfo getCacheInfo() {
+        return new CacheInfo(guid, createDate, cacheStats.checksCount(),
+                cacheStats.addedItemsCount(), closed, defaultMode, lastCleanTime,
+                getItemsCount(), getObjectsCount(), getStoragesInfo());
+    }
+    /** get detailed info about this service */
+    public CacheInfo getInfo() {
+        return getCacheInfo();
     }
 
     /** get number of storages */
@@ -367,6 +379,8 @@ public class AgentCacheImpl extends CacheBase {
     /** check cache every X seconds to clear TTL caches */
     public boolean onTimeClean() {
         long checkSeq = cacheStats.check();
+        log.info("Timer cache clean check, seq: " + checkSeq +", working time: " + parentAgent.getAgentWorkingTime());
+
         createEvent("onTimeClean", AgentEvent.EVENT_TIMER_CLEAN);
         storages.values().stream().forEach(x ->  x.timeToClean(checkSeq, lastCleanTime));
         lastCleanTime = System.currentTimeMillis();
@@ -374,6 +388,7 @@ public class AgentCacheImpl extends CacheBase {
     }
     /** */
     public boolean onTimeStatsRefresh() {
+        log.info("Timer cache stats refresh check, seq: " + cacheStats.checksCount() +", working time: " + parentAgent.getAgentWorkingTime());
         createEvent("onTimeStatsRefresh", AgentEvent.EVENT_INITIALIZE_TIMER_RATIO);
         cacheStats.refresh();
         return true;

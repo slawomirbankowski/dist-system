@@ -24,6 +24,10 @@ public interface Agentable {
     List<AgentSearchResultItem> search(AgentSearchQuery query);
     /** touch this object which is changing lastUpdatedDate */
     void touch();
+    /** touch this object */
+    void touch(String touchBy);
+    /** touch this object */
+    void touch(boolean withEvent, String touchBy);
     /** get resolver manager to resolve String values */
     ResolverManager getResolverManager();
     /** resolve any String value */

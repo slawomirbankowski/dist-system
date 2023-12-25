@@ -102,6 +102,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** close DAO */
     public List<AgentDaoSimpleInfo> daoClose(String daoGuid) {
+        touch();
         log.info("Try to close DAO by GUID: " + daoGuid);
         createEvent("daoClose", "DAO_CLOSE", daoGuid);
         return getDaoOrEmpty(daoGuid).stream().map(d -> {
@@ -120,6 +121,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     /** re-initialize DAO, reconnect */
     public Map<String, Object> daoCreateFromJson(String bodyJson) {
         try {
+            touch();
             createEvent("daoCreateFromJson");
             log.info("Try to create DAO with parameters for agent: " + parentAgent.getAgentGuid() + ", current DAOs: " + daos.size());
             Map<String, Object> props = JsonUtils.deserializeToMapOfObjects(bodyJson);
@@ -136,6 +138,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     public Map<String, Object> daoReconnect(String daoGuid) {
         //return getDaoOrEmpty(daoGuid).stream().map(d -> d.re()).toList();
         createEvent("daoReconnect", "", daoGuid);
+        touch();
         Dao d = daos.get(daoGuid);
         if (d != null) {
             return d.reinitializeDao();
@@ -147,6 +150,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
 
     /** test connectivity of one DAO */
     public Map<String, Object> daoTest(String daoGuid) {
+        touch("daoTest");
         Dao d = daos.get(daoGuid);
         createEvent("daoTest", "DAO_TEST", daoGuid);
         if (d != null) {
@@ -171,6 +175,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     /** get DAO for key and class */
     public <T extends Dao> Optional<T> getOrCreateDao(Class<T> daoClass, DaoParams params) {
         try {
+            touch("getOrCreateDao");
             log.info("Try to get or create DAO for key=" + params.getKey() + ", DAO type: " + params.getDaoType().name());
             return getOrCreateDaoObject(daoClass, params);
         } catch (Exception ex) {
@@ -190,17 +195,20 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** get DAO for key and class */
     private <T extends Dao> Optional<T> getOrCreateDaoObject(Class<T> daoClass, DaoParams params) {
+        touch("getOrCreateDaoObject");
         readCount.incrementAndGet();
         Optional<T> daoOrEmpty = getDao(params.getKey(), daoClass);
         return daoOrEmpty.or(() -> createDao(params.getKey(), daoClass, params));
     }
     /** register a function to produce DAO object for given key and parameters */
     public void registerDaoProducer(String className, Function<DaoParams, Dao> producer) {
+        touch("registerDaoProducer");
         log.info("Registering new DAO producer for class: " + className);
         daoProducers.put(className, producer);
     }
     /** register a function to produce DAO object for given key and parameters */
     public <T> void registerDaoProducer(Class<T> cl, Function<DaoParams, Dao> producer) {
+        touch("registerDaoProducer");
         log.info("Registering new DAO producer for class: " + cl.getName());
         daoProducers.put(cl.getName(), producer);
     }
@@ -240,6 +248,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** create NEW dao and put it into DAO map */
     public Optional<Dao> createDao(String key, DaoParams params) {
+        touch("createDao");
         var producer = daoProducers.get(params.getDaoType().getClassName());
         if (producer == null) {
             return Optional.empty();
@@ -252,19 +261,23 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
 
     /** get or create Kafka DAO */
     public Dao createKafkaDao(DaoParams params) {
+        touch("createKafkaDao");
         return new DaoKafkaBase(params, parentAgent);
     }
     /** get or create JDBC DAO */
     public Dao createJdbcDao(DaoParams params) {
+        touch("createJdbcDao");
         return new DaoJdbcBase(params, parentAgent);
     }
     /** get or create DAO for Elasticsearch */
     private Dao createElasticsearchDao(DaoParams params) {
+        touch("createElasticsearchDao");
         // get elastic DAO
         return new DaoElasticsearchBase(params, parentAgent);
     }
     /** create all DAOs for given names with parameters */
     public void createDaos(Map<String, DaoParams> daos) {
+        touch("createDaos");
         daos.entrySet().stream().forEach(dp -> {
             createDao(dp.getKey(), dp.getValue());
         });

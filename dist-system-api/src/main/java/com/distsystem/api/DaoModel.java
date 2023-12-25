@@ -233,7 +233,9 @@ public class DaoModel<T extends BaseRow> {
     public static final DaoModel<DistAgentAuthKeyRow> authKey = new DaoModel<>(DistAgentAuthKeyRow.class);
     public static final DaoModel<DistAgentAuthRoleRow> authRole = new DaoModel<>(DistAgentAuthRoleRow.class);
     public static final DaoModel<DistAgentAuthTokenParserRow> authTokenParser = new DaoModel<>(DistAgentAuthTokenParserRow.class);
+
     public static final DaoModel<DistAgentCacheItemRow> cacheItem = new DaoModel<>(DistAgentCacheItemRow.class);
+    public static final DaoModel<DistAgentCacheInstanceRow> cacheInstance = new DaoModel<>(DistAgentCacheInstanceRow.class);
     public static final DaoModel<DistAgentConfigInitRow> configInit = new DaoModel<>(DistAgentConfigInitRow.class);
     public static final DaoModel<DistAgentConfigRow> config = new DaoModel<>(DistAgentConfigRow.class);
     public static final DaoModel<DistAgentDaoRow> dao = new DaoModel<>(DistAgentDaoRow.class);
@@ -251,6 +253,7 @@ public class DaoModel<T extends BaseRow> {
     public static final DaoModel<DistAgentResourceRow> resource = new DaoModel<>(DistAgentResourceRow.class);
     public static final DaoModel<DistAgentScheduleExecutionRow> scheduleExecution = new DaoModel<>(DistAgentScheduleExecutionRow.class);
     public static final DaoModel<DistAgentScheduleRow> schedule = new DaoModel<>(DistAgentScheduleRow.class);
+    public static final DaoModel<DistAgentScriptRow> script = new DaoModel<>(DistAgentScriptRow.class);
     public static final DaoModel<DistAgentServerRow> server = new DaoModel<>(DistAgentServerRow.class);
     public static final DaoModel<DistAgentServiceRow> service = new DaoModel<>(DistAgentServiceRow.class);
     public static final DaoModel<DistAgentSettingRow> setting = new DaoModel<>(DistAgentSettingRow.class);

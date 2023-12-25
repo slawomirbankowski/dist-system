@@ -9,7 +9,7 @@ import java.util.Map;
 public class DistAgentEventRow extends BaseRow {
 
     private final String eventGuid;
-    /** date and time of event */
+    /** */
     private final LocalDateTime createdDateTime;
     private final String parentClass;
     private final String parentGuid;
@@ -34,8 +34,8 @@ public class DistAgentEventRow extends BaseRow {
         this.lastUpdatedDate = createdDate;
     }
 
-    public LocalDateTime getCreatedDateTime() {
-        return createdDateTime;
+    public String getCreatedDateTime() {
+        return createdDateTime.toString();
     }
     public String getParentClass() {
         return parentClass;
@@ -48,7 +48,7 @@ public class DistAgentEventRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { eventGuid, createdDateTime, parentClass, parentGuid, method, eventType, isActive, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { eventGuid, createdDateTime, parentClass, parentGuid, method, eventType, hostName, isActive, createdDate, lastUpdatedDate };
     }
 
     public Map<String, String> toMap() {

@@ -26,6 +26,8 @@ public interface Agent extends DistService, IssueHandler {
     String getAgentGuid();
     /** get total initialization agent time in milliseconds */
     long getTotalInitializationTime();
+    /** get time in milliseconds of working for this Agent */
+    long getAgentWorkingTime();
     /** get short version ID of this agent GUID */
     String getAgentShortGuid();
     /** get start time of this agent -  System.currentTimeMillis() */
@@ -114,6 +116,8 @@ public interface Agent extends DistService, IssueHandler {
     AgentSchedule getSchedule();
     /** get service for version */
     AgentVersion getVersion();
+    /** get memory service */
+    AgentMemory getMemory();
     /** create new message builder starting this agent */
     DistMessageBuilder createMessageBuilder();
     /** message send to agent(s) */

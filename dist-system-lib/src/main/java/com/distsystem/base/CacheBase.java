@@ -90,13 +90,6 @@ public abstract class CacheBase extends ServiceBase implements Cache {
             return "";
         }
     }
-    /** get info about cache */
-    public CacheInfo getCacheInfo() {
-        return new CacheInfo(guid, createDate, cacheStats.checksCount(),
-                cacheStats.addedItemsCount(), closed,
-            getAgent().getIssues().getIssues().size(), getAgent().getEvents().getEvents().size(),
-            getItemsCount(), getObjectsCount(), getStoragesInfo());
-    }
     /** get custom map of info about service */
     public Map<String, String> getServiceInfoCustomMap() {
         return Map.of("keyEncoder", keyEncoder.getClass().getName());

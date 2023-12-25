@@ -64,7 +64,8 @@ public class DistAgentServerRow extends BaseRow {
         this.isActive = 0;
     }
     public DistAgentServerRow copyNoPassword() {
-        return new DistAgentServerRow(agentGuid, serverGuid, serverType, serverHost, serverIp, serverPort, serverUrl, createdDate, isActive, lastPingDate, serverParams);
+        return new DistAgentServerRow(agentGuid, serverGuid, serverType, serverHost, serverIp, serverPort,
+                serverUrl, createdDate, isActive, lastPingDate, serverParams);
     }
     public String getAgentGuid() {
         return agentGuid;
@@ -87,26 +88,26 @@ public class DistAgentServerRow extends BaseRow {
     public String getServerUrl() {
         return serverUrl;
     }
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getCreatedDate() {
+        return createdDate.toString();
     }
     public int getIsActive() {
         return isActive;
     }
-    public LocalDateTime getLastPingDate() {
-        return lastPingDate;
+    public String getLastPingDate() {
+        return lastPingDate.toString();
     }
     public String getServerParams() {
         return serverParams;
     }
 
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
     }
 
     public Object[] toInsertRow() {
-        return new Object[] {agentGuid, serverGuid, serverType, serverHost, serverIp,
-                serverPort, serverUrl, serverParams, lastPingDate, isActive, createdDate, lastPingDate };
+        return new Object[] {agentGuid, serverGuid, serverType, serverHost, serverIp, serverPort,
+                serverUrl, serverParams, lastPingDate, isActive, createdDate, lastPingDate };
     }
     public Map<String, String> toMap() {
         HashMap<String, String> map = new HashMap<>();

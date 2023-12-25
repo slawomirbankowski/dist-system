@@ -98,6 +98,7 @@ public class AgentApiImpl extends ServiceBase implements AgentApi {
 
     /** open all known APIs for this agent */
     public void openApis() {
+        touch();
         log.info("Opening Agent Web APIs for agent: " + parentAgent.getAgentGuid());
         if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_API_PORT)) {
             createEvent("openApis");
@@ -130,6 +131,7 @@ public class AgentApiImpl extends ServiceBase implements AgentApi {
     }
     /** check all registered APIs */
     public List<Boolean> checkApis() {
+        touch();
         log.info("Check APIs for Agent: " + parentAgent.getAgentGuid());
         createEvent("checkApis");
         checkCount.incrementAndGet();

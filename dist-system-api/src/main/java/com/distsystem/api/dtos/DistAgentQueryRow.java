@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**  */
-@DaoTable(tableName="DistAgentQuery", keyName="queryName", keyIsUnique=true)
 public class DistAgentQueryRow extends BaseRow {
 
     private final String queryName;

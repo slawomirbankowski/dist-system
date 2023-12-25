@@ -7,6 +7,7 @@ import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentInfo;
+import com.distsystem.api.info.AgentServiceInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.*;
@@ -94,10 +95,10 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     private final AgentNotification notification = new AgentNotificationImpl(this);
     /** get service for managing shared objects */
     private final AgentSchedule schedule = new AgentScheduleImpl(this);
+    /** memory service to check memory usage of this JVM and Agent */
+    private final AgentMemory memory = new AgentMemoryImpl(this);
     /** get service for managing shared objects */
     private final AgentVersion version = new AgentVersionImpl(this);
-
-
 
     /** tags assigned to this Agent, by these tags other Agent can search set of Agent */
     private final Set<String> agentTags = new HashSet<>();
@@ -131,6 +132,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
         // create default DAOs
         agentDao.createDaos(daos);
         log.info("CREATING NEW AGENT with guid: " + getAgentGuid() + " FINISHED");
+        touch("AgentInstance");
     }
 
     /** count objects in this agentable object including this object */
@@ -152,7 +154,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Agent that is binding all services and components";
     }
     /** create new service UID for this service */
     protected String createGuid() {
@@ -222,6 +224,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
         log.info("Initializing agent for guid: " + guid + ", services: " + services.getServicesCount() + ", configurations: " + config.getPropertiesCount() + ", ");
         services.reinitializeAllServices();
         totalInitializationTime = System.currentTimeMillis() - agentStartTime;
+        touch("initializeAgent");
     }
     /** initialize again this agent and get info */
     public AgentInfo initializeAgentWithInfo() {
@@ -322,13 +325,19 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
         return ml;
     }
     /** get service for managing shared objects */
+
     public AgentObjects getObjects() {
         return objects;
     }
-
+    /** get memory service */
+    public AgentMemory getMemory() { return memory; }
     /** get start time of this agent -  System.currentTimeMillis() */
     public long getAgentStartTime() {
         return agentStartTime;
+    }
+    /** get time in milliseconds of working for this Agent */
+    public long getAgentWorkingTime() {
+        return System.currentTimeMillis()-agentStartTime;
     }
     /** get monitor service */
     public AgentMonitor getMonitor() {
@@ -361,15 +370,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
                 componentList.stream().map(c -> c.getComponentType().name()).toList(),
                 agentConfigReader.getInfo(),
                 messageProcessor.getInfo(),
-                api.getInfo(),
-                connectors.getInfo(),
                 services.getServiceInfos(),
-                registrations.getInfo(),
-                timers.getInfo(),
-                threads.getInfo(),
-                agentDao.getInfo(),
-                getEvents().getEvents().size(),
-                getIssues().getIssues().size(),
                 config.getConfigGroupInfos());
     }
 
@@ -422,7 +423,19 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     public void addEvent(AgentEvent event) {
         events.addEvent(event);
     }
-
+    /** get detailed info about this service */
+    public Map<String, Object> getInfo() {
+        return Map.of("agentStartTime", ""+agentStartTime,
+                "totalInitializationTime", ""+totalInitializationTime,
+                "agentName", agentName,
+                "agentShortGuid", agentShortGuid,
+                "serializer", serializer.getInfo(),
+                "countObjects",""+countObjectsService(),
+                "distGroup", getDistGroup(),
+                "distName ", getDistName(),
+                "environmentType", getEnvironmentType()
+        );
+    }
     /** close all items in this agent */
     public void onClose() {
         log.info("Closing agent: " + guid);
@@ -454,7 +467,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
 
     /** parse message from JSON body, process that message and respond as Map  */
     protected Map<String, String> sendMessageAsJson(String messageBodyJson) {
-
+        touch("sendMessageAsJson");
 
         // TODO: implement parsing message from JSON into DistMessage and run processMessage()
         //DistMessage.createMessage();
@@ -468,6 +481,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
 
     /** message send to agent(s) */
     public DistMessageFull sendMessage(DistMessageFull msg) {
+        touch("sendMessage");
         log.info("SENDING MESSAGE " + msg.getMessage());
         getConnectors().sendMessage(msg);
         return msg;
@@ -512,6 +526,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
 
     /** ping this agent, return is pong */
     private DistMessage pingMethod(String methodName, DistMessage msg) {
+        touch("pingMethod");
         log.info("METHOD PING from agent: " + msg.getFromAgent());
         if (msg.isTypeRequest()) {
             return msg.pong(getAgentGuid());
@@ -522,6 +537,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** register new config group in agent configuration */
     public DistConfigGroup registerConfigGroup(String groupName, DistService parentService) {
+        touch("registerConfigGroup");
         return config.registerConfigGroup(groupName, parentService);
     }
     /** method to get registration keys for this agent */
@@ -533,6 +549,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
 
     /** set this Agent instance as default one for current JVM */
     public Agent setAsDefaultAgent() {
+        touch("setAsDefaultAgent");
         log.info("Set current agent as default in DistFactory, agent GUID: " + getAgentGuid());
         DistFactory.setDefaultAgent(this);
         return this;

@@ -16,7 +16,7 @@ public enum CacheStorageType {
     redis, // Redis database
     mongodb, // Mongo DB database
     cassandra, // Cassandra to keep cache objects
-    kafka,
+    kafka, // Kafka storage - to keep objects as topic messages by key
     other; // other, unknown, custom implementation
 
     /** storage types */

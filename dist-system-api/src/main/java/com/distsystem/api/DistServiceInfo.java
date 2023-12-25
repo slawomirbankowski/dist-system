@@ -3,6 +3,7 @@ package com.distsystem.api;
 import com.distsystem.api.enums.DistServiceType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /** class to keep information about Dist Service.
@@ -13,24 +14,34 @@ public class DistServiceInfo {
     private final DistServiceType serviceType;
     private final String serviceClass;
     private final String serviceGuid;
+    private final String serviceDescription;
     private final LocalDateTime createdDateTime;
     private final LocalDateTime lastTouchDate;
+    private final String lastTouchBy;
     private final boolean closed;
     private final boolean initialized;
+    private final List<String> componentKeys;
     private final Map<String, Long> counters;
     private final Map<String, String> customAttributes;
     /** custom info */
     private final Object info;
 
     /** */
-    public DistServiceInfo(DistServiceType serviceType, String serviceClass, String serviceGuid, LocalDateTime createdDateTime, LocalDateTime lastTouchDate, boolean closed, boolean initialized, Map<String, Long> counters, Map<String, String> customAttributes, Object info) {
+    public DistServiceInfo(DistServiceType serviceType, String serviceClass, String serviceGuid, String serviceDescription,
+                           LocalDateTime createdDateTime, LocalDateTime lastTouchDate, String lastTouchBy,
+                           boolean closed, boolean initialized,
+                           List<String> componentKeys, Map<String, Long> counters,
+                           Map<String, String> customAttributes, Object info) {
         this.serviceType = serviceType;
         this.serviceClass = serviceClass;
         this.serviceGuid = serviceGuid;
+        this.serviceDescription = serviceDescription;
         this.createdDateTime = createdDateTime;
         this.lastTouchDate = lastTouchDate;
+        this.lastTouchBy = lastTouchBy;
         this.closed = closed;
         this.initialized = initialized;
+        this.componentKeys = componentKeys;
         this.counters = counters;
         this.customAttributes = customAttributes;
         this.info = info;
@@ -51,12 +62,19 @@ public class DistServiceInfo {
         return serviceGuid;
     }
 
+    public String getServiceDescription() {
+        return serviceDescription;
+    }
+
     public String getCreatedDateTime() {
         return createdDateTime.toString();
     }
 
     public String getLastTouchDate() {
         return lastTouchDate.toString();
+    }
+    public String getLastTouchBy() {
+        return lastTouchBy;
     }
 
     public boolean isClosed() {
@@ -66,6 +84,11 @@ public class DistServiceInfo {
     public boolean isInitialized() {
         return initialized;
     }
+
+    public List<String> getComponentKeys() {
+        return componentKeys;
+    }
+
     public Map<String, Long> getCounters() {
         return counters;
     }

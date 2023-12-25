@@ -65,6 +65,7 @@ public class RegistrationJdbc extends RegistrationBase {
         dao.checkAndCreateModel(DaoModel.authRole);
         dao.checkAndCreateModel(DaoModel.authTokenParser);
         dao.checkAndCreateModel(DaoModel.cacheItem);
+        dao.checkAndCreateModel(DaoModel.cacheInstance);
         dao.checkAndCreateModel(DaoModel.configInit);
         dao.checkAndCreateModel(DaoModel.config);
         dao.checkAndCreateModel(DaoModel.dao);
@@ -81,6 +82,7 @@ public class RegistrationJdbc extends RegistrationBase {
         dao.checkAndCreateModel(DaoModel.resource);
         dao.checkAndCreateModel(DaoModel.schedule);
         dao.checkAndCreateModel(DaoModel.scheduleExecution);
+        dao.checkAndCreateModel(DaoModel.script);
         dao.checkAndCreateModel(DaoModel.server);
         dao.checkAndCreateModel(DaoModel.service);
         dao.checkAndCreateModel(DaoModel.setting);

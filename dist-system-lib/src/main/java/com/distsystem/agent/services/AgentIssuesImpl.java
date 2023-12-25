@@ -2,6 +2,8 @@ package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.EventsInfo;
+import com.distsystem.api.info.IssuesInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentIssues;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /** Implementation of Issues service to track all exceptions inside agent.
  * Issues could be added in case of incorrect data, Exception, any error or unsupported thing in service
@@ -22,6 +26,8 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
     protected static final Logger log = LoggerFactory.getLogger(AgentIssuesImpl.class);
     /** queue of issues reported when using cache */
     protected final Queue<DistIssue> issues = new LinkedList<>();
+    /** created counter */
+    private final AtomicLong addedIssuesCount = new AtomicLong();
 
     /** */
     public AgentIssuesImpl(Agent parentAgent) {
@@ -61,8 +67,10 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
      * issue could be Exception, Error, problem with connecting to storage,
      * internal error, not consistent state that is unknown and could be used by parent manager */
     public void addIssue(DistIssue issue) {
+        touch("addIssue");
         synchronized (issues) {
             issues.add(issue);
+            addedIssuesCount.incrementAndGet();
             // add issue for registration services
             parentAgent.getRegistrations().addIssue(issue);
             while (issues.size() > parentAgent.getConfig().getPropertyAsLong(DistConfig.AGENT_CACHE_ISSUES_MAX_COUNT, DistConfig.AGENT_CACHE_ISSUES_MAX_COUNT_VALUE)) {
@@ -76,6 +84,7 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
     }
     /** clear all issues */
     public String clearIssues() {
+        touch("clearIssues");
         createEvent("clearIssues");
         synchronized (issues) {
             issues.clear();
@@ -87,6 +96,11 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
         return issues;
     }
 
+    /** get info about issues */
+    public IssuesInfo getInfo() {
+        return new IssuesInfo(addedIssuesCount.get(), issues.size(),
+                issues.stream().limit(5).map(DistIssue::toRow).collect(Collectors.toList()));
+    }
     /** close issues with clearing all */
     protected void onClose() {
         synchronized (issues) {

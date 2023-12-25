@@ -21,15 +21,7 @@ public class AgentInfo implements Serializable {
     private final List<String> components;
     private final AgentConfigReaderInfo configReader;
     private final AgentMessageProcessorInfo messageProcessor;
-    private final AgentApisInfo apis;
     List<DistServiceInfo> services;
-    private final AgentConnectorsInfo connectors;
-    private final AgentRegistrationsInfo registrations;
-    private final AgentTimerInfo timers;
-    private final DistThreadsInfo threads;
-    private final AgentDaosInfo daos;
-    private final int eventsCount;
-    private final int issuesCount;
     private final List<DistConfigGroupInfo> configGroupInfos;
 
     public AgentInfo(String agentGuid,
@@ -41,14 +33,7 @@ public class AgentInfo implements Serializable {
                      List<String> components,
                      AgentConfigReaderInfo configReader,
                      AgentMessageProcessorInfo messageProcessor,
-                     AgentApisInfo apis,
-                     AgentConnectorsInfo connectors,
                      List<DistServiceInfo> services,
-                     AgentRegistrationsInfo registrations,
-                     AgentTimerInfo timers,
-                     DistThreadsInfo threads,
-                     AgentDaosInfo daos,
-                     int eventsCount, int issuesCount,
                      List<DistConfigGroupInfo> configGroupInfos) {
         this.agentGuid = agentGuid;
         this.distName = distName;
@@ -59,24 +44,13 @@ public class AgentInfo implements Serializable {
         this.tags = tags;
         this.components = components;
         this.configReader = configReader;
-        this.apis = apis;
-        this.connectors = connectors;
         this.services = services;
-        this.registrations = registrations;
-        this.timers = timers;
-        this.threads = threads;
-        this.daos = daos;
-        this.eventsCount = eventsCount;
-        this.issuesCount = issuesCount;
         this.configGroupInfos = configGroupInfos;
     }
 
     /** serialize this agent info */
     public String toString() {
-        return "AGENT uid: " + agentGuid + ", created: " + createDate + ", closed: " + closed
-                + ", registrationsCount: " + registrations.getRegistrations().size() + ", agents: " + registrations.getAgents().size()
-                + ", timerTasksCount: " + timers.getTasks().size() + ", threadsCount: " + threads.getThreadsCount()
-                + ", eventsCount: " + eventsCount + ", issuesCount: " + issuesCount;
+        return "AGENT uid: " + agentGuid + ", created: " + createDate + ", closed: " + closed;
     }
 
     public String getAgentGuid() {
@@ -102,43 +76,17 @@ public class AgentInfo implements Serializable {
     public Set<String> getTags() {
         return tags;
     }
-
     public List<String> getComponents() {
         return components;
     }
-
     public AgentConfigReaderInfo getConfigReader() {
         return configReader;
     }
     public AgentMessageProcessorInfo getMessageProcessor() {
         return messageProcessor;
     }
-    public AgentApisInfo getApis() {
-        return apis;
-    }
     public List<DistServiceInfo> getServices() {
         return services;
     }
-    public AgentConnectorsInfo getConnectors() {
-        return connectors;
-    }
-    public AgentRegistrationsInfo getRegistrations() {
-        return registrations;
-    }
-    public AgentTimerInfo getTimers() {
-        return timers;
-    }
-    public DistThreadsInfo getThreads() {
-        return threads;
-    }
-    public AgentDaosInfo getDaos() {
-        return daos;
-    }
-    public int getEventsCount() {
-        return eventsCount;
-    }
 
-    public int getIssuesCount() {
-        return issuesCount;
-    }
 }
