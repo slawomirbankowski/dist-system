@@ -3,6 +3,8 @@ package com.distsystem.agent.services;
 import com.distsystem.agent.semaphore.SemaphoreBase;
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentMemoryInfo;
+import com.distsystem.api.info.AgentSemaphoresInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentSemaphores;
@@ -25,7 +27,7 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     /** count objects in this agentable object including this object */
     public long countObjectsService() {
         // TODO: calculate counts of objects
-        return 2L;
+        return 2L + semaphoreManagers.size()*14L;
     }
     /** read configuration and re-initialize this component */
     protected boolean onReinitialize() {
@@ -42,9 +44,14 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     public void afterInitialization() {
 
     }
+    /** get detailed info about this service */
+    public AgentSemaphoresInfo getInfo() {
+        return new AgentSemaphoresInfo(semaphoreManagers.values().stream().map(s -> s.getSemaphoreManagerInfo()).toList());
+    }
 
     /** initialization of semaphore manager for given class name */
     private void initializeSemaphore(DistConfigBucket bucket) {
+        touch("initializeSemaphore");
         String className = DistConfig.AGENT_SEMAPHORE_CLASS_MAP.get(bucket.getKey().getConfigType());
         try {
             log.info("Try to create new semaphore manager for agent: " + parentAgent.getAgentGuid() + ", class: " + className + ", bucket key: " + bucket.getKey());
@@ -62,7 +69,7 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Distributed semaphores";
     }
     /** lock semaphore */
     public synchronized boolean lock(String semaphoreName, long maxWaitingTime) {

@@ -82,8 +82,8 @@ public class AgentEventsImpl extends ServiceBase implements AgentEvents {
 
     /** get info about events */
     public EventsInfo getInfo() {
-        //events.stream().toList().subList(0, 99);
-        return new EventsInfo(addedEventsCount.get(), events.size(), lastAddedDate);
+        return new EventsInfo(addedEventsCount.get(), events.size(), lastAddedDate,
+                events.stream().limit(5).map(AgentEvent::getEventRow).collect(Collectors.toList()));
     }
     /** get number of events per method */
     public Map<String, Long> eventsByMethod() {

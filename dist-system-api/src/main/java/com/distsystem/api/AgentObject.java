@@ -2,6 +2,8 @@ package com.distsystem.api;
 
 import com.distsystem.api.info.AgentRegisteredInfo;
 import com.distsystem.api.dtos.DistAgentRegisterRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -13,13 +15,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * */
 public class AgentObject {
 
+    /** local logger for this class*/
+    protected static final Logger log = LoggerFactory.getLogger(AgentObject.class);
     /** create date of this object representing agent */
     private final LocalDateTime createDate = LocalDateTime.now();
-    /** registering object for agent */
-    private AgentRegister register;
     /** */
     private DistAgentRegisterRow agentRegisterRow;
-
     /** last updated date and time of this Agent */
     private LocalDateTime lastUpdated = LocalDateTime.now();
     /** number of updates of this Agent */
@@ -29,16 +30,13 @@ public class AgentObject {
     /** time of last ping from this agent */
     private LocalDateTime lastPingDate = LocalDateTime.now();
 
-    public AgentObject(AgentRegister register) {
-        this.register = register;
-        //this.agentRegisterRow = register.toSimplified();
-    }
     public AgentObject(DistAgentRegisterRow agentRegisterRow) {
         this.agentRegisterRow = agentRegisterRow;
+        log.info("Create new AgentObject for GUID: " + agentRegisterRow.getAgentGuid() + ", hostIp: " + agentRegisterRow.getHostIp() + ", hostName: " + agentRegisterRow.getHostName());
     }
     /** get GUID for agent */
     public String getAgentGuid() {
-        return register.getAgentGuid();
+        return agentRegisterRow.getAgentGuid();
     }
     /** unregister this agent */
     public void unregister() {
@@ -68,10 +66,6 @@ public class AgentObject {
     /** */
     public DistAgentRegisterRow getSimplified() {
         return agentRegisterRow;
-    }
-    /** get simplified version of agent in cache */
-    public DistAgentRegisterRow toSimplified() {
-        return register.toAgentRegisterRow();
     }
 
     public boolean isActive() {

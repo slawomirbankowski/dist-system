@@ -10,11 +10,16 @@ public class AgentServiceInfo {
 
     private List<String> serviceKeys;
 
-    public AgentServiceInfo(List<String> serviceKeys) {
-        this.serviceKeys = serviceKeys;
-    }
+    private List<AgentServiceSimpleInfo> serviceInfos;
 
+    public AgentServiceInfo(List<String> serviceKeys, List<AgentServiceSimpleInfo> serviceInfos) {
+        this.serviceKeys = serviceKeys;
+        this.serviceInfos = serviceInfos;
+    }
     public List<String> getServiceKeys() {
         return serviceKeys;
+    }
+    public List<AgentServiceSimpleInfo> getServiceInfos() {
+        return serviceInfos;
     }
 }

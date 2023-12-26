@@ -35,9 +35,13 @@ public interface AgentRegistrations extends DistService {
 
     /** get number of known agents */
     int getAgentsCount();
+    /** get number of active agents */
+    long getAgentsActiveCount();
     /** get list of agents possible to connect from this agent
      * this is list of all known agents read from registration services of from other agents */
     List<DistAgentRegisterRow> getAgents();
+    /** get all active agents */
+    List<DistAgentRegisterRow> getAgentsActive();
     /** add issue to registrations */
     void addIssue(DistIssue issue);
 

@@ -75,7 +75,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
 
     public AgentServiceInfo getInfo() {
-        return new AgentServiceInfo(services.keySet().stream().toList());
+        return new AgentServiceInfo(services.keySet().stream().toList(), services.values().stream().map(DistService::getServiceSimpleInfo).collect(Collectors.toList()));
     }
     /** set new policy for services */
     public void setPolicy(CachePolicy policy) {
@@ -138,6 +138,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** */
     public Optional<DistServiceInfo> runAfterInitializationWithInfo(String serviceUid) {
+        touch("runAfterInitializationWithInfo");
         createEvent("runAfterInitializationWithInfo");
         DistService srv = services.get(serviceUid);
         if (srv != null) {
@@ -157,6 +158,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** register service to this agent */
     public void registerService(DistService service) {
+        touch("registerService");
         // TODO: register new service like cache, report, measure, ...
         synchronized (services) {
             createdCount.incrementAndGet();

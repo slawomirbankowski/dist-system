@@ -14,8 +14,8 @@ public class DistAgentSettingRow extends BaseRow {
     private final String settingCategory;
     private final String settingType;
     private final String settingValue;
-    private final LocalDateTime createdDate;
     private final int isActive;
+    private final LocalDateTime createdDate;
     private final LocalDateTime lastUpdatedDate;
 
     public DistAgentSettingRow(String settingName, String settingCategory, String settingType, String settingValue, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
@@ -66,7 +66,7 @@ public class DistAgentSettingRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { settingName, settingCategory, settingType, settingValue, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { settingName, settingCategory, settingType, settingValue, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "DistAgentSettingRow",

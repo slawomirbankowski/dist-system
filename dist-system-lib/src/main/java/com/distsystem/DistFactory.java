@@ -746,9 +746,17 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD, ""+periodMs);
         return this;
     }
+    public DistFactory withTimerStorageCleanDefault() {
+        props.setProperty(DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD, ""+DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD_DELAY_VALUE);
+        return this;
+    }
     /** define internal timer delay for check  */
     public DistFactory withTimerRegistrationPeriod(long periodMs) {
         props.setProperty(DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD, ""+periodMs);
+        return this;
+    }
+    public DistFactory withTimerRegistrationPeriodDefault() {
+        props.setProperty(DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD, ""+DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD_DELAY_VALUE);
         return this;
     }
     /** define internal timer delay for check servers and clients */
@@ -756,7 +764,10 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_CACHE_TIMER_SERVER_CLIENT_PERIOD, ""+periodMs);
         return this;
     }
-
+    public DistFactory withTimerServerPeriodDefault() {
+        props.setProperty(DistConfig.AGENT_CACHE_TIMER_SERVER_CLIENT_PERIOD, ""+DistConfig.TIMER_SERVER_CLIENT_PERIOD_DELAY_VALUE);
+        return this;
+    }
     /** add JDBC as configuration reader */
     public DistFactory withConfigReaderJdbc(String url, String driver, String user, String pass) {
         props.setProperty(DistConfig.AGENT_CONFIGREADER_OBJECT_JDBC_URL, url);

@@ -17,9 +17,8 @@ public class DistAgentScheduleRow extends BaseRow {
     private String scheduleParams;
     private LocalDateTime scheduleStartDate;
     private LocalDateTime scheduleEndDate;
-
     private LocalDateTime lastRunDate;
-    private String runCount;
+    private long runCount;
     private LocalDateTime createdDate;
     private int isActive;
     private LocalDateTime lastUpdatedDate;
@@ -31,6 +30,8 @@ public class DistAgentScheduleRow extends BaseRow {
         this.scheduleParams = scheduleParams;
         this.scheduleStartDate = scheduleStartDate;
         this.scheduleEndDate = scheduleEndDate;
+        this.lastRunDate = LocalDateTime.of(1900, 1, 1, 0, 0);
+        this.runCount = 0;
         this.createdDate = createdDate;
         this.isActive = isActive;
         this.lastUpdatedDate = lastUpdatedDate;
@@ -42,14 +43,15 @@ public class DistAgentScheduleRow extends BaseRow {
         this.scheduleParams = scheduleParams;
         this.scheduleStartDate = scheduleStartDate;
         this.scheduleEndDate = scheduleEndDate;
+        this.lastRunDate = LocalDateTime.of(1900, 1, 1, 0, 0);
+        this.runCount = 0;
         this.createdDate = LocalDateTime.now();
         this.isActive = 1;
         this.lastUpdatedDate = createdDate;
     }
-
-
     public Object[] toInsertRow() {
-        return new Object[] { scheduleName, scheduleType, scheduleExpression, scheduleParams, scheduleStartDate, scheduleEndDate, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { scheduleName, scheduleType, scheduleExpression, scheduleParams,
+                scheduleStartDate, scheduleEndDate, lastRunDate, runCount, createdDate, isActive, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("scheduleName", scheduleName,
@@ -105,7 +107,7 @@ public class DistAgentScheduleRow extends BaseRow {
         return lastRunDate;
     }
 
-    public String getRunCount() {
+    public long getRunCount() {
         return runCount;
     }
 

@@ -32,6 +32,8 @@ public abstract class AgentableBase implements Agentable {
     protected boolean initialized = false;
     /** last touch date of this agentable instance of class */
     protected LocalDateTime lastTouchDate = LocalDateTime.now();
+    /** name of method or actor that touched this object */
+    protected String lastTouchBy = "";
     /** service events - only last 100 is stored */
     protected final LinkedList<AgentEvent> agentableEvents = new LinkedList<>();
 
@@ -76,9 +78,22 @@ public abstract class AgentableBase implements Agentable {
     }
     /** touch this object */
     @Override
-    public void touch() {
-        createEvent("touch");
+    public void touch(boolean withEvent, String touchBy) {
+        if (withEvent) {
+            createEvent("touch");
+        }
         lastTouchDate = LocalDateTime.now();
+        lastTouchBy = touchBy;
+    }
+    /** touch this object */
+    @Override
+    public void touch(String touchBy) {
+        touch(false, touchBy);
+    }
+    /** touch this object */
+    @Override
+    public void touch() {
+        touch(false, "");
     }
     /** count objects in this agentable object including this object */
     public long countObjects() {
@@ -166,7 +181,7 @@ public abstract class AgentableBase implements Agentable {
         if (closed) {
             log.warn("Agentable object is already closed for UID: " + guid);
         } else {
-            touch();
+            touch("close");
             closed = true;
             log.debug("Closing Agentable object for GUID: " + guid);
             onClose();

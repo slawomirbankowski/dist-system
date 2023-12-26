@@ -10,10 +10,10 @@ import com.distsystem.utils.DistWebApiProcessor;
 
 import java.util.LinkedList;
 
-/** service for schedules */
+/** service for versions */
 public class AgentVersionImpl extends ServiceBase implements AgentVersion {
 
-    /** creates new schedule service */
+    /** creates new version service */
     public AgentVersionImpl(Agent parentAgent) {
         super(parentAgent);
         parentAgent.getServices().registerService(this);

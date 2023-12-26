@@ -20,8 +20,8 @@ public class DistAgentStorageRow extends BaseRow {
     private String storagePassword;
     private String storageDefinition;
     private String storageParams;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
     public DistAgentStorageRow(String storageName, String storageType, String storageCategory, String storageUrl, String storageHost, String storagePort, String storageUser, String storagePassword, String storageDefinition, String storageParams, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
@@ -108,7 +108,9 @@ public class DistAgentStorageRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { storageName, storageType, storageCategory, storageUrl, storageHost, storagePort, storageUser, storagePassword, storageDefinition, storageParams, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { storageName, storageType, storageCategory, storageUrl, storageHost, storagePort,
+                storageUser, storagePassword, storageDefinition, storageParams,
+                isActive, createdDate, lastUpdatedDate };
     }
 
     public Map<String, String> toMap() {

@@ -24,9 +24,9 @@ public class AgentRegisterJdbcTest {
                 .withWebApiDefaultPort()
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withServerSocketPort(9901)
-                .withTimerStorageClean(1000)
-                .withTimerRegistrationPeriod(1000)
-                .withTimerServerPeriod(1000)
+                .withTimerStorageClean(30000)
+                .withTimerRegistrationPeriod(30000)
+                .withTimerServerPeriod(30000)
                 .createAgentInstance();
 
         Agent agent2 = DistFactory.buildEmptyFactory()
@@ -34,21 +34,28 @@ public class AgentRegisterJdbcTest {
                 .withWebApiPort(9998)
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withServerSocketPort(9902)
-                .withTimerStorageClean(1000)
-                .withTimerRegistrationPeriod(1000)
-                .withTimerServerPeriod(1000)
+                .withTimerStorageClean(30000)
+                .withTimerRegistrationPeriod(30000)
+                .withTimerServerPeriod(30000)
                 .createAgentInstance();
 
         assertNotNull(agent1, "Created agent1 should not be null");
         assertNotNull(agent2, "Created agent2 should not be null");
 
-        DistUtils.sleep(1000);
+        DistUtils.sleep(4000);
 
-        log.info("========-----> Agent1: " + agent1.getAgentInfo());
-        log.info("========-----> Agent2: " + agent2.getAgentInfo());
+        DistUtils.sleep(4000);
 
-        assertEquals(2, agent1.getRegistrations().getAgents().size(), "There should be 2 agents known by agent1");
-        assertEquals(2, agent2.getRegistrations().getAgents().size(), "There should be 2 agents known by agent2");
+        int maxTime = 3;
+        for (int t=0; t<maxTime; t++) {
+            log.info("TIME IS RUNNING................................ minutes: " + t + " of " + maxTime);
+            log.info("========-----> Agent1: " + agent1.getAgentInfo());
+            log.info("========-----> Agent2: " + agent2.getAgentInfo());
+            DistUtils.sleep(60000);
+        }
+
+        assertEquals(1, agent1.getRegistrations().getAgentsActiveCount(), "There should be 1 agent known by agent1");
+        assertEquals(1, agent2.getRegistrations().getAgentsActiveCount(), "There should be 1 agent known by agent2");
 
         log.info("========-----> Agent1 client keys: " + agent1.getConnectors().getClientKeys());
         log.info("========-----> Agent2 client keys: " + agent2.getConnectors().getClientKeys());
@@ -65,7 +72,6 @@ public class AgentRegisterJdbcTest {
             return true;
         }));
 
-        int maxTime = 3;
         for (int t=0; t<maxTime; t++) {
             log.info("TIME IS RUNNING................................ minutes: " + t + " of " + maxTime);
             DistUtils.sleep(60000);

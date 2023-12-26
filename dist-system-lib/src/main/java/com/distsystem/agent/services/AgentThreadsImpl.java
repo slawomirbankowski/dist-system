@@ -79,6 +79,7 @@ public class AgentThreadsImpl extends ServiceBase implements AgentThreads {
     /** register thread to be maintained by Agent */
     public void registerThread(AgentComponent parent, Thread thread, String threadFriendlyName) {
         createEvent("registerThread");
+        touch("registerThread");
         synchronized (registeredThreads) {
             createdCount.incrementAndGet();
             AgentThreadObject thObj = new AgentThreadObject(parent, thread, threadFriendlyName);
@@ -94,6 +95,7 @@ public class AgentThreadsImpl extends ServiceBase implements AgentThreads {
     }
     /** stop thread for GUID or name*/
     public Optional<AgentThreadInfo> stopThread(String guid) {
+        touch("stopThread");
         createEvent("stopThread");
         Optional<AgentThreadObject> th = registeredThreads.stream().filter(t -> t.getThreadGuid().equals(guid)).findFirst();
         return th.map(t -> t.stopThread());

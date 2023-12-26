@@ -2,6 +2,8 @@ package com.distsystem.api.dtos;
 
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoTable;
+import com.distsystem.api.info.AgentMemoryRowInfo;
+import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.Map;
 /**  */
 public class DistAgentMemoryRow extends BaseRow {
 
+    private String memoryGuid;
     private String agentGuid;
     private long agentWorkingTime;
     private long memorySeq;
@@ -17,11 +20,12 @@ public class DistAgentMemoryRow extends BaseRow {
     private long memFree;
     private long memUsed;
     private long objectsCount;
-    private LocalDateTime createdDate;
     private int isActive;
+    private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;
 
     public DistAgentMemoryRow(String agentGuid, long agentWorkingTime, long memorySeq, long memMax, long memTotal, long memFree, long memUsed, long objectsCount, LocalDateTime createdDate, int isActive, LocalDateTime lastUpdatedDate) {
+        this.memoryGuid = DistUtils.generateCustomGuid("MEM");
         this.agentGuid = agentGuid;
         this.agentWorkingTime = agentWorkingTime;
         this.memorySeq = memorySeq;
@@ -30,11 +34,12 @@ public class DistAgentMemoryRow extends BaseRow {
         this.memFree = memFree;
         this.memUsed = memUsed;
         this.objectsCount = objectsCount;
-        this.createdDate = createdDate;
         this.isActive = isActive;
+        this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentMemoryRow(String agentGuid, long agentWorkingTime, long memorySeq, long memMax, long memTotal, long memFree, long memUsed, long objectsCount) {
+        this.memoryGuid = DistUtils.generateCustomGuid("MEM");
         this.agentGuid = agentGuid;
         this.agentWorkingTime = agentWorkingTime;
         this.memorySeq = memorySeq;
@@ -43,13 +48,13 @@ public class DistAgentMemoryRow extends BaseRow {
         this.memFree = memFree;
         this.memUsed = memUsed;
         this.objectsCount = objectsCount;
-        this.createdDate = LocalDateTime.now();
         this.isActive = 1;
+        this.createdDate = LocalDateTime.now();
         this.lastUpdatedDate = createdDate;
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, agentWorkingTime, memorySeq, memMax, memTotal, memFree, memUsed, objectsCount, createdDate, isActive, lastUpdatedDate };
+        return new Object[] { agentGuid, agentWorkingTime, memorySeq, memMax, memTotal, memFree, memUsed, objectsCount, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "memory",
@@ -63,6 +68,10 @@ public class DistAgentMemoryRow extends BaseRow {
                 "lastUpdatedDate", lastUpdatedDate.toString());
     }
 
+    /** create info from this row  */
+    public AgentMemoryRowInfo toInfo() {
+        return new AgentMemoryRowInfo(memorySeq, memMax, memTotal, memFree, memUsed, objectsCount, createdDate);
+    }
     /** get name of key attribute */
     public static String getKeyAttributeName() {
         return "agentGuid";

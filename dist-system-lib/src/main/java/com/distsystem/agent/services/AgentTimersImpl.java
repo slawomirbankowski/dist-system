@@ -79,10 +79,12 @@ public class AgentTimersImpl extends ServiceBase implements AgentTimers {
     /** schedule timer */
     public void setUpTimer(String timerName, String delayConfigName, long defaultTimerValue, Function<String, Boolean> onTask) {
         long timerPeriod = getAgent().getConfig().getPropertyAsLong(delayConfigName, defaultTimerValue);
+        touch("setUpTimer");
         setUpTimer(timerName, timerPeriod, timerPeriod, onTask);
     }
     /** set-up timer for given method */
     public void setUpTimer(String timerName, long delayMs, long periodMs, Function<String, Boolean> onTask) {
+        touch("setUpTimer");
         createEvent("setUpTimer");
         log.info("Scheduling timer task for agent: " + parentAgent.getAgentGuid() + ", name: " + timerName + ", current tasks count: " + timerTasks.size() + ", delay: " + delayMs + ", period: " + periodMs);
         AgentTimerTask agentTask = new AgentTimerTask(timerName, delayMs, periodMs, onTask);
@@ -113,6 +115,7 @@ public class AgentTimersImpl extends ServiceBase implements AgentTimers {
     }
     /** cancel timer with task for given name */
     public boolean cancelTimer(String timerName) {
+        touch("cancelTimer");
         createEvent("cancelTimer");
         timerTasks.stream().filter(tt -> tt.getName().equals(timerName)).forEach(tt -> {
             tt.close();

@@ -1,6 +1,8 @@
 package com.distsystem.base;
 
 import com.distsystem.api.*;
+import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentServiceSimpleInfo;
 import com.distsystem.api.info.DistConfigGroupInfo;
 import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.Agent;
@@ -50,6 +52,7 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
             .addHandlerGet("created", (m, req) -> req.responseOkText(getCreateDate().toString()))
             .addHandlerGet("uid", (m, req) -> req.responseOkText(getGuid()))
             .addHandlerGet("last-touch-date", (m, req) -> req.responseOkText(lastTouchDate.toString()))
+            .addHandlerGet("last-touch-by", (m, req) -> req.responseOkText(lastTouchBy))
             .addHandlerGet("service-apis", (m, req) -> req.responseOkJsonSerialize(getAllHandlers()))
             .addHandlerGet("service-type", (m, req) -> req.responseOkText(getServiceType().name()))
             .addHandlerGet("service-info", (m, req) -> req.responseOkJsonSerialize(getServiceInfo()))
@@ -96,6 +99,7 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     }
     /** read configuration and re-initialize this service */
     public boolean reinitialize() {
+        touch();
         createEvent("reinitialize");
         log.debug("Reinitialization of service in agent: " + parentAgent.getAgentGuid() + ", service: " + getServiceType().name() + ", UID: " + getGuid() + ", class: " + this.getClass().getName() + ", initializedCount: " + initializedCount.get());
         initializedCount.incrementAndGet();
@@ -209,7 +213,14 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
                 "initialized", initializedCount.get(),
                 "messages", messagesCount.get()
         );
-        return new DistServiceInfo(getServiceType(), getClass().getName(), getGuid(), createDate, lastTouchDate, closed, initialized, counters, getServiceInfoCustomMap(), getInfo());
+        return new DistServiceInfo(getServiceType(), getClass().getName(), getGuid(), getServiceDescription(),
+                createDate, lastTouchDate, lastTouchBy, closed, initialized,
+                getComponentKeys(), counters, getServiceInfoCustomMap(), getInfo());
+    }
+
+    /** get simple information about service */
+    public final AgentServiceSimpleInfo getServiceSimpleInfo() {
+        return new AgentServiceSimpleInfo(getServiceType(), getClass().getName(), getGuid(), createDate, lastTouchDate, closed, initialized);
     }
     /** get basic information about service */
     public Object getInfo() {
@@ -218,7 +229,8 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** get row for registration services */
     public DistAgentServiceRow getServiceRow() {
         // String agentguid, String serverguid, String servicetype, LocalDateTime createddate, int isactive, LocalDateTime lastpingdate
-        return new DistAgentServiceRow(parentAgent.getAgentGuid(), getGuid(), getServiceType().name(), JsonUtils.serialize(getServiceInfo()), createDate, (closed)?0:1, LocalDateTime.now());
+        return new DistAgentServiceRow(parentAgent.getAgentGuid(), getGuid(), getServiceType().name(),
+                JsonUtils.serialize(getServiceInfo()), createDate, (closed)?0:1, LocalDateTime.now());
     }
     /** add component to this service */
     public final void addComponent(AgentComponent component) {

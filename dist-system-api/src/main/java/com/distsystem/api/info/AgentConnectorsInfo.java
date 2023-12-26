@@ -7,27 +7,26 @@ import java.util.List;
 /** information class about connectors in Agent: servers and clients */
 public class AgentConnectorsInfo {
     private final List<AgentServerInfo> createdServers;
-    private final List<DistAgentServerRow> serverDefinitions;
-    private final List<ClientInfo> clientInfos;
-    public AgentConnectorsInfo(List<AgentServerInfo> createdServers, List<DistAgentServerRow> serverDefinitions, List<ClientInfo> clientInfos) {
+    private final List<DistAgentServerRow> agents;
+    private final List<ClientInfo> clients;
+    public AgentConnectorsInfo(List<AgentServerInfo> createdServers, List<DistAgentServerRow> agents, List<ClientInfo> clients) {
         this.createdServers = createdServers;
-        this.serverDefinitions = serverDefinitions;
-        this.clientInfos = clientInfos;
+        this.agents = agents;
+        this.clients = clients;
     }
     public List<AgentServerInfo> getCreatedServers() {
         return createdServers;
     }
-    public List<DistAgentServerRow> getServerDefinitions() {
-        return serverDefinitions;
+    public List<DistAgentServerRow> getAgents() {
+        return agents;
     }
-    public List<ClientInfo> getClientInfos() {
-        return clientInfos;
+    public List<ClientInfo> getClients() {
+        return clients;
     }
-
 
     @Override
     public java.lang.String toString() {
-        return "SRV,createdServers=" + createdServers + ",serverDefinitions=" + serverDefinitions + ",clientInfos=" + clientInfos;
+        return "SRV,createdServers=" + createdServers + ",serverDefinitions=" + agents.size() + ",clientInfos=" + clients.size();
     }
 }
 

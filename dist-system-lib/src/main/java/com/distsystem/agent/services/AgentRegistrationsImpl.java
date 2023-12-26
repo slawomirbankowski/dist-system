@@ -131,6 +131,10 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
     public int getAgentsCount() {
         return agents.size();
     }
+    /** get number of active agents */
+    public long getAgentsActiveCount() {
+        return agents.values().stream().filter(AgentObject::isActive).count();
+    }
 
     /** register server for ROW */
     public void registerServer(DistAgentServerRow servDto) {
@@ -146,6 +150,10 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
     /** get list of agents possible to connect */
     public List<DistAgentRegisterRow> getAgents() {
         return agents.values().stream().map(AgentObject::getSimplified).collect(Collectors.toList());
+    }
+    /** get all active agents */
+    public List<DistAgentRegisterRow> getAgentsActive() {
+        return agents.values().stream().filter(AgentObject::isActive).map(AgentObject::getSimplified).collect(Collectors.toList());
     }
     /** get all registrations */
     public List<Registration> getRegistrations() {
@@ -170,9 +178,12 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
             return Optional.empty();
         }
     }
+
     /** run by agent every X seconds */
     public boolean onTimeRegisterRefresh() {
         try {
+            checkCount.incrementAndGet();
+            log.info("Timer registration check, seq: " + checkCount.get() +", working time: " + parentAgent.getAgentWorkingTime());
             createEvent("onTimeRegisterRefresh");
             pingAllRegistrations();
             checkActiveAgents();
@@ -269,7 +280,6 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
                 DistUtils.getCurrentHostName(), DistUtils.getCurrentHostAddress(),
                 parentAgent.getApi().getPort(), parentAgent.getCreateDate(), agents, true);
         List<DistAgentServiceRow> serviceRows = parentAgent.getServices().getServiceRows();
-
         List<DistAgentServerRow> serverRows = parentAgent.getConnectors().getServerRows();
         try {
             synchronized (registrations) {

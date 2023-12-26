@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /** JSON utils */
@@ -25,6 +26,10 @@ public class JsonUtils {
                     .build();
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException ex) {
+            StackTraceElement[] sts = Thread.currentThread().getStackTrace();
+            Arrays.stream(sts).forEach(st -> {
+                System.out.print("]]]" + st.getFileName() + ":" + st.getMethodName() + ":" + st.getLineNumber());
+            });
             log.warn("CANNOT SERIALIZE OBJECT: " + obj.getClass().getName() + ", reason: " + ex.getMessage(), ex);
             return null;
         }

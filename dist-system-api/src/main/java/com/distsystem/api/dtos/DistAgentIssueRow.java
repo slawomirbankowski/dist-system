@@ -9,9 +9,7 @@ import java.util.Map;
 
 /** row for issues
  * */
-@DaoTable(tableName="distagentissue", keyName="guid", keyIsUnique=true)
 public class DistAgentIssueRow extends BaseRow {
-
 
     /** globally unique ID of this issue */
     private final String issueGuid;
@@ -83,17 +81,17 @@ public class DistAgentIssueRow extends BaseRow {
         return isActive;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getCreatedDate() {
+        return createdDate.toString();
     }
 
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
     }
 
     public Object[] toInsertRow() {
         return new Object[] { issueGuid, agentGuid, methodName, exceptionClass, exceptionMessage,
-                exceptionSerialized, JsonUtils.serialize(params),
+                exceptionSerialized, params,
                 isActive, createdDate, lastUpdatedDate
         };
     }

@@ -70,6 +70,7 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
 
     /** get info object for this reader */
     public AgentConfigReaderInfo getInfo() {
+
         return new AgentConfigReaderInfo(readCount.get(), readerObjectCount.get(), getReadersCount(), getReaderKeys());
     }
     /** resolve given value info full value */
@@ -138,9 +139,9 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         createEvent("onReinitialize");
         log.info("Initialization for ConfigReader to read from external sources for agent: " + parentAgent.getAgentGuid());
         registerConfigGroup(DistConfig.AGENT_CONFIGREADER_OBJECT);
-        parentAgent.getTimers().cancelTimer("AgentConfigReader");
+        parentAgent.getTimers().cancelTimer("CONFIG_READER");
         long timerMs = parentAgent.getConfig().getPropertyAsLong(DistConfig.AGENT_CONFIGREADER_TIMER, 60000L);
-        parentAgent.getTimers().setUpTimer("AgentConfigReader", timerMs, timerMs, x -> {
+        parentAgent.getTimers().setUpTimer("CONFIG_READER", timerMs, timerMs, x -> {
             readConfig();
             return true;
         });
