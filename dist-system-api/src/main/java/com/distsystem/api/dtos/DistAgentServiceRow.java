@@ -37,7 +37,7 @@ public class DistAgentServiceRow extends BaseRow {
     public String getServiceGuid() {
         return serviceGuid;
     }
-    public Object[] getObjectRow() {
+    public Object[] toObjectRow() {
         return new Object[] {agentGuid, serviceGuid, serviceType, createdDate, 1L, lastPingDate, lastUpdatedDate};
     }
 
@@ -45,16 +45,16 @@ public class DistAgentServiceRow extends BaseRow {
         return serviceType;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getCreatedDate() {
+        return createdDate.toString();
     }
 
     public int getIsActive() {
         return isActive;
     }
 
-    public LocalDateTime getLastPingDate() {
-        return lastPingDate;
+    public String getLastPingDate() {
+        return lastPingDate.toString();
     }
 
     public String getServiceInfoJson() {
@@ -65,8 +65,8 @@ public class DistAgentServiceRow extends BaseRow {
         this.serviceInfoJson = serviceInfoJson;
     }
 
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
     }
 
     public Object[] toInsertRow() {

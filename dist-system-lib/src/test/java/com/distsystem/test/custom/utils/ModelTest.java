@@ -35,6 +35,8 @@ public class ModelTest {
         log.info("-----> annotation:" + dt);
         var model = DaoModel.authAccount;
 
+        // insert into distagentauthaccount(accountName,domainName,accountAttributes,isActive,createdDate,lastUpdatedDate) values (?,?,?,?,?,?) on conflict (accountName) do update set domainName = EXCLUDED.domainName, accountAttributes = EXCLUDED.accountAttributes, isActive = EXCLUDED.isActive, createdDate = EXCLUDED.createdDate, lastUpdatedDate = EXCLUDED.lastUpdatedDate
+
         log.info("START ------ getName: " + model.getModelClass().getName());
         log.info("START ------ getSimpleName: " + model.getModelClass().getSimpleName());
         log.info("START ------ getPackageName: " + model.getModelClass().getPackageName());

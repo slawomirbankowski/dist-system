@@ -5,6 +5,7 @@ import com.distsystem.interfaces.Agentable;
 import com.distsystem.utils.DistUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 /** event from cache - full format with parent object, method, type and parameters  */
 public class AgentEvent {
@@ -48,10 +49,12 @@ public class AgentEvent {
         return params;
     }
 
+    /** search if event contains given string */
+    public boolean search(String str) {
+        return method.contains(str) || eventType.contains(str) || Arrays.stream(params).anyMatch(p -> p.toString().contains(str));
+    }
     /** get event row from this event */
     public DistAgentEventRow getEventRow() {
-        parent.getGuid();
-
         // TODO: add to event row service/agentable name and GUID of parent component that added this event
         return new DistAgentEventRow(eventGuid, createdDateTime, parent.getClass().getName(), parent.getGuid(), method, eventType, hostName);
     }

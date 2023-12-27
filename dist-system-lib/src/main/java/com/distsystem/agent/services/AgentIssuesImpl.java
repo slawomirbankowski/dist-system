@@ -1,8 +1,8 @@
 package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
+import com.distsystem.api.dtos.DistAgentIssueRow;
 import com.distsystem.api.enums.DistServiceType;
-import com.distsystem.api.info.EventsInfo;
 import com.distsystem.api.info.IssuesInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
-                .addHandlerGet("issues", (m, req) -> req.responseOkJsonSerialize(issues.stream().map(e -> e.toRow()).toList()))
+                .addHandlerGet("issues", (m, req) -> req.responseOkJsonSerialize(getIssueRowsLast()))
                 .addHandlerPost("clear", (m, req) -> req.responseOkJsonSerialize(clearIssues()))
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()));
     }
@@ -96,6 +97,9 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
         return issues;
     }
 
+    public List<DistAgentIssueRow> getIssueRowsLast() {
+        return issues.stream().limit(100).map(e -> e.toRow()).toList();
+    }
     /** get info about issues */
     public IssuesInfo getInfo() {
         return new IssuesInfo(addedIssuesCount.get(), issues.size(),

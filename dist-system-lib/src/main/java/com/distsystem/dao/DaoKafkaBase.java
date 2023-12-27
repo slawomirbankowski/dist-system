@@ -1,6 +1,7 @@
 package com.distsystem.dao;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.DistStatusMap;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
@@ -69,8 +70,8 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
     }
 
     /** test DAO and returns items */
-    public Map<String, Object> testDao() {
-        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    public DistStatusMap testDao() {
+        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
     /** get URL of this DAO */
     public String getUrl() {

@@ -47,4 +47,16 @@ public class AgentMemoryInfo {
     public AgentMemoryRowInfo getLastRow() {
         return lastRow;
     }
+    public double getUsedPercentage() {
+        return 100.0 * lastRow.getMemUsed() / (double)lastRow.getMemTotal();
+    }
+    public double getUsedToMaxPercentage() {
+        return 100.0 * lastRow.getMemUsed() / (double)lastRow.getMemMax();
+    }
+    public double getFreePercentage() {
+        return 100.0 * lastRow.getMemFree() / (double)lastRow.getMemTotal();
+    }
+    public double getFreeToMaxPercentage() {
+        return 100.0 * lastRow.getMemFree() / (double)lastRow.getMemMax();
+    }
 }

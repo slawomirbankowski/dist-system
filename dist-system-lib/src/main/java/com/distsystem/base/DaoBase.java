@@ -1,6 +1,7 @@
 package com.distsystem.base;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.DistStatusMap;
 import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentDaoInfo;
@@ -33,7 +34,7 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
         this.params = params;
     }
     /** reinitialize this DAO and test it */
-    public Map<String, Object> reinitializeDao() {
+    public DistStatusMap reinitializeDao() {
         componentReinitialize();
         return testDao();
     }

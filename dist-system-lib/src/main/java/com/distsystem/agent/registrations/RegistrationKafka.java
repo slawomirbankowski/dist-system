@@ -136,7 +136,7 @@ public class RegistrationKafka extends RegistrationBase {
     }
     /** remove active agents without last ping date for more than X minutes */
     public boolean removeInactiveAgents(LocalDateTime beforeDate) {
-        agents.values().stream().filter(a -> a.getActive() == 1 && a.getLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
+        agents.values().stream().filter(a -> a.getActive() == 1 && a.originalLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
         return true;
     }
     /** remove inactive agents with last ping date for more than X minutes */

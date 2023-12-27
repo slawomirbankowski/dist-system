@@ -37,7 +37,7 @@ public class AgentScheduleImpl extends ServiceBase implements AgentSchedule {
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
-                .addHandlerPost("ml-models", (m, req) -> req.responseOkJsonSerialize(new LinkedList<String>()));
+                .addHandlerPost("schedules", (m, req) -> req.responseOkJsonSerialize(new LinkedList<String>()));
     }
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {

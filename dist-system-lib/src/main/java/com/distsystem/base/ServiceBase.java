@@ -1,6 +1,7 @@
 package com.distsystem.base;
 
 import com.distsystem.api.*;
+import com.distsystem.api.dtos.DistAgentEventRow;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentServiceSimpleInfo;
 import com.distsystem.api.info.DistConfigGroupInfo;
@@ -48,24 +49,24 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** processor class for Web API - instant synchronized API to be used directly with Agent service */
     protected final DistWebApiProcessor webApiProcessor = new DistWebApiProcessor(getServiceType())
             .addHandlerGet("_self", (m, req) -> req.responseOkJsonSerialize(req))
-            .addHandlerGet("ping", (m, req) -> req.responseOkText("ping"))
-            .addHandlerGet("created", (m, req) -> req.responseOkText(getCreateDate().toString()))
-            .addHandlerGet("uid", (m, req) -> req.responseOkText(getGuid()))
-            .addHandlerGet("last-touch-date", (m, req) -> req.responseOkText(lastTouchDate.toString()))
-            .addHandlerGet("last-touch-by", (m, req) -> req.responseOkText(lastTouchBy))
+            .addHandlerGet("ping", (m, req) -> req.responseOkText("pong"))
+            .addHandlerGet("service-created", (m, req) -> req.responseOkText(getCreateDate().toString()))
+            .addHandlerGet("service-uid", (m, req) -> req.responseOkText(getGuid()))
+            .addHandlerGet("service-last-touch-date", (m, req) -> req.responseOkText(lastTouchDate.toString()))
+            .addHandlerGet("service-last-touch-by", (m, req) -> req.responseOkText(lastTouchBy))
             .addHandlerGet("service-apis", (m, req) -> req.responseOkJsonSerialize(getAllHandlers()))
             .addHandlerGet("service-type", (m, req) -> req.responseOkText(getServiceType().name()))
             .addHandlerGet("service-info", (m, req) -> req.responseOkJsonSerialize(getServiceInfo()))
             .addHandlerGet("service-search", (m, req) -> req.responseOkJsonSerialize(searchInService(req)))
-            .addHandlerGet("service-events", (m, req) -> req.responseOkJsonSerialize(agentableEvents.stream().map(e -> e.getEventRow()).toList()))
+            .addHandlerGet("service-events", (m, req) -> req.responseOkJsonSerialize(getServiceEventRows()))
             .addHandlerGet("service-requests", (m, req) -> req.responseOkJsonSerialize(getLatestRequests()))
             .addHandlerGet("service-messages", (m, req) -> req.responseOkJsonSerialize(getLatestRequests()))
             .addHandlerGet("service-method-handlers", (m, req) -> req.responseOkJsonSerialize(getMessageHandlerMethods()))
-            .addHandlerPost("reinitialize", (m, req) -> req.responseOkJsonSerialize(getServiceInfo()))
-            .addHandlerGet("components", (m, req) -> req.responseOkText(JsonUtils.serialize(getComponentKeys())))
-            .addHandlerGet("closed", (m, req) -> req.responseOkText( ""+isClosed()))
-            .addHandlerGet("initialized", (m, req) -> req.responseOkText( ""+isInitialized()))
-            .addHandlerGet("config-group", (m, req) -> req.responseOkJsonSerialize((configGroup==null)?DistConfigGroupInfo.emptyInfo():configGroup.getInfo()))
+            .addHandlerPost("service-reinitialize", (m, req) -> req.responseOkJsonSerialize(getServiceInfo()))
+            .addHandlerGet("service-components", (m, req) -> req.responseOkText(JsonUtils.serialize(getComponentKeys())))
+            .addHandlerGet("service-closed", (m, req) -> req.responseOkText( ""+isClosed()))
+            .addHandlerGet("service-initialized", (m, req) -> req.responseOkText( ""+isInitialized()))
+            .addHandlerGet("service-config-group", (m, req) -> req.responseOkJsonSerialize((configGroup==null)?DistConfigGroupInfo.emptyInfo():configGroup.getInfo()))
             .merge(additionalWebApiProcessor());
 
     /** creates new service with agent */
@@ -92,6 +93,10 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     public final List<String> getComponentKeys() {
         return componentList.stream().map(c -> c.getComponentType().name()).toList();
     }
+    /** get agentable event rows */
+    public List<DistAgentEventRow> getServiceEventRows() {
+        return agentableEvents.stream().map(e -> e.getEventRow()).toList();
+    }
 
     /** get name of this agentable object */
     public String getAgentableName() {
@@ -110,7 +115,8 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** read configuration and re-initialize this service - to override */
     protected abstract boolean onReinitialize();
     /** change values in configuration bucket - to override this method */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+        return DistStatusMap.create(this).notImplemented();
     }
     /** run after initialization */
     public void afterInitialization() {
@@ -215,7 +221,7 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
         );
         return new DistServiceInfo(getServiceType(), getClass().getName(), getGuid(), getServiceDescription(),
                 createDate, lastTouchDate, lastTouchBy, closed, initialized,
-                getComponentKeys(), counters, getServiceInfoCustomMap(), getInfo());
+                getComponentKeys(), counters, getServiceInfoCustomMap(), webApiProcessor.getInfo(), getInfo());
     }
 
     /** get simple information about service */

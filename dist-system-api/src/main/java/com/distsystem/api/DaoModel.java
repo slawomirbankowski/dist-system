@@ -28,12 +28,14 @@ public class DaoModel<T extends BaseRow> {
     private final String selectByNameQuery;
     private final String insertQuery;
     private final String insertQueryNoConflict;
+    private final String insertQueryUpdateOnConflict;
     private final String updateByKeyQuery;
 
     private boolean keyIsUnique;
     private final String deleteOldQuery;
     private final String deleteByKeyQuery;
     private final List<String> columns;
+    private final List<String> columnUpdateList;
     private final Map<String, String> columnTypes;
     private final String columnList;
 
@@ -48,12 +50,11 @@ public class DaoModel<T extends BaseRow> {
             this.keyName = calculateKeyName();
             this.keyIsUnique = calculateKeyIsUnique();
         } else {
-            log.info("dt: " + dt);
             this.tableName = dt.tableName().toLowerCase();
             this.keyName = dt.keyName().toLowerCase();
             this.keyIsUnique = dt.keyIsUnique();
         }
-        log.info("DaoModel: " + modelClass.getName() + ", table: " + tableName + ", key: " + keyName);
+        this.columnUpdateList = columns.stream().filter(col -> !col.equals(keyName) && !col.equals("createdDate")).collect(Collectors.toList());
         this.selectAllQuery = "select * from " + tableName;
         this.selectAllDescQuery = selectAllQuery + " order by createdDate desc";
         this.selectAllActiveQuery = "select * from " + tableName + " where isActive=1";
@@ -61,9 +62,12 @@ public class DaoModel<T extends BaseRow> {
         String questionList = columns.stream().map(x -> "?").collect(Collectors.joining(","));
         this.insertQuery = "insert into " + tableName + "(" + columnList + ") values (" + questionList + ")";
         this.insertQueryNoConflict = insertQuery + " on conflict do nothing";
+        String insertConflictUpdateSql = columnUpdateList.stream().map(col -> col + " = EXCLUDED." + col).collect(Collectors.joining(", "));
+        this.insertQueryUpdateOnConflict = insertQuery + " on conflict (" + keyName + ") do update set " + insertConflictUpdateSql;
         this.updateByKeyQuery = "update " + tableName + " set columns...=? where " + keyName + "=?";
         this.deleteOldQuery = "delete from " + tableName + " where createdDate<?";
         this.deleteByKeyQuery = "delete from " + tableName + " where " + keyName + "=?";
+        log.info("DaoModel: " + modelClass.getName() + ", table: " + tableName + ", key: " + keyName + ", keyIsUnique: " + keyIsUnique + "columns: " + columnList + "");
     }
     /** calculate list of columns based on declared fields for DTO class */
     private List<String> calculateColumns(Class<T> cl) {
@@ -154,6 +158,27 @@ public class DaoModel<T extends BaseRow> {
             String unq = (keyIsUnique)?"unique":"";
             return "create " + unq + " index idx_" + tableName + "_" + keyName + " on " + tableName + "(" + keyName + ")";
         }
+    }
+    public String getSelectByNameQuery() {
+        return selectByNameQuery;
+    }
+    public String getInsertQueryUpdateOnConflict() {
+        return insertQueryUpdateOnConflict;
+    }
+    public String getUpdateByKeyQuery() {
+        return updateByKeyQuery;
+    }
+    public boolean isKeyIsUnique() {
+        return keyIsUnique;
+    }
+    public String getDeleteByKeyQuery() {
+        return deleteByKeyQuery;
+    }
+    public List<String> getColumnUpdateList() {
+        return columnUpdateList;
+    }
+    public Map<String, String> getColumnTypes() {
+        return columnTypes;
     }
     /** convert row into T object */
     public T convert(Map<String, Object> map) {

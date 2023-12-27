@@ -1,6 +1,7 @@
 package com.distsystem.interfaces;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.DistStatusMap;
 import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.info.AgentDaoInfo;
 import com.distsystem.api.info.AgentDaoSimpleInfo;
@@ -14,9 +15,9 @@ public interface Dao {
     /** returns true if DAO is connected */
     boolean isConnected();
     /** test DAO and returns items */
-    Map<String, Object> testDao();
+    DistStatusMap testDao();
     /** */
-    Map<String, Object> reinitializeDao();
+    DistStatusMap reinitializeDao();
     /** get initialization parameters */
     DaoParams getParams();
     /** close current DAO */

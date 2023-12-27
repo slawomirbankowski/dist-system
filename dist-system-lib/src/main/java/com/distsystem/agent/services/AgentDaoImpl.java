@@ -63,8 +63,9 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     public void updateConfig(DistConfig newCfg) {
     }
     /** change values in configuration bucket */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
         // INITIALIZE DAOs
+        return DistStatusMap.create(this).notImplemented();
     }
     /** run after initialization */
     public void afterInitialization() {
@@ -102,7 +103,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** close DAO */
     public List<AgentDaoSimpleInfo> daoClose(String daoGuid) {
-        touch();
+        touch("daoClose");
         log.info("Try to close DAO by GUID: " + daoGuid);
         createEvent("daoClose", "DAO_CLOSE", daoGuid);
         return getDaoOrEmpty(daoGuid).stream().map(d -> {
@@ -120,14 +121,15 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** re-initialize DAO, reconnect */
     public Map<String, Object> daoCreateFromJson(String bodyJson) {
+        DistStatusMap status = DistStatusMap.create(this);
         try {
-            touch();
+            touch("daoCreateFromJson");
             createEvent("daoCreateFromJson");
             log.info("Try to create DAO with parameters for agent: " + parentAgent.getAgentGuid() + ", current DAOs: " + daos.size());
             Map<String, Object> props = JsonUtils.deserializeToMapOfObjects(bodyJson);
             DaoParams params = DaoParams.fromMap(props);
             Optional<Dao> dao = createDao(params.getKey(), params);
-            return dao.stream().map(x -> x.testDao()).findFirst().orElse(Map.of("exists", false));
+            return dao.stream().map(x -> status.appendMap(x.testDao())).findFirst().orElse(status.withStatus("NOT_TESTED"));
         } catch (Exception ex) {
             log.warn("Cannot create DAO for parameters, agent: " + parentAgent.getAgentGuid() + ", reason: " + ex.getMessage(), ex);
             addIssueToAgent("daoCreateFromJson", ex);
@@ -135,15 +137,16 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
         }
     }
     /** re-initialize DAO, reconnect */
-    public Map<String, Object> daoReconnect(String daoGuid) {
+    public DistStatusMap daoReconnect(String daoGuid) {
+        DistStatusMap status = DistStatusMap.create(this);
         //return getDaoOrEmpty(daoGuid).stream().map(d -> d.re()).toList();
         createEvent("daoReconnect", "", daoGuid);
-        touch();
+        touch("daoReconnect");
         Dao d = daos.get(daoGuid);
         if (d != null) {
-            return d.reinitializeDao();
+            return status.join(d.reinitializeDao());
         } else {
-            return Map.of("exists", false);
+            return status.withStatus("not_exists");
         }
     }
 
@@ -165,7 +168,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     }
     /** get DAO info objects for all initialized DAOs*/
     public List<AgentDaoInfo> getDaoInfos() {
-        log.info("!!!!!!!!!!!!!!!!!!!! DAO info - current daos: " + daos.size());
+        log.info("DAO info - current daos: " + daos.size());
         return daos.values().stream().map(d -> d.getInfo()).toList();
     }
     /** get all DAOs for all types */
@@ -180,6 +183,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
             return getOrCreateDaoObject(daoClass, params);
         } catch (Exception ex) {
             log.warn("Could not create DAO for class:" + daoClass.getName() + ", reason: " + ex.getMessage());
+            addIssueToAgent("getAllDaos", ex);
             return Optional.empty();
         }
     }
@@ -278,6 +282,7 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     /** create all DAOs for given names with parameters */
     public void createDaos(Map<String, DaoParams> daos) {
         touch("createDaos");
+        createEvent("createDaos");
         daos.entrySet().stream().forEach(dp -> {
             createDao(dp.getKey(), dp.getValue());
         });

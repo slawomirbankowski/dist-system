@@ -1,6 +1,7 @@
 package com.distsystem.interfaces;
 
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.DistStatusMap;
 import com.distsystem.api.enums.DistDaoType;
 import com.distsystem.api.info.AgentDaoInfo;
 import com.distsystem.api.info.AgentDaoSimpleInfo;
@@ -34,7 +35,7 @@ public interface AgentDao extends DistService {
     /** simple info for DAO */
     List<AgentDaoSimpleInfo> daoSimpleInfo(String daoGuid);
     /** re-initialize DAO, reconnect */
-    Map<String, Object> daoReconnect(String daoGuid);
+    DistStatusMap daoReconnect(String daoGuid);
     /** get all keys for DAO producers */
     Set<String> getDaoProducerKeys();
     /** test connectivity of one DAO */

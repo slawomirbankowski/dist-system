@@ -43,7 +43,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     /** short GUID of agent  */
     private String agentShortGuid;
 
-    /** manager for services registered in agent  */
+    /** manager for services registered in agent - that one MUST BE first in agent definition, because all other services would be added here */
     private final AgentServices services = new AgentServicesImpl(this);
     /** external configuration reader */
     private final AgentConfigReader agentConfigReader = new AgentConfigImpl(this);
@@ -133,6 +133,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
         agentDao.createDaos(daos);
         log.info("CREATING NEW AGENT with guid: " + getAgentGuid() + " FINISHED");
         touch("AgentInstance");
+        createEvent("AgentInstance");
     }
 
     /** count objects in this agentable object including this object */
@@ -365,11 +366,10 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** get high-level information about this agent */
     public AgentInfo getAgentInfo() {
-        return new AgentInfo(guid, getDistName(), getAgentName(), createDate, closed,
+        return new AgentInfo(guid,
+                getEnvironmentType(), getEnvironmentName(),
+                getDistName(), getAgentName(), createDate, closed,
                 getAgentTags(),
-                componentList.stream().map(c -> c.getComponentType().name()).toList(),
-                agentConfigReader.getInfo(),
-                messageProcessor.getInfo(),
                 services.getServiceInfos(),
                 config.getConfigGroupInfos());
     }
@@ -438,6 +438,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** close all items in this agent */
     public void onClose() {
+        createEvent("onClose");
         log.info("Closing agent: " + guid);
         closed = true;
         log.info("Agent is trying to close APIs, agent: " + guid);
@@ -557,13 +558,16 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     /** wait in this thread till agent would be killed by external command */
     public void waitTillKill() {
         try {
+            createEvent("waitTillKill");
             log.info("Agent will be waiting in this thread till closed, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
             while (!closed) {
                 log.trace("Waiting for agent to be killed.");
                 Thread.sleep(5000L);
             }
+            createEvent("waitTillKill:killed");
             log.info("Agent has been closed with success, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
         } catch (InterruptedException ex) {
+            createEvent("waitTillKill:exception");
             log.info("Agent will be waiting in this thread till closed, GUID: " + getAgentGuid() + ", workingTimeMs: " + getCurrentWorkingTimeMs());
         }
     }

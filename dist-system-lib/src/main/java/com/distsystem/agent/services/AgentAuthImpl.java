@@ -10,6 +10,7 @@ import com.distsystem.base.AuthTokenBase;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentAuth;
+import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 
 import java.util.LinkedList;
@@ -52,16 +53,16 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
         // TODO: implement reinitialization
         registerConfigGroup(DistConfig.AGENT_AUTH_STORAGE);
 
-
         return true;
     }
     /** change values in configuration bucket */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
         // TODO: insert, update, delete of bucket
-        createAuthStorage(bucket);
+        return createAuthStorage(bucket);
     }
     /** create new auth from bucket */
-    public void createAuthStorage(DistConfigBucket bucket) {
+    public DistStatusMap createAuthStorage(DistConfigBucket bucket) {
+        DistStatusMap status = DistStatusMap.create(this);
         String readerClass = DistConfig.AGENT_AUTH_STORAGE_CLASS_MAP.get(bucket.getKey().getConfigType());
         log.info("Create new Auth storage for type: " + bucket.getKey().getConfigType() + ", class: " + readerClass);
         createEvent("createAuthStorage");
@@ -73,9 +74,12 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
                     .getConstructor(ServiceObjectParams.class)
                     .newInstance(params);
             auths.put(bucket.getKey().toString(), authObj);
+
+            return status;
         } catch (Exception ex) {
             log.info("Cannot initialize auth storage for agent: "  + parentAgent.getAgentGuid() + ", class: " + readerClass + ", reason: " + ex.getMessage(), ex);
             addIssueToAgent("createAuthStorage", ex);
+            return status.exception(ex);
         }
     }
 
@@ -107,13 +111,13 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
     /** find account by name */
     public Optional<DistAgentAuthAccountRow> findAccount(String accountName) {
         return auths.values().stream()
-                .flatMap(x -> x.findAccount(accountName).stream())
+                .flatMap(stb -> stb.findAccount(accountName).stream())
                 .findFirst();
     }
     /** find account by name */
     public List<DistAgentAuthAccountRow> searchAccounts(String searchString) {
         return auths.values().stream()
-                .flatMap(x -> x.searchAccounts(searchString).stream())
+                .flatMap(stb -> stb.searchAccounts(searchString).stream())
                 .toList();
     }
     /** get set of priviliges for selected account */

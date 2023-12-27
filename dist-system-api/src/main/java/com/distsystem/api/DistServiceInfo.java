@@ -1,6 +1,8 @@
 package com.distsystem.api;
 
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentMessageProcessorInfo;
+import com.distsystem.api.info.DistWebApiInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +25,7 @@ public class DistServiceInfo {
     private final List<String> componentKeys;
     private final Map<String, Long> counters;
     private final Map<String, String> customAttributes;
+    private final DistWebApiInfo webApiInfo;
     /** custom info */
     private final Object info;
 
@@ -31,7 +34,8 @@ public class DistServiceInfo {
                            LocalDateTime createdDateTime, LocalDateTime lastTouchDate, String lastTouchBy,
                            boolean closed, boolean initialized,
                            List<String> componentKeys, Map<String, Long> counters,
-                           Map<String, String> customAttributes, Object info) {
+                           Map<String, String> customAttributes, DistWebApiInfo webApiInfo,
+                           Object info) {
         this.serviceType = serviceType;
         this.serviceClass = serviceClass;
         this.serviceGuid = serviceGuid;
@@ -44,6 +48,7 @@ public class DistServiceInfo {
         this.componentKeys = componentKeys;
         this.counters = counters;
         this.customAttributes = customAttributes;
+        this.webApiInfo = webApiInfo;
         this.info = info;
     }
 
@@ -97,6 +102,9 @@ public class DistServiceInfo {
     }
     public Map<String, String> getCustomAttributes() {
         return customAttributes;
+    }
+    public DistWebApiInfo getWebApiInfo() {
+        return webApiInfo;
     }
 
     @Override

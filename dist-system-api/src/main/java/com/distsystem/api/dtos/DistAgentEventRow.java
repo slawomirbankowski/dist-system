@@ -34,6 +34,30 @@ public class DistAgentEventRow extends BaseRow {
         this.lastUpdatedDate = createdDate;
     }
 
+    public String getEventGuid() {
+        return eventGuid;
+    }
+
+    public String getParentGuid() {
+        return parentGuid;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public int getIsActive() {
+        return isActive;
+    }
+
+    public String getCreatedDate() {
+        return createdDate.toString();
+    }
+
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
+    }
+
     public String getCreatedDateTime() {
         return createdDateTime.toString();
     }

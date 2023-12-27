@@ -308,6 +308,11 @@ public class DistUtils {
         }
         return b.toString();
     }
+
+    /** */
+    public static Map<String, String> statusMapException(Exception ex) {
+        return Map.of("status", "exception", "reason", ex.getMessage(), "exception", serializeException(ex));
+    }
     public static String serializeException(Exception ex) {
         if (ex==null) {
             return "null";

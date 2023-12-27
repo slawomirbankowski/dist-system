@@ -13,6 +13,7 @@ import com.distsystem.interfaces.AgentMemory;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -35,12 +36,6 @@ public class AgentMemoryImpl extends ServiceBase implements AgentMemory {
     public AgentMemoryImpl(Agent parentAgent) {
         super(parentAgent);
         parentAgent.getServices().registerService(this);
-        AgentMemoryRowInfo row = createMemoryRow().toInfo();
-        countRow.incrementAndGet();
-        minRow = row;
-        maxRow = row;
-        sumRow = row;
-        lastRow = row;
     }
 
     /** count objects in this agentable object including this object */
@@ -93,7 +88,10 @@ public class AgentMemoryImpl extends ServiceBase implements AgentMemory {
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
-                .addHandlerPost("memories", (m, req) -> req.responseOkJsonSerialize(new LinkedList<String>()));
+                .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()))
+                .addHandlerGet("memory-now", (m, req) -> req.responseOkJsonSerialize(createMemoryRow()))
+                .addHandlerGet("memory-states", (m, req) -> req.responseOkJsonSerialize(memoryStates))
+                .addHandlerPost("gc", (m, req) -> req.responseOkJsonSerialize(runGc()));
     }
     /** get sequence of this memory in current agent */
     public long getMemorySeq() {
@@ -101,10 +99,12 @@ public class AgentMemoryImpl extends ServiceBase implements AgentMemory {
     }
     /** create single row with memory stats */
     public DistAgentMemoryRow createMemoryRow() {
+        createEvent("createMemoryRow");
         Runtime rt = java.lang.Runtime.getRuntime();
         long freeMemory = rt.freeMemory();
         long totalMemory = rt.totalMemory();
         long maxMemory = rt.maxMemory();
+        memorySeq.incrementAndGet();
         return new DistAgentMemoryRow(parentAgent.getAgentGuid(),
                 System.currentTimeMillis()- parentAgent.getAgentStartTime(), memorySeq.incrementAndGet(),
                 maxMemory, totalMemory, freeMemory, totalMemory-freeMemory, parentAgent.countAgentObjects());
@@ -113,12 +113,27 @@ public class AgentMemoryImpl extends ServiceBase implements AgentMemory {
     public void updateConfig(DistConfig newCfg) {
         // TODO: update configuration of this service
     }
+    /** run GC */
+    public Map<String, Object> runGc() {
+        createEvent("runGc");
+        long startTime = System.currentTimeMillis();
+        System.gc();
+        long runTimeMs = System.currentTimeMillis() - startTime;
+        return Map.of("date", LocalDateTime.now().toString(),
+                "runTimeMs", ""+runTimeMs);
+    }
     @Override
     protected void onClose() {
     }
 
     /** read configuration and re-initialize this component */
     protected boolean onReinitialize() {
+        AgentMemoryRowInfo row = createMemoryRow().toInfo();
+        countRow.incrementAndGet();
+        minRow = row;
+        maxRow = row;
+        sumRow = row;
+        lastRow = row;
         log.debug("Set up timer to save memory state, agent: " + getParentAgentGuid());
         parentAgent.getTimers().cancelTimer("MEMORY_STATE");
         parentAgent.getTimers().setUpTimer("MEMORY_STATE", DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD, DistConfig.AGENT_CACHE_TIMER_REGISTRATION_PERIOD_DELAY_VALUE, x -> onTimeMemoryCheck());

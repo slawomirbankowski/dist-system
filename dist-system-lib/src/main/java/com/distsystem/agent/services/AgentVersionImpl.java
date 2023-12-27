@@ -37,7 +37,7 @@ public class AgentVersionImpl extends ServiceBase implements AgentVersion {
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
-                .addHandlerPost("ml-models", (m, req) -> req.responseOkJsonSerialize(new LinkedList<String>()));
+                .addHandlerPost("versions", (m, req) -> req.responseOkJsonSerialize(new LinkedList<String>()));
     }
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {

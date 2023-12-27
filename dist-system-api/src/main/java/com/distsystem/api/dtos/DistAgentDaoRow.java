@@ -23,7 +23,7 @@ public class DistAgentDaoRow extends BaseRow {
     private final LocalDateTime lastUpdatedDate;
 
     public DistAgentDaoRow(String agentGuid, String daoKey, String daoType, String daoUrl, String structureList, int isActive, LocalDateTime createdDate, LocalDateTime lastUpdatedDate) {
-        this.daoGuid = DistUtils.generateCustomGuid("");
+        this.daoGuid = DistUtils.generateCustomGuid("DAO_");
         this.agentGuid = agentGuid;
         this.daoKey = daoKey;
         this.daoType = daoType;
@@ -34,7 +34,7 @@ public class DistAgentDaoRow extends BaseRow {
         this.lastUpdatedDate = lastUpdatedDate;
     }
     public DistAgentDaoRow(String agentGuid, String daoKey, String daoType, String daoUrl, String structureList) {
-        this.daoGuid = DistUtils.generateCustomGuid("");
+        this.daoGuid = DistUtils.generateCustomGuid("DAO_");
         this.agentGuid = agentGuid;
         this.daoKey = daoKey;
         this.daoType = daoType;
@@ -96,7 +96,10 @@ public class DistAgentDaoRow extends BaseRow {
 
     /** get name of key attribute */
     public static String getKeyAttributeName() {
-        return "daoGuid";
+        return "daoKey";
+    }
+    public static Boolean getKeyIsUnique() {
+        return true;
     }
     public static DistAgentDaoRow fromMap(Map<String, Object> map) {
         AdvancedMap m = new AdvancedMap(map, true);

@@ -3,13 +3,17 @@ package com.distsystem.agent.services;
 import com.distsystem.agent.semaphore.SemaphoreBase;
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
-import com.distsystem.api.info.AgentMemoryInfo;
+import com.distsystem.api.info.AgentSemaphoreManagerInfo;
 import com.distsystem.api.info.AgentSemaphoresInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentSemaphores;
+import com.distsystem.utils.DistUtils;
+import com.distsystem.utils.DistWebApiProcessor;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -18,6 +22,8 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
 
     /** all available semaphore implementations */
     private final java.util.Map<String, SemaphoreBase> semaphoreManagers = new HashMap<>();
+    /**  all known semaphores */
+    private final java.util.Map<String, AgentSemaphoreLocal> semaphores = new HashMap<>();
 
     /** creates new ML service */
     public AgentSemaphoresImpl(Agent parentAgent) {
@@ -36,8 +42,8 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
         return true;
     }
     /** change values in configuration bucket */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
-        initializeSemaphore(bucket);
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+        return initializeSemaphore(bucket);
     }
 
     /** run after initialization */
@@ -50,8 +56,10 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     }
 
     /** initialization of semaphore manager for given class name */
-    private void initializeSemaphore(DistConfigBucket bucket) {
+    private DistStatusMap initializeSemaphore(DistConfigBucket bucket) {
+        DistStatusMap status = DistStatusMap.create(this);
         touch("initializeSemaphore");
+        createEvent("initializeSemaphore", bucket.getKey().getConfigType());
         String className = DistConfig.AGENT_SEMAPHORE_CLASS_MAP.get(bucket.getKey().getConfigType());
         try {
             log.info("Try to create new semaphore manager for agent: " + parentAgent.getAgentGuid() + ", class: " + className + ", bucket key: " + bucket.getKey());
@@ -59,8 +67,10 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
                     .getConstructor(ServiceObjectParams.class)
                     .newInstance(ServiceObjectParams.create(parentAgent, this, className, bucket));
             semaphoreManagers.put(bucket.getKey().toString(), sem);
+            return status.withStatus("OK");
         } catch (Exception ex) {
             log.warn("Cannot initialize semaphore manager for agent: " + parentAgent.getAgentGuid() + ", class: " + className + ", reason: " + ex.getMessage());
+            return status.exception(ex);
         }
     }
     @Override
@@ -69,18 +79,43 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "Distributed semaphores";
+        return "Distributed semaphores that can be locked so method could be run once across all agents.";
     }
+    /** additional web API endpoints */
+    protected DistWebApiProcessor additionalWebApiProcessor() {
+        return new DistWebApiProcessor(getServiceType())
+                .addHandlerGet("semaphore-managers", (m, req) -> req.responseOkJsonSerialize(getSemaphoreManagerInfos()));
+    }
+    /** get info objects for semaphore managers */
+    public List<AgentSemaphoreManagerInfo> getSemaphoreManagerInfos() {
+        return semaphoreManagers.values().stream().map(s -> s.getSemaphoreManagerInfo()).toList();
+    }
+
+
     /** lock semaphore */
     public synchronized boolean lock(String semaphoreName, long maxWaitingTime) {
         createEvent("lock");
+        AgentSemaphoreLocal localSem = semaphores.get(semaphoreName);
+        if (localSem == null) {
+            localSem = new AgentSemaphoreLocal(semaphoreName);
+            semaphores.put(semaphoreName, localSem);
+        }
         semaphoreManagers.values().stream().filter(s -> s.lock(semaphoreName, maxWaitingTime)).findFirst();
-        return true;
+        boolean locked = true;
+        localSem.tryLock(locked);
+        return locked;
     }
     /** lock semaphore */
     public synchronized boolean unlock(String semaphoreName) {
         createEvent("unlock");
+        AgentSemaphoreLocal localSem = semaphores.get(semaphoreName);
+        if (localSem == null) {
+            localSem = new AgentSemaphoreLocal(semaphoreName);
+            semaphores.put(semaphoreName, localSem);
+        }
+        // TODO: unlock semaphore
 
+        localSem.tryUnlock(false);
         return true;
     }
     /** lock and unlock semaphore */
