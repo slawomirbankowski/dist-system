@@ -54,7 +54,7 @@ public class DistAgentMemoryRow extends BaseRow {
     }
 
     public Object[] toInsertRow() {
-        return new Object[] { agentGuid, agentWorkingTime, memorySeq, memMax, memTotal, memFree, memUsed, objectsCount, isActive, createdDate, lastUpdatedDate };
+        return new Object[] { memoryGuid, agentGuid, agentWorkingTime, memorySeq, memMax, memTotal, memFree, memUsed, objectsCount, isActive, createdDate, lastUpdatedDate };
     }
     public Map<String, String> toMap() {
         return Map.of("type", "memory",
@@ -66,6 +66,54 @@ public class DistAgentMemoryRow extends BaseRow {
                 "isactive", "" + isActive,
                 "createddate", createdDate.toString(),
                 "lastUpdatedDate", lastUpdatedDate.toString());
+    }
+
+    public String getMemoryGuid() {
+        return memoryGuid;
+    }
+
+    public String getAgentGuid() {
+        return agentGuid;
+    }
+
+    public long getAgentWorkingTime() {
+        return agentWorkingTime;
+    }
+
+    public long getMemorySeq() {
+        return memorySeq;
+    }
+
+    public long getMemMax() {
+        return memMax;
+    }
+
+    public long getMemTotal() {
+        return memTotal;
+    }
+
+    public long getMemFree() {
+        return memFree;
+    }
+
+    public long getMemUsed() {
+        return memUsed;
+    }
+
+    public long getObjectsCount() {
+        return objectsCount;
+    }
+
+    public int getIsActive() {
+        return isActive;
+    }
+
+    public String getCreatedDate() {
+        return createdDate.toString();
+    }
+
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
     }
 
     /** create info from this row  */

@@ -32,7 +32,7 @@ public class AgentObject {
 
     public AgentObject(DistAgentRegisterRow agentRegisterRow) {
         this.agentRegisterRow = agentRegisterRow;
-        log.info("Create new AgentObject for GUID: " + agentRegisterRow.getAgentGuid() + ", hostIp: " + agentRegisterRow.getHostIp() + ", hostName: " + agentRegisterRow.getHostName());
+        log.debug("Create new AgentObject for GUID: " + agentRegisterRow.getAgentGuid() + ", hostIp: " + agentRegisterRow.getHostIp() + ", hostName: " + agentRegisterRow.getHostName() + ", active: " + agentRegisterRow.getIsActive());
     }
     /** get GUID for agent */
     public String getAgentGuid() {

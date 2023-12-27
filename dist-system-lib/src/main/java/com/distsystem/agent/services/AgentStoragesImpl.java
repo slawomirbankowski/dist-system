@@ -42,7 +42,7 @@ public class AgentStoragesImpl extends ServiceBase implements Storages {
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Shared storages to create DAOs and run reports on OR execute custom queries.";
     }
     /** read configuration and re-initialize this component */
     protected boolean onReinitialize() {
@@ -51,8 +51,9 @@ public class AgentStoragesImpl extends ServiceBase implements Storages {
     }
 
     /** change values in configuration bucket */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
         // TODO: insert, update, delete of bucket
+        return DistStatusMap.create(this).notImplemented();
     }
 
     /** update configuration of this Service */

@@ -65,7 +65,7 @@ public interface DistService {
     /** update configuration of this Service to add registrations, services, servers, ... */
     void updateConfig(DistConfig newCfg);
     /** change values in configuration bucket */
-    void initializeConfigBucket(DistConfigBucket bucket);
+    DistStatusMap initializeConfigBucket(DistConfigBucket bucket);
     /** run after initialization */
     void afterInitialization();
     /** close and deinitialize service */

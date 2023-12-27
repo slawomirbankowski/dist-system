@@ -5,6 +5,7 @@ import com.distsystem.utils.JsonUtils;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -163,11 +164,30 @@ public class AgentWebApiRequest {
     public AgentWebApiResponse responseOkText(String c) {
         return new AgentWebApiResponse(200, headerText, c);
     }
-
+    public AgentWebApiResponse responseOkTextOrNotFound(Optional<String> c) {
+        if (c.isPresent()) {
+            return new AgentWebApiResponse(200, headerText, c.get());
+        } else {
+            return new AgentWebApiResponse(404, headerText, "");
+        }
+    }
     public AgentWebApiResponse responseOkJsonSerialize(Object obj) {
         return new AgentWebApiResponse(200, headerJson, obj, JsonUtils.serialize(obj));
     }
-
+    public AgentWebApiResponse responseOkJsonSerializeOrNull(Object obj) {
+        if (obj == null) {
+            return new AgentWebApiResponse(404, headerJson, obj, "");
+        } else {
+            return new AgentWebApiResponse(200, headerJson, obj, JsonUtils.serialize(obj));
+        }
+    }
+    public <T> AgentWebApiResponse responseOkJsonSerializeOrNotFound(Optional<T> obj) {
+        if (obj.isPresent()) {
+            return new AgentWebApiResponse(200, headerJson, obj, JsonUtils.serialize(obj.get()));
+        } else {
+            return new AgentWebApiResponse(404, headerJson, obj, "");
+        }
+    }
     public static final Map<String, List<String>> headerJson = Map.of("Content-Type", List.of("application/json"));
     public static final Map<String, List<String>> headerText = Map.of("Content-Type", List.of("text/html"));
 

@@ -3,6 +3,7 @@ package com.distsystem.dao;
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoModel;
 import com.distsystem.api.DaoParams;
+import com.distsystem.api.DistStatusMap;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
@@ -114,8 +115,8 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             connPool.setMaxActive(maxActiveConnections);
             log.info("Connected!!!! to Connection Pool, URL=" + resolve(jdbcUrl));
         } catch (Exception ex) {
-            log.info("Cannot connect to JDBC, GUID: " + getGuid() + ",URL:" + jdbcUrl + ", reason: " + ex.getMessage());
-            ex.printStackTrace();
+            log.info("Cannot connect to JDBC, GUID: " + getGuid() + ",URL:" + jdbcUrl + ", reason: " + ex.getMessage(), ex);
+            addIssueToAgent("onInitialize", ex);
         }
     }
     /** get all tables */
@@ -442,6 +443,9 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     public <X extends BaseRow> int executeInsertRowForModelNoConflict(DaoModel<X> model, X obj) {
         return executeUpdateQuery(model.getInsertQueryNoConflict(), obj.toInsertRow());
     }
+    public <X extends BaseRow> int executeInsertRowForModelUpdateOnConflict(DaoModel<X> model, X obj) {
+        return executeUpdateQuery(model.getInsertQueryUpdateOnConflict(), obj.toInsertRow());
+    }
     /** insert full object to given table name */
     public <X extends BaseRow> int executeInsertRowsForModel(DaoModel<X> model, List<X> objs) {
         if (objs.isEmpty()) {
@@ -490,8 +494,9 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
         }
     }
     /** test DAO and returns items */
-    public Map<String, Object> testDao() {
-        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    public DistStatusMap testDao() {
+        //DistStatusMap.fromMap();
+        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
     public boolean closeDao() {
         try {

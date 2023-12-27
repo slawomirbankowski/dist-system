@@ -72,6 +72,7 @@ public class RegistrationJdbc extends RegistrationBase {
         dao.checkAndCreateModel(DaoModel.event);
         dao.checkAndCreateModel(DaoModel.issue);
         dao.checkAndCreateModel(DaoModel.measure);
+        dao.checkAndCreateModel(DaoModel.memory);
         dao.checkAndCreateModel(DaoModel.monitorCheck);
         dao.checkAndCreateModel(DaoModel.monitor);
         dao.checkAndCreateModel(DaoModel.notification);
@@ -345,9 +346,9 @@ public class RegistrationJdbc extends RegistrationBase {
         return true;
     }
 
-    /** add DAO row */
+    /** upsert DAO row */
     public boolean addDao(DistAgentDaoRow daoRow) {
-        dao.executeInsertRowForModel(DaoModel.dao, daoRow);
+        dao.executeInsertRowForModelUpdateOnConflict(DaoModel.dao, daoRow);
         return true;
     }
 

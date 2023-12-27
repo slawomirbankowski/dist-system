@@ -2,6 +2,7 @@ package com.distsystem.utils;
 
 import com.distsystem.api.*;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.DistWebApiInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,8 @@ public class DistWebApiProcessor {
     /** all external methods to process messages */
     protected Map<String, Function<DistMessage, DistMessage>> messageHandlers = new HashMap<>();
     private final LinkedList<AgentWebApiEvent> latestRequest = new LinkedList<>();
+    private final AtomicLong handledRequests = new AtomicLong();
+    private final AtomicLong handledRequestsTimeMs = new AtomicLong();
     /** counter of received messages */
     private final AtomicLong receivedMessages = new AtomicLong();
     private final AtomicLong exceptionMessages = new AtomicLong();
@@ -39,6 +42,11 @@ public class DistWebApiProcessor {
     public DistWebApiProcessor(String servType) {
         this.servType = DistServiceType.custom;
         this.servName = servType;
+    }
+    public DistWebApiInfo getInfo() {
+        return new DistWebApiInfo(requestMethodHandlers.size(), messageHandlers.size(),
+                receivedMessages.get(), exceptionMessages.get(),
+                handledRequests.get(), handledRequestsTimeMs.get());
     }
     /** get current number of request handler registered */
     public long getRequestHandlersCount() {
@@ -110,8 +118,12 @@ public class DistWebApiProcessor {
     public AgentWebApiResponse handleRequest(AgentWebApiRequest req) {
         String fullMethodName = req.getRequestKey(); // getHandlerKey(req.getMethod(),req.getServiceMethod());
         var requestHandler = requestMethodHandlers.get(fullMethodName);
+        handledRequests.incrementAndGet();
         if (requestHandler != null) {
+            long startReqTime = System.currentTimeMillis();
             AgentWebApiResponse res = requestHandler.getMethod().apply(req.getServiceMethod(), req);
+            long totalReqTime = System.currentTimeMillis() - startReqTime;
+            handledRequestsTimeMs.addAndGet(totalReqTime);
             addEvent(req.getReqSeq(), req.getMethod(), req.getServiceMethod(), true, res.getResponseCode(), res.getContent().length());
             return res;
         } else {

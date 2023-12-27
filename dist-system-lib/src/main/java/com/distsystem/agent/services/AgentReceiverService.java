@@ -9,13 +9,15 @@ import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /** service to receive messages to any custom listener */
 public class AgentReceiverService extends ServiceBase implements Receiver {
 
-
+    private Set<String> customMethods = new HashSet<>();
     /** */
     public AgentReceiverService(Agent parentAgent) {
         super(parentAgent);
@@ -37,6 +39,7 @@ public class AgentReceiverService extends ServiceBase implements Receiver {
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("method-names", (m, req) -> req.responseOkJsonSerialize(webApiProcessor.getMessageHandlerMethods()))
+                .addHandlerGet("request-names", (m, req) -> req.responseOkJsonSerialize(customMethods))
                 .addHandlerPost("send", (m, req) -> req.responseOkJsonSerialize(sendMessage(req.getContentAsString())));
     }
 
@@ -47,6 +50,7 @@ public class AgentReceiverService extends ServiceBase implements Receiver {
     }
     /** register new method to process received messages */
     public void registerReceiverMethod(String method, Function<DistMessage, DistMessage> methodToProcess) {
+        customMethods.add(method);
         webApiProcessor.registerReceiverMethod(method, methodToProcess);
     }
     /** get number of receiver methods */

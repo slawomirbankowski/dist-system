@@ -18,9 +18,6 @@ public interface AgentServices extends DistService {
     List<DistService> getServices();
     /** reinitialize all registered services */
     List<Boolean> reinitializeAllServices();
-    /** set new policy for services */
-    void setPolicy(CachePolicy policy);
-
     /** get number of services */
     int getServicesCount();
     /** get description of all registered services */

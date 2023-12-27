@@ -25,8 +25,17 @@ public class DistConfigEntry {
     private final String configType; // HTTP, JDBC, KAFKA, ELASTICSEARCH, REDIS, MONGODB, ...
     private final String configSetting; // URL, USER, PASS, BROKERS, HOST, PORT, ...
     private final String configInstance; // PRIMARY, SECONDARY, TERTIARY
-    private final String configValue; //
+    private final String configValue; // value of this entry
 
+    /** groupName - AGENT_CACHE_STORAGE
+     * fullConfig - AGENT_CACHE_STORAGE_MONGODB_HOST_PRIMARY
+     * serviceName - CACHE
+     * serviceGroup - OBJECT, SERVER
+     * configType - HTTP, JDBC, KAFKA, ELASTICSEARCH, REDIS, MONGODB, ...
+     * configSetting - URL, USER, PASS, BROKERS, HOST, PORT, ...
+     * configInstance - PRIMARY, SECONDARY, TERTIARY
+     * configValue - any value
+     * */
     public DistConfigEntry(String groupName, String fullConfig, String serviceName, String serviceGroup, String configType, String configSetting, String configInstance, String configValue) {
         this.groupName = groupName;
         this.fullConfig = fullConfig;

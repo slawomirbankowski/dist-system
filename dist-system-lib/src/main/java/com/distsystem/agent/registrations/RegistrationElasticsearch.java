@@ -88,7 +88,7 @@ public class RegistrationElasticsearch extends RegistrationBase {
     }
     /** remove active agents without last ping date for more than X minutes */
     public boolean removeInactiveAgents(LocalDateTime beforeDate) {
-        var agentsToInactivate = getAgents().stream().filter(a -> a.getActive() == 1 && a.getLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
+        var agentsToInactivate = getAgents().stream().filter(a -> a.getActive() == 1 && a.originalLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
         log.info("Deactivating old agent without ping before: " + beforeDate.toString() +", by agent:" + parentAgent.getAgentGuid() +", to deactivate: " + agentsToInactivate.size());
         agentsToInactivate.stream().forEach(a -> {
             log.info("Deactivating old agent without ping for GUID: " + a.getAgentGuid() +", by agent: " + parentAgent.getAgentGuid() + ", lastPing: " + a.getLastPingDate().toString() + ", active: " + a.getActive());
@@ -100,7 +100,7 @@ public class RegistrationElasticsearch extends RegistrationBase {
 
     /** remove inactive agents with last ping date for more than X minutes */
     public boolean deleteInactiveAgents(LocalDateTime beforeDate) {
-        var agentsDelete = getAgents().stream().filter(a -> a.getLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
+        var agentsDelete = getAgents().stream().filter(a -> a.originalLastPingDate().isBefore(beforeDate)).collect(Collectors.toList());
         log.info("Deleting old agent without ping before: " + beforeDate.toString() +", by agent:" + parentAgent.getAgentGuid() + ", to delete: " + agentsDelete.size());
         agentsDelete.stream().forEach(a -> {
             log.info("Deleting old agent without ping for GUID: " + a.getAgentGuid() +", by agent: " + parentAgent.getAgentGuid() + ", lastPing: " + a.getLastPingDate().toString());

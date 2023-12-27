@@ -61,8 +61,8 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
     }
 
     /** test DAO and returns items */
-    public Map<String, Object> testDao() {
-        return Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName());
+    public DistStatusMap testDao() {
+        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
 
     /** get URL of this DAO */

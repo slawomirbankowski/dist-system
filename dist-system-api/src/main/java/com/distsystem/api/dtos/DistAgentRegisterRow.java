@@ -125,20 +125,21 @@ public class DistAgentRegisterRow extends BaseRow {
     public int getPortNumber() {
         return portNumber;
     }
-    public LocalDateTime getLastPingDate() {
-        return lastPingDate;
+    public String getLastPingDate() {
+        return lastPingDate.toString();
     }
+    public LocalDateTime originalLastPingDate() { return lastPingDate; }
     public int getActive() {
         return isActive;
     }
     public String getRegisterGuid() {
         return registerGuid;
     }
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getCreatedDate() {
+        return createdDate.toString();
     }
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate.toString();
     }
 
     public long getPingsCount() {

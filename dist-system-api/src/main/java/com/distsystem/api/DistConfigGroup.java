@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
  * GROUP_TYPE_NAME_KEY = AGENT_CONFIGREADER_OBJECT_HTTP_URL
  *  SERVICE=CONFIGREADER
  *  =OBJECT
- *  TYPE=HTTP
+ *  TYPE=HTTP - configType
  *  NAME=URL
- *  KEY=PRIMARY
+ *  KEY=PRIMARY -
  * */
 public class DistConfigGroup {
     private static final Logger log = LoggerFactory.getLogger(DistConfigGroup.class);
@@ -33,12 +33,14 @@ public class DistConfigGroup {
     private final DistService parentService;
     /** all added entries to this group */
     private final List<DistConfigEntry> entries = new LinkedList<>();
+    private final List<DistStatusMap> results = new LinkedList<>();
     /** creates new group of configuration values */
     public DistConfigGroup(DistConfig parentConfig, String groupName, DistService parentService) {
         this.parentConfig = parentConfig;
         this.groupName = groupName;
         this.parentService = parentService;
-        calculateBuckets();
+        List<DistStatusMap> initialResults = calculateBuckets();
+        results.addAll(initialResults);
     }
 
     /** close current group */
@@ -56,7 +58,7 @@ public class DistConfigGroup {
     /** calculate buckets from all entries - each bucket has many configuration values for the same instance and type, example:
      * AGENT_SEMAPHORE_OBJECT_JDBC_URL, AGENT_SEMAPHORE_OBJECT_JDBC_DRIVER, AGENT_SEMAPHORE_OBJECT_JDBC_USER, AGENT_SEMAPHORE_OBJECT_JDBC_PASS
      * */
-    public void calculateBuckets() {
+    public List<DistStatusMap> calculateBuckets() {
         log.debug("Start calculating buckets for group, service: " + parentService.getServiceType().name() + ", config: " + parentConfig.getConfigGuid() + ", group: "  + groupName);
         List<DistConfigEntry> newEntries = parentConfig.getPropertiesStartsWith(groupName).entrySet().stream().flatMap(p -> {
             String fullName = p.getKey();
@@ -84,16 +86,41 @@ public class DistConfigGroup {
             log.debug("Configuration bucket group adding new bucket, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", bucketKey: " + g.getKey() + ", hash: " + bucket.getEntriesHash() + ", entries: " + g.getValue().size());
             newBuckets.put(g.getKey(), bucket);
         });
-        newBuckets.values().stream().forEach(bucket -> {
-            parentService.initializeConfigBucket(bucket);
-        });
+        List<DistStatusMap> results = newBuckets.values().stream().map(bucket -> parentService.initializeConfigBucket(bucket)).toList();
         log.debug("Recalculated buckets, config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", previous count: " + buckets.size() + ", new count: " + newBuckets.size());
         // TODO: merge existing buckets with new ones
         // newBuckets with buckets, initialize all new buckets
         //parentService.initializeConfigBucket();
         buckets.putAll(newBuckets);
         log.debug("Calculated config group of configuration values for config: " + parentConfig.getConfigGuid() + ", group: "  + groupName + ", all entries: " + newEntries.size() + ", all buckets: " + buckets.size());
+        return results;
     }
+    /** adding new configuration bucket from values
+     * serviceGroup - OBJECT, SERVER
+     * configType - JDBC, ELASTICSEARCH, MONGODB, SOCKET, ...
+     * configInstance - PRIMARY, SECONDARY, TETRIARY, ...
+     * configValues - key/value map like URL=http://  USER=someuser   PASS=supersecretpassword123
+     * AGENT_REGISTRATION_OBJECT_JDBC_URL_PRIMARY
+     * AGENGT_serviceName_serviceGroup_configType_key_configInstance
+     * */
+    public DistStatusMap addConfigValues(String serviceGroup, String configType, String configInstance, Map<String, String> configValues) {
+        String serviceName = parentService.getServiceType().name().toUpperCase();
+        DistConfigBucketKey key = new DistConfigBucketKey(serviceName, configType, configInstance);
+        log.info("Add new configuration values to group: " + groupName +", serviceGroup: " + serviceGroup + ", serviceName: " + serviceName +", configType: " + configType + ", instance: " + configInstance + ", values: " + configValues.size());
+        List<DistConfigEntry> entries = configValues.entrySet().stream().map(cv -> {
+            String configFullKey = "AGENT_" + serviceName + "_" + serviceGroup + "_" + configType + "_" + cv.getKey() + "_" + configInstance;
+            String configFullValue = cv.getValue();
+            log.debug("----> Add new configuration value, fullKey: " + configFullKey);
+            DistConfigEntry entry = new DistConfigEntry(groupName, configFullKey, serviceName, serviceGroup, configType, cv.getKey(), configInstance, configFullValue);
+            return entry;
+        }).collect(Collectors.toList());
+        DistConfigBucket configBucket = new DistConfigBucket(this, key, entries);
+        buckets.put(key, configBucket);
+        DistStatusMap result = parentService.initializeConfigBucket(configBucket);
+        results.add(result);
+        return result;
+    }
+
     /** get parent config for this group */
     public DistConfig getParentConfig() {
         return parentConfig;

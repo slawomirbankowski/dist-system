@@ -101,7 +101,7 @@ public class AgentApiImpl extends ServiceBase implements AgentApi {
         touch();
         log.info("Opening Agent Web APIs for agent: " + parentAgent.getAgentGuid());
         if (parentAgent.getConfig().hasProperty(DistConfig.AGENT_API_PORT)) {
-            createEvent("openApis");
+            createEvent("openApis", parentAgent.getConfig().getProperty(DistConfig.AGENT_API_PORT));
             openCount.incrementAndGet();
             log.info("Creates new WebApi interface for Agent: " + parentAgent.getAgentGuid());
             WebSimpleApi api = new WebSimpleApi(this);

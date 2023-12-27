@@ -68,7 +68,7 @@ public class DaoParams {
     }
     /** create DAO parameters for Kafka */
     public static DaoParams kafkaParams(String brokers, int numPartitions, short replicationFactor) {
-        String key = DistDaoType.kafka.name() + ":" + DistUtils.fingerprint( brokers);
+        String key = DistDaoType.kafka.name() + "_" + DistUtils.fingerprint( brokers);
         return new DaoParams(DistDaoType.kafka, key, Map.of(
                 BROKERS, brokers,
                 NUM_PARTITIONS, numPartitions,
@@ -78,7 +78,7 @@ public class DaoParams {
 
     /** create DAO parameters for JDBC connections */
     public static DaoParams jdbcParams(String jdbcUrl, String jdbcDriver, String jdbcUser, String jdbcPass, int initConnections, int maxActiveConnections) {
-        String key = DistDaoType.jdbc.name() + ":" + DistUtils.fingerprint( jdbcUrl + ":" + jdbcUser);
+        String key = DistDaoType.jdbc.name() + "_" + DistUtils.fingerprint( jdbcUrl + ":" + jdbcUser);
         return new DaoParams(DistDaoType.jdbc, key, Map.of(
                 URL, jdbcUrl,
                 DRIVER, jdbcDriver,
@@ -94,7 +94,7 @@ public class DaoParams {
     }
     /** create DAO parameters for Elasticsearch */
     public static DaoParams elasticsearchParams(String elasticUrl, String elasticUser, String elasticPass) {
-        String key = DistDaoType.elasticsearch.name() + "" + DistUtils.fingerprint( elasticUrl + ":" + elasticUser);
+        String key = DistDaoType.elasticsearch.name() + "_" + DistUtils.fingerprint( elasticUrl + ":" + elasticUser);
         return new DaoParams(DistDaoType.elasticsearch, key, Map.of(
                 URL, elasticUrl,
                 USER, elasticUser,

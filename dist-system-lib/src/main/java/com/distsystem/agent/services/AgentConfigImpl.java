@@ -7,6 +7,7 @@ import com.distsystem.base.ConfigReaderBase;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentConfigReader;
+import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()))
                 .addHandlerGet("keys", (m, req) -> req.responseOkJsonSerialize(getReaderKeys()))
+                .addHandlerGet("env", (m, req) -> req.responseOkJsonSerialize(System.getenv()))
                 .addHandlerGet("resolve", (m, req) -> req.responseOkText(resolveWithManager(req.getContentAsString())))
                 .addHandlerGet("property", (m, req) -> req.responseOkText(getProperty(req.getParamOne())))
                 .addHandlerPost("property", (m, req) -> req.responseOkText(setProperty(req.getParamOne(), req.getParamTwo())))
@@ -70,8 +72,8 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
 
     /** get info object for this reader */
     public AgentConfigReaderInfo getInfo() {
-
-        return new AgentConfigReaderInfo(readCount.get(), readerObjectCount.get(), getReadersCount(), getReaderKeys());
+        Map<String, String> configValues = parentAgent.getConfig().getHashMap(false);
+        return new AgentConfigReaderInfo(readCount.get(), readerObjectCount.get(), getReadersCount(), getReaderKeys(), configValues);
     }
     /** resolve given value info full value */
     protected String resolveWithManager(String value) {
@@ -127,11 +129,11 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return getConfig().getProperty(key, "");
     }
     /** change values in configuration bucket */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+        touch("initializeConfigBucket");
         // TODO: initialize or deinitialize
         createEvent("initializeConfigBucket");
-
-        initializeReader(bucket);
+        return initializeReader(bucket);
     }
 
     /** reinitialize */
@@ -179,8 +181,10 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return getInfo();
     }
     /** initialize new config reader for configuration bucket with values */
-    private void initializeReader(DistConfigBucket bucket) {
+    private DistStatusMap initializeReader(DistConfigBucket bucket) {
+        DistStatusMap status = DistStatusMap.create(this);
         String className = DistConfig.AGENT_CONFIGREADER_MAP.get(bucket.getKey().getConfigType());
+        status.append("className", className);
         try {
             createEvent("initializeReader");
             log.info("Try to initialize external configuration reader for agent: " + parentAgent.getAgentGuid() + ", class: " + className + ", bucket key: " + bucket.getKey());
@@ -198,9 +202,11 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
                 configReaders.put(bucket.getKey().toString(), reader);
             }
             openCount.incrementAndGet();
+            return status.withStatus("OK");
         } catch (Exception ex) {
             log.info("Cannot initialize external configuration reader for agent: "  + parentAgent.getAgentGuid() + ", class: " + className + ", reason: " + ex.getMessage(), ex);
             addIssueToAgent("initializeReader", ex);
+            return status.exception(ex);
         }
     }
 

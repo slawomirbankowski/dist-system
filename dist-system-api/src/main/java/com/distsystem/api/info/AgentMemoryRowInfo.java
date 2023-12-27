@@ -78,5 +78,24 @@ public class AgentMemoryRowInfo {
     public String getCreatedDate() {
         return createdDate.toString();
     }
+    public double getUsedPercentage() {
+        return 100.0 * memUsed / (double)memTotal;
+    }
+    public double getUsedToMaxPercentage() {
+        return 100.0 * memUsed / (double)memMax;
+    }
+    public double getFreePercentage() {
+        return 100.0 * memFree / (double)memTotal;
+    }
+    public double getFreeToMaxPercentage() {
+        return 100.0 * memFree / (double)memMax;
+    }
+    public long getMemUsedMb() {
+        return memUsed / 1024L / 1024L;
+    }
+    public long getMemFreeMb() {
+        return memFree / 1024L / 1024L;
+    }
+
 }
 

@@ -24,6 +24,7 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
     private int workingPort;
     private String url;
     private Thread mainThread;
+    private boolean datagramOpened = true;
 
     public AgentDatagramServer(ServiceObjectParams params) {
         super(params);
@@ -81,11 +82,21 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
                 byte[] received = packet.getData();
                 if (received != null && received.length > 0) {
                     DistMessage receivedMsg = (DistMessage)parentAgent.getSerializer().deserialize(DistMessage.class.getName(), received);
-                    log.info("......... Got message from from UDP:  " + receivedMsg.toString());
+                    log.debug("......... Got message from from UDP:  " + receivedMsg.toString());
                 }
             } catch (SocketTimeoutException ex) {
+            } catch (SocketException ex) {
+                if (closed) {
+                    log.info("Datagram server already closed, breaking waiting for packed, agent: " + parentAgent.getAgentGuid() + ", workingPort: " + workingPort);
+                } else {
+                    log.error("!!!!! IOException on Datagram server working on port " + workingPort + ", reason: " + ex.getMessage(), ex);
+                }
             } catch (IOException ex) {
-                log.error("!!!!! IOException on Datagram server working on port " + workingPort + ", reason: " + ex.getMessage(), ex);
+                if (closed) {
+
+                } else {
+                    log.error("!!!!! IOException on Datagram server working on port " + workingPort + ", reason: " + ex.getMessage(), ex);
+                }
             } catch (Exception ex) {
                 log.error("!!!!! Unknown exception on Datagram server working on port " + workingPort + ", reason: " + ex.getMessage(), ex);
                 parentAgent.getIssues().addIssue("AgentDatagramServer.run", ex);
@@ -101,7 +112,7 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
 
     protected void onClose() {
         try {
-            log.info("Try to close DATAGRAM server for Agent: " + parentAgent.getAgentGuid());
+            log.info("Try to close DATAGRAM server for Agent: " + parentAgent.getAgentGuid() + ", server closed: " + closed);
             datagramSocket.close();
             mainThread.join(2000);
         } catch (Exception ex) {

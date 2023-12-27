@@ -3,6 +3,7 @@ package com.distsystem.agent.services;
 import com.distsystem.api.*;
 import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.enums.DistServiceType;
+import com.distsystem.api.info.AgentRegisteredInfo;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.api.info.AgentRegistrationsInfo;
 import com.distsystem.base.RegistrationBase;
@@ -65,8 +66,11 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("registration-keys", (m, req) -> req.responseOkJsonSerialize(registrations.keySet()))
                 .addHandlerGet("registration-infos", (m, req) -> req.responseOkJsonSerialize(getRegistrationInfos()))
+                .addHandlerGet("agents-all", (m, req) -> req.responseOkJsonSerialize(getAgents()))
+                .addHandlerGet("agents-active", (m, req) -> req.responseOkJsonSerialize(getAgentsActive()))
                 .addHandlerGet("agents-keys", (m, req) -> req.responseOkJsonSerialize(agents.keySet()))
                 .addHandlerGet("agents-now", (m, req) -> req.responseOkJsonSerialize(getAgentsNow()))
+                .addHandlerGet("agent", (m, req) -> req.responseOkJsonSerialize(getAgentInfo(req.getParamOne())))
                 .addHandlerGet("servers", (m, req) -> req.responseOkJsonSerialize(registeredServers.stream().map(s -> s.copyNoPassword()).toList()))
                 .addHandlerGet("register", (m, req) -> req.responseOkJsonSerialize(register.toAgentRegisterRow()))
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()));
@@ -79,10 +83,14 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
         return true;
     }
     /** change values in configuration bucket - to override this method */
-    public void initializeConfigBucket(DistConfigBucket bucket) {
+    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+        DistStatusMap status = DistStatusMap.create(this);
         // TODO: insert, update, delete of bucket
         log.info("Initializing new registration with bucket for agent: " + parentAgent.getAgentGuid() + ", bucket key: " + bucket.getKey() + ", current servers: " + registeredServers.size());
-        createRegistration(bucket);
+        Optional<RegistrationBase> reg = createRegistration(bucket);
+        // Map.of("status", "OK", "guid", r.getRegisterGuid(), "url", r.getUrl())
+        //DistStatusMap.
+        return reg.stream().map(r -> r.statusMap()).findFirst().orElse(status.withStatus("NOT_CREATED"));
     }
     /** run after initialization */
     public void afterInitialization() {
@@ -127,6 +135,15 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
                 .flatMap(x -> x.getAgents().stream())
                 .collect(Collectors.toList());
     }
+    /** get info about agent by GUID */
+    public Optional<AgentRegisteredInfo> getAgentInfo(String guid) {
+        AgentObject agent = agents.get(guid);
+        if (agent != null) {
+            return Optional.of(agent.getRegisteredInfo());
+        } else {
+            return Optional.empty();
+        }
+    }
     /** get number of known agents */
     public int getAgentsCount() {
         return agents.size();
@@ -134,6 +151,11 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
     /** get number of active agents */
     public long getAgentsActiveCount() {
         return agents.values().stream().filter(AgentObject::isActive).count();
+    }
+
+    /** create new registration */
+    public void createRegistration(String configType, String configInstance, Map<String, String> configValues) {
+        configGroup.addConfigValues("OBJECT", configType,configInstance, configValues);
     }
 
     /** register server for ROW */
@@ -189,8 +211,9 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
             checkActiveAgents();
             removeInactiveAgents();
             saveDaos();
+            long activeAgentsCount = getAgent().getRegistrations().getAgentsActiveCount();
             // TODO: connect to all nearby agents, check statuses
-            log.debug("AGENT REGISTRATION summary for guid: " + parentAgent.getAgentGuid() + ", registrations: " + registrations.size() + ", connected agents: " + agents.size() + ", registeredServers: " + registeredServers.size());
+            log.debug("AGENT REGISTRATION summary for guid: " + parentAgent.getAgentGuid() + ", registrations: " + registrations.size() + ", connected agents: " + agents.size() + ", activeAgentsCount: " + activeAgentsCount + ", registeredServers: " + registeredServers.size());
             return true;
         } catch (Exception ex) {
             log.warn("Cannot ping registrations, check agents or remove inactive agents, reason: " + ex.getMessage(), ex);
@@ -239,7 +262,7 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
             });
         });
         checkCount.incrementAndGet();
-        log.debug("AFTER check connected agents for agent: " + parentAgent.getAgentGuid() + ", current count: " + agents.size() + ", registrations: " + registrations.size() + ", registeredServers: " + registeredServers.size());
+        log.info("AFTER check connected agents for agent: " + parentAgent.getAgentGuid() + ", current count: " + agents.size() + ", registrations: " + registrations.size() + ", registeredServers: " + registeredServers.size());
     }
     /** remove all inactive agents */
     public void removeInactiveAgents() {
@@ -263,6 +286,7 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
 
     /** save all DAOs */
     private void saveDaos() {
+        createEvent("saveDaos");
         List<DistAgentDaoRow> daoRows = parentAgent.getAgentDao().getAllDaos().stream().map(d -> d.toRow()).collect(Collectors.toList());
         log.info("Save all DAOs in all registration objects, daos: " + daoRows.size() +", registrations: " + registrations.size());
         registrations.values().stream().forEach(reg -> {

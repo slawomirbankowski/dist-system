@@ -22,9 +22,15 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     protected static final Logger log = LoggerFactory.getLogger(AgentServicesImpl.class);
     /** all registered services for this agent */
     private final HashMap<String, DistService> services = new HashMap<>();
-    /** policy to add cache Objects to storages and changing mode, ttl, priority, tags */
-    protected CachePolicy policy;
+    /** endpoint processor for empty service */
     private DistWebApiProcessor emptyServiceWebApiProcessor = new DistWebApiProcessor("")
+            .addHandlerGet("ping", (m, req) -> req.responseOkText("pong"))
+            .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(parentAgent.getAgentInfo()))
+            .addHandlerGet("created", (m, req) -> req.responseOkText(getCreateDate().toString()))
+            .addHandlerGet("name", (m, req) -> req.responseOkText(parentAgent.getAgentName()))
+            .addHandlerGet("environment", (m, req) -> req.responseOkText(parentAgent.getEnvironmentName()))
+            .addHandlerGet("uid", (m, req) -> req.responseOkText(parentAgent.getAgentGuid()))
+            .addHandlerGet("endpoints", (m, req) -> req.responseOkJsonSerialize(parentAgent.getApi().getAllHandlers()))
             .addHandlerGet("", (m, req) -> req.responseOkText(parentAgent.welcomeMessage()));
 
     /** creates service manager for agent with parent agent assigned */
@@ -68,18 +74,14 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
                 .addHandlerGet("services", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceInfo).toList()))
                 .addHandlerGet("services-row", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceRow).toList()))
                 .addHandlerGet("services-guid", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getGuid).toList()))
-                .addHandlerGet("service", (m, req) -> req.responseOkJsonSerialize(getServiceInfoOrEmpty(req.getParamOne())))
+                .addHandlerGet("service", (m, req) -> req.responseOkJsonSerializeOrNotFound(getServiceInfoOrEmpty(req.getParamOne())))
                 .addHandlerPost("reinitialize-all", (m, req) -> req.responseOkJsonSerialize(reinitializeAllServices()))
-                .addHandlerPost("reinitialize-service", (m, req) -> req.responseOkJsonSerialize(reinitializeServiceWithInfo(req.getParamOne())))
+                .addHandlerPost("reinitialize-service", (m, req) -> req.responseOkJsonSerializeOrNotFound(reinitializeServiceWithInfo(req.getParamOne())))
                 .addHandlerPost("reinitialize-possible", (m, req) -> req.responseOkJsonSerialize(initializeAllPossible()));
     }
 
     public AgentServiceInfo getInfo() {
         return new AgentServiceInfo(services.keySet().stream().toList(), services.values().stream().map(DistService::getServiceSimpleInfo).collect(Collectors.toList()));
-    }
-    /** set new policy for services */
-    public void setPolicy(CachePolicy policy) {
-        this.policy = policy;
     }
     /** return all services assigned to this agent */
     public List<DistService> getServices() {
@@ -105,7 +107,6 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     /** initialize all known services */
     public List<String> initializeAllPossible() {
         createEvent("initializeAllPossible");
-
         return getServiceTypes();
     }
     /** get basic information about service for given type of UID */
@@ -167,6 +168,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** receive message from connector or server, need to find service and process that message on service */
     public void receiveMessage(DistMessage msg) {
+        touch("receiveMessage");
         log.info("Receive message to be processes, message: " + msg.toString());
         if (msg.isTypeRequest()) {
             DistMessage response = dispatchMessage(msg);
@@ -184,6 +186,8 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** dispatch message - find service and execute that message on processor */
     public DistMessage dispatchMessage(DistMessage msg) {
+        createEvent("dispatchMessage");
+        touch("dispatchMessage");
         DistService serviceToProcessMessage = services.get(msg.getToService().name());
         if (serviceToProcessMessage != null) {
             return serviceToProcessMessage.processMessage(msg);
@@ -193,6 +197,8 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** handle API request in this Web API for Agent */
     public AgentWebApiResponse dispatchRequest(AgentWebApiRequest request) {
+        createEvent("dispatchRequest");
+        touch("dispatchRequest");
         DistService service = services.get(request.getServiceName());
         if (service != null) {
             return service.handleRequest(request);
@@ -215,7 +221,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Services kept and managed.";
     }
 
 }

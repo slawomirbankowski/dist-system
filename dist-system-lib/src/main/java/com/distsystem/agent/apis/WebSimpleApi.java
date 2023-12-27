@@ -164,7 +164,7 @@ public class WebSimpleApi extends AgentWebApi {
                 os.close();
             } catch (Exception ex) {
                 handledRequestsErrors.incrementAndGet();
-                log.warn("Web API Exception: " + ex.getMessage());
+                log.warn("Web API Exception: " + ex.getMessage(), ex);
                 parentApi.getAgent().getIssues().addIssue("WebSimpleApiHandler.handle", ex);
                 String errorResponse = ">>>>> ERROR DURING REQUEST [" + reqSeq +  "] +, reason: " + ex.getMessage();
                 httpExchange.sendResponseHeaders(501, errorResponse.length());

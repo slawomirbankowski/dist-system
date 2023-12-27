@@ -46,6 +46,8 @@ public class DistConfigBucket {
     /** get property for this bucket */
     public String getProperty(String name, String defaultValue) {
         String fullConfig = convertPropertyName(name);
+        //entries.stream().findFirst();
+
         log.info("Get config property for object, group: " + parentGroup.getGroupName() + ", name: " + name + ", fullConfig: " + fullConfig);
         return parentGroup.getParentConfig().getProperty(fullConfig, defaultValue);
 

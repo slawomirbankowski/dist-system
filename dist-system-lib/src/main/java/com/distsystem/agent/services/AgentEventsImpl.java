@@ -1,6 +1,7 @@
 package com.distsystem.agent.services;
 
 import com.distsystem.api.*;
+import com.distsystem.api.dtos.DistAgentEventRow;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.EventsInfo;
 import com.distsystem.base.ServiceBase;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,12 +64,13 @@ public class AgentEventsImpl extends ServiceBase implements AgentEvents {
     /** additional web API endpoints */
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
-                .addHandlerGet("events", (m, req) -> req.responseOkJsonSerialize(events.stream().limit(100).map(e -> e.getEventRow()).toList()))
+                .addHandlerGet("events", (m, req) -> req.responseOkJsonSerialize(getEventRowsLast()))
+                .addHandlerGet("events-search", (m, req) -> req.responseOkJsonSerialize(getEventRowsSearch(req.getParamOne())))
                 .addHandlerGet("callback-keys", (m, req) -> req.responseOkJsonSerialize(callbacks.keys()))
                 .addHandlerPost("clear", (m, req) -> req.responseOkJsonSerialize(clearEvents()))
                 .addHandlerGet("events-count", (m, req) -> req.responseOkText(""+events.size()))
                 .addHandlerGet("events-by-method", (m, req) -> req.responseOkJsonSerialize(eventsByMethod()))
-                .addHandlerGet("events-by-method", (m, req) -> req.responseOkJsonSerialize(eventsByType()))
+                .addHandlerGet("events-by-type", (m, req) -> req.responseOkJsonSerialize(eventsByType()))
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()));
     }
     /** read configuration and re-initialize this component */
@@ -127,6 +130,15 @@ public class AgentEventsImpl extends ServiceBase implements AgentEvents {
     /** get all recent events added to cache */
     public Queue<AgentEvent> getEvents() {
         return events;
+    }
+
+    /** get event rows for last 100 events */
+    public List<DistAgentEventRow> getEventRowsLast() {
+        return events.stream().limit(100).map(e -> e.getEventRow()).toList();
+    }
+    /** get event rows with search */
+    public List<DistAgentEventRow> getEventRowsSearch(String str) {
+        return events.stream().filter(e -> e.search(str)).limit(100).map(e -> e.getEventRow()).toList();
     }
     /** close */
     protected void onClose() {

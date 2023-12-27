@@ -37,6 +37,7 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
         super(params);
         parentAgent.addComponent(this);
         initialize();
+        createEvent("RegistrationBase");
     }
 
     /** get type of this component */
@@ -56,12 +57,14 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
     private void initialize() {
         onInitialize();
         initialized = true;
+        createEvent("initialize");
     }
     /** run for initialization in classes */
     protected abstract void onInitialize();
 
     /** if connector is connected */
     public boolean isConnected() {
+        createEvent("isConnected");
         // TODO: calculate connection OK ratio
         boolean connected = onIsConnected();
         lastConnected = connected;
@@ -72,6 +75,9 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
         }
         return connected;
     }
+    public DistStatusMap statusMap() {
+        return DistStatusMap.create(this).notImplemented();
+    }
     /** last status of connection */
     public boolean isLastConnected() {
         return lastConnected;
@@ -80,6 +86,7 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
     protected abstract boolean onIsConnected();
     /** register this agent to connector */
     public AgentConfirmation agentRegister(AgentRegister register) {
+        createEvent("agentRegister");
         log.info("Registering agent at registration: " + getUrl() + ", registerGuid: " + registerGuid + ", agent: " + register.getAgentGuid());
         AgentConfirmation cfm =  onAgentRegister(register);
         registerConfirmation = cfm;
@@ -91,12 +98,14 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
     /** ping from this agent to connector */
     @Override
     public AgentPingResponse agentPing(AgentPing ping) {
+        createEvent("agentPing");
         AgentPingResponse pingResp = onAgentPing(ping);
         // TODO: register latest ping response
         return pingResp;
     }
     @Override
     public AgentConfirmation agentUnregister(AgentRegister register) {
+        createEvent("agentUnregister");
         log.info("Unregistering agent at registration: " + getUrl() + ", registerGuid: " + registerGuid + ", agent: " + register.getAgentGuid());
         register.deactivate();
         AgentConfirmation cfm =  onAgentUnregister(register);

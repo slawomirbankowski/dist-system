@@ -13,39 +13,36 @@ import java.util.Set;
 public class AgentInfo implements Serializable {
 
     private final String agentGuid;
+    private final String environmentType;
+    private final String environmentName;
     private final String distName;
     private final String agentName;
     private final LocalDateTime createDate;
     private final boolean closed;
     private final Set<String> tags;
-    private final List<String> components;
-    private final AgentConfigReaderInfo configReader;
-    private final AgentMessageProcessorInfo messageProcessor;
     List<DistServiceInfo> services;
-    private final List<DistConfigGroupInfo> configGroupInfos;
+    private final List<DistConfigGroupInfo> configGroups;
 
     public AgentInfo(String agentGuid,
+                     String environmentType,
+                     String environmentName,
                      String distName,
                      String agentName,
                      LocalDateTime createDate,
                      boolean closed,
                      Set<String> tags,
-                     List<String> components,
-                     AgentConfigReaderInfo configReader,
-                     AgentMessageProcessorInfo messageProcessor,
                      List<DistServiceInfo> services,
-                     List<DistConfigGroupInfo> configGroupInfos) {
+                     List<DistConfigGroupInfo> configGroups) {
         this.agentGuid = agentGuid;
+        this.environmentType = environmentType;
+        this.environmentName = environmentName;
         this.distName = distName;
         this.agentName = agentName;
         this.createDate = createDate;
         this.closed = closed;
-        this.messageProcessor = messageProcessor;
         this.tags = tags;
-        this.components = components;
-        this.configReader = configReader;
         this.services = services;
-        this.configGroupInfos = configGroupInfos;
+        this.configGroups = configGroups;
     }
 
     /** serialize this agent info */
@@ -56,6 +53,15 @@ public class AgentInfo implements Serializable {
     public String getAgentGuid() {
         return agentGuid;
     }
+
+    public String getEnvironmentType() {
+        return environmentType;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
     public String getDistName() {
         return distName;
     }
@@ -76,17 +82,10 @@ public class AgentInfo implements Serializable {
     public Set<String> getTags() {
         return tags;
     }
-    public List<String> getComponents() {
-        return components;
-    }
-    public AgentConfigReaderInfo getConfigReader() {
-        return configReader;
-    }
-    public AgentMessageProcessorInfo getMessageProcessor() {
-        return messageProcessor;
-    }
     public List<DistServiceInfo> getServices() {
         return services;
     }
-
+    public List<DistConfigGroupInfo> getConfigGroups() {
+        return configGroups;
+    }
 }

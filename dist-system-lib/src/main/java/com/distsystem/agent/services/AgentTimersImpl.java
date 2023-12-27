@@ -44,7 +44,7 @@ public class AgentTimersImpl extends ServiceBase implements AgentTimers {
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Timers manager.";
     }
 
     /** update configuration of this Service to add registrations, services, servers, ... */
@@ -80,6 +80,7 @@ public class AgentTimersImpl extends ServiceBase implements AgentTimers {
     public void setUpTimer(String timerName, String delayConfigName, long defaultTimerValue, Function<String, Boolean> onTask) {
         long timerPeriod = getAgent().getConfig().getPropertyAsLong(delayConfigName, defaultTimerValue);
         touch("setUpTimer");
+        createEvent("setUpTimer");
         setUpTimer(timerName, timerPeriod, timerPeriod, onTask);
     }
     /** set-up timer for given method */
