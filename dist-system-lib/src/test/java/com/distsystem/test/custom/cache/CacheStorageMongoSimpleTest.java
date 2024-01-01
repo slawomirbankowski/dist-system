@@ -4,6 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class CacheStorageMongoSimpleTest {
     private static final Logger log = LoggerFactory.getLogger(CacheStorageMongoSimpleTest.class);
 
     @Test
+    @Tag("custom")
     public void mongoSimpleTest() {
         log.info("START ------ ");
         String host = "localhost";

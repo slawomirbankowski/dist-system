@@ -48,9 +48,13 @@ public class SerializersTest {
                 Set.of(),
                 List.of(),
                 List.of());
+
+        var agentSimpleInfo = new AgentSimpleInfo(agentGuid, "dev", "dev", agentGuid, agentGuid, LocalDateTime.now(), false,
+                Set.of());
+
         // DistClientType clientType, String clientClassName, String url, boolean working, String clientGuid, Set<String> tags, long receivedMessages, long sentMessages
         var clientInfo = new ClientInfo(DistClientType.http, "ClientClassName", "serverUrl", true, "client_guid", Set.of("tag1"), 1, 1);
-        AgentWelcomeMessage welcome = new AgentWelcomeMessage(agentInfo, clientInfo);
+        AgentWelcomeMessage welcome = new AgentWelcomeMessage(agentSimpleInfo, clientInfo);
         DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, agentGuid, DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
 
         log.info("Welcome message: " + welcomeMsg);

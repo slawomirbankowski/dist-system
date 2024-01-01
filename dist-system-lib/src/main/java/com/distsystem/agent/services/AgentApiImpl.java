@@ -73,7 +73,7 @@ public class AgentApiImpl extends ServiceBase implements AgentApi {
     }
     /** list all API handlers - methods to be run */
     public List<AgentServiceHandlers> listAllApis() {
-        return getAgent().getServices().getServices().stream().map(s -> {
+        return getAgent().getServices().getServicesByType().stream().map(s -> {
             return new AgentServiceHandlers(s.getServiceType().name(), s.getWebApiProcessor().getAllHandlers());
         }).toList();
     }

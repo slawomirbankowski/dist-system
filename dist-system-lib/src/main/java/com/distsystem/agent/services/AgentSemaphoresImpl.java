@@ -8,6 +8,7 @@ import com.distsystem.api.info.AgentSemaphoresInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentSemaphores;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 
@@ -42,7 +43,7 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
         return true;
     }
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         return initializeSemaphore(bucket);
     }
 
@@ -56,8 +57,8 @@ public class AgentSemaphoresImpl extends ServiceBase implements AgentSemaphores 
     }
 
     /** initialization of semaphore manager for given class name */
-    private DistStatusMap initializeSemaphore(DistConfigBucket bucket) {
-        DistStatusMap status = DistStatusMap.create(this);
+    private AdvancedMap initializeSemaphore(DistConfigBucket bucket) {
+        AdvancedMap status = AdvancedMap.create(this);
         touch("initializeSemaphore");
         createEvent("initializeSemaphore", bucket.getKey().getConfigType());
         String className = DistConfig.AGENT_SEMAPHORE_CLASS_MAP.get(bucket.getKey().getConfigType());

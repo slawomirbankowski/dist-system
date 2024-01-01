@@ -5,6 +5,7 @@ import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.JsonUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class AgentReceiverSendingTest {
     private static final Logger log = LoggerFactory.getLogger(AgentReceiverSendingTest.class);
 
     @Test
+    @Tag("custom")
     public void agentReceiverSendingTest() {
         log.info("START ------ agent receiver sending test");
 
@@ -23,7 +25,7 @@ public class AgentReceiverSendingTest {
                 .withEnvironmentVariables()
                 .withWebApiPort(9999)
                 .withRegistrationJdbcFromEnv()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9991)
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)

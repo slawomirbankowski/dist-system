@@ -9,6 +9,7 @@ import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.DistService;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
@@ -115,8 +116,8 @@ public abstract class ServiceBase extends AgentableBase implements DistService {
     /** read configuration and re-initialize this service - to override */
     protected abstract boolean onReinitialize();
     /** change values in configuration bucket - to override this method */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
-        return DistStatusMap.create(this).notImplemented();
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
+        return AdvancedMap.create(this).notImplemented();
     }
     /** run after initialization */
     public void afterInitialization() {

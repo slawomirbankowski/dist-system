@@ -7,6 +7,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Receiver;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class AgentServerKafkaTest {
     private static final Logger log = LoggerFactory.getLogger(AgentServerKafkaTest.class);
 
     @Test
+    @Tag("custom")
     public void agentKafkaServerTest() {
         log.info("START ------ agent server Kafka test");
         Agent agent1 = DistFactory.buildEmptyFactory()

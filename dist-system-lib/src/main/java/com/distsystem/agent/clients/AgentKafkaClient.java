@@ -50,7 +50,8 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
             daoKafka = parentAgent.getAgentDao().getOrCreateDaoOrError(DaoKafkaBase.class, params);
             daoKafka.usedByComponent(this);
             log.info("Created new KAFKA client for server: " + serverRow.simpleInfo());
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
@@ -83,7 +84,7 @@ public class AgentKafkaClient extends AgentClientBase implements AgentClient {
     protected void onClose() {
         log.info("Closing Kafka client for GUID: " + clientGuid);
         try {
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage closeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "close",  welcome);
             send(closeMsg);
             working = false;

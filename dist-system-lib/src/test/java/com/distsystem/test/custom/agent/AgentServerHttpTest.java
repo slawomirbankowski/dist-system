@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.api.*;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class AgentServerHttpTest {
     private static final Logger log = LoggerFactory.getLogger(AgentServerHttpTest.class);
 
     @Test
+    @Tag("custom")
     public void agentServerHttpTest() {
         log.info("START ------ agent server HTTP test");
         Agent agent1 = DistFactory.buildEmptyFactory()
@@ -32,7 +34,7 @@ public class AgentServerHttpTest {
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerHttpPort(9912)
+                .withServerHttpPort(9992)
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
                 .withTimerRegistrationPeriod(1000)
@@ -42,24 +44,24 @@ public class AgentServerHttpTest {
         assertNotNull(agent1, "Created agent1 should not be null");
         assertNotNull(agent2, "Created agent2 should not be null");
 
-        log.info("======-----> Agent1 [1]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServices().size());
-        assertEquals(1, agent1.getServices().getServices().size(), "There should be 1 server");
+        log.info("======-----> Agent1 [1]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServicesByType().size());
+        assertEquals(1, agent1.getServices().getServicesByType().size(), "There should be 1 server");
         assertEquals(0, agent1.getRegistrations().getAgents().size(), "There should be 0 agents");
         assertEquals(1, agent1.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
-        log.info("======-----> Agent2 [1]: " + agent2.getRegistrations().getAgents().size() + ", servers: " + agent2.getServices().getServices().size());
-        assertEquals(1, agent2.getServices().getServices().size(), "There should be 1 server");
+        log.info("======-----> Agent2 [1]: " + agent2.getRegistrations().getAgents().size() + ", servers: " + agent2.getServices().getServicesByType().size());
+        assertEquals(1, agent2.getServices().getServicesByType().size(), "There should be 1 server");
         assertEquals(0, agent2.getRegistrations().getAgents().size(), "There should be 0 agents");
         assertEquals(1, agent2.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
 
 //com.distsystem.api.enums.DistServiceType fromService, DistServiceType toService, String method, Object message, DistCallbacks
 
         DistUtils.sleep(3000);
-        log.info("======-----> Agent1 [2]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServices().size());
-        assertEquals(1, agent1.getServices().getServices().size(), "There should be 1 server");
+        log.info("======-----> Agent1 [2]: " + agent1.getRegistrations().getAgents().size() + ", servers: " + agent1.getServices().getServicesByType().size());
+        assertEquals(1, agent1.getServices().getServicesByType().size(), "There should be 1 server");
         assertEquals(2, agent1.getRegistrations().getAgents().size(), "There should be 2 agents");
         assertEquals(1, agent1.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
-        log.info("======-----> Agent2 [2]: " + agent2.getRegistrations().getAgents().size() + ", servers: " + agent2.getServices().getServices().size());
-        assertEquals(1, agent2.getServices().getServices().size(), "There should be 1 server");
+        log.info("======-----> Agent2 [2]: " + agent2.getRegistrations().getAgents().size() + ", servers: " + agent2.getServices().getServicesByType().size());
+        assertEquals(1, agent2.getServices().getServicesByType().size(), "There should be 1 server");
         assertEquals(2, agent2.getRegistrations().getAgents().size(), "There should be s agent");
         assertEquals(1, agent2.getRegistrations().getRegistrationsCount(), "There should be 1 registration service");
 

@@ -191,7 +191,8 @@ public class DistFactory {
         long totalTime = System.currentTimeMillis() - startTime;
         long memoryAfter = rt.maxMemory()-rt.freeMemory();
         long memoryUsed = memoryAfter-memoryBefore;
-        log.info("New Agent created and initialized, guid: " + agent.getAgentGuid() +", services: " + agent.getServices().getServicesCount() + ", totalTime: " + totalTime + ", free: "  + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory() + ", used: " + memoryUsed);
+        log.info("New Agent CREATED AND INITIALIZED!!! guid: " + agent.getAgentGuid() +", services: " + agent.getServices().getServicesCount() + ", totalTime: " + totalTime + "ms, free: "  + rt.freeMemory() + ", max: " + rt.maxMemory() + ", total: " +rt.totalMemory() + ", used: " + memoryUsed);
+        log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         return agent;
     }
     /** set type and name of the environment */

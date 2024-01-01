@@ -13,13 +13,13 @@ public class DistConfigBucketKey {
     private static final Logger log = LoggerFactory.getLogger(DistConfigBucketKey.class);
 
     /** name of service: CACHE, API, DAO, */
-    private String serviceName;
-    /** name of configuration type: HTTP, JDBC, KAFKA, ELASTICSEARCH, ...*/
-    private String configType;
+    private final String serviceName;
+    /** name of configuration type: HTTP, JDBC, KAFKA, ELASTICSEARCH, MONGODB, ...*/
+    private final String configType;
     /** name of configuration instance: PRIMARY, SECONDARY, TERTIARY
      * there might be many instances of the same type of configuration
      * */
-    private String configInstance;
+    private final String configInstance;
 
     /** */
     public DistConfigBucketKey(String serviceName, String configType, String configInstance) {
@@ -31,9 +31,11 @@ public class DistConfigBucketKey {
     public String getServiceName() {
         return serviceName;
     }
+    /** get configuration type: JDBC, KAFKA, ELASTICSEARCH, DNS, MONGODB, ... */
     public String getConfigType() {
         return configType;
     }
+    /** get configuration instance - PRIMARY, SECONDARY, TETRIARY, ... */
     public String getConfigInstance() {
         return configInstance;
     }

@@ -1,0 +1,124 @@
+<html>
+    <head>
+        <title>Distributed Agent System</title>
+    </head>
+
+<body>
+<h2>Distributed Agent System</h2>
+Distributed Agent System is Framework to easily create Cloud-compliant software. <br>
+Agents help to create effective communication, keep common storages and distributed reports, organize DAOs, gathering events and issues, provide management of timers and threads.
+<br/>
+These Agents could be created in many places, many applications and have different services turned on.<br/>
+At first - Agent is connecting to Registration Services (JDBC, Elasticsearch, Kafka, ...) and register itself, servers and services.<br/>
+Then, Agent is opening Servers for communication with other clients.<br/>
+Next, Agent is opening Web API for custom connections.<br/>
+The last - Agent is checking other Agent connected to Registration Services and<br/>
+<br/>
+Current agent is running on localhost.<br/>
+<br/>
+<br/>
+Each Agent has:<br/>
+<ul>
+    <li>Registrations - global repository of agents, servers, clients, issues, events, configurations</li>
+    <li>Connectors - clients and servers to connect to other agents</li>
+    <li>Services - all services like Cache, Reports, Storages, Spaces, ...</li>
+    <li>Api - Web REST API to connect to Agent, typically on port 9999.</li>
+    <li>Serializer -  serializer to serialize and deserialize messages and other objects in Agent</li>
+    <li>Configuration - agent1.getConfig() - properties to create Agent and services</li>
+    <li>Issues - agent.getAgentIssues() - issues like errors and exceptions from Agent and dependent services</li>
+    <li>Events - agent.getAgentEvents() - events</li>
+    <li>Threads - agent.getAgentThreads() -</li>
+    <li>Timers - agent1.getAgentTimers() -</li>
+    <li>Tags - agent1.getAgentTags() - set of custom String values to classify agent</li>
+    <li></li>
+    <li></li>
+</ul>
+
+<h2>Registrations</h2>
+Agent is registering to<br/>
+
+<h2>Services</h2>
+Agent might be having many services:<br/>
+${GET:/agent/services}
+<br/>
+<br/>
+
+<h2>API</h2>
+List of API endpoints:
+
+
+<h2>Cache</h2>
+Distributed cache library for JVM applications or through socket/http connectors.<br/>
+Cache can be fully configured how to keep objects:<br/>
+<br/>
+<ul>
+    <li>time-based - it means that object is released/disposed after some time</li>
+    <li>priority-based - it means that each object is disposed based on priority, top priority would be disposed last</li>
+    <li>out-of-memory - large object would be disposed first, small would be disposed the last</li>
+    <li>LRU-based - last recently used would not be disposed</li>
+    <li>usage-factor-based - usage factor over time is calculated for each object</li>
+    <li>keep with replace - replace will be only if new object is in cache, always there must be at least one object</li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+Cache is distributed and can be deployed as many instances with additional configuration.<br/>
+<ul>
+<li>there is agent-based system to keep cache-instances connected</li>
+<li>there are callback to be set when something important is happening</li>
+<li>last usage date is available</li>
+<li>get cache size per storage</li>
+<li>refresh all caches with refresh mode</li>
+<li></li>
+</ul>
+
+Cache can be connected to different storages to keep cache items and communicate between cache-agents:<br/>
+<ul>
+    <li>Redis</li>
+    <li>Elasticseach</li>
+    <li>Kafka</li>
+    <li>JDBC-compliant database(s) (with DDL option)</li>
+    <li>custom HTTP storage</li>
+</ul>
+
+Cache could be used as:<br/>
+<ul>
+    <li>library to be linked and used inside application</li>
+    <li>standalone application having public API to be used and REST API</li>
+    <li>code to be included "as it is"</li>
+    <li></li>
+    <li></li>
+</ul>
+
+Each cache is creating agent that can communicate to other configured agents to provide fast read and distributed write.
+
+
+<h2>TODO list</h2>
+<ul>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+
+</body>
+</html>

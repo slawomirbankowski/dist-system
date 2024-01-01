@@ -81,6 +81,7 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
                 datagramSocket.receive(packet);
                 byte[] received = packet.getData();
                 if (received != null && received.length > 0) {
+                    log.debug("......... Got message from UDP to be parsed, content: " + received.length);
                     DistMessage receivedMsg = (DistMessage)parentAgent.getSerializer().deserialize(DistMessage.class.getName(), received);
                     log.debug("......... Got message from from UDP:  " + receivedMsg.toString());
                 }
@@ -93,7 +94,7 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
                 }
             } catch (IOException ex) {
                 if (closed) {
-
+                    log.info("Datagram server already closed, breaking waiting for packed, agent: " + parentAgent.getAgentGuid() + ", workingPort: " + workingPort);
                 } else {
                     log.error("!!!!! IOException on Datagram server working on port " + workingPort + ", reason: " + ex.getMessage(), ex);
                 }
@@ -112,6 +113,7 @@ public class AgentDatagramServer extends ServerBase implements AgentServer, Runn
 
     protected void onClose() {
         try {
+            closed = true;
             log.info("Try to close DATAGRAM server for Agent: " + parentAgent.getAgentGuid() + ", server closed: " + closed);
             datagramSocket.close();
             mainThread.join(2000);

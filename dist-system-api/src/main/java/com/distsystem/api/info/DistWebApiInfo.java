@@ -1,6 +1,8 @@
 package com.distsystem.api.info;
 
-public class DistWebApiInfo {
+import java.io.Serializable;
+
+public class DistWebApiInfo implements Serializable {
 
     private final long requestMethodHandlersCount;
     private final long messageHandlersCount;

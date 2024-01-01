@@ -10,6 +10,7 @@ import com.distsystem.base.AuthTokenBase;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentAuth;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 
@@ -56,13 +57,13 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
         return true;
     }
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         // TODO: insert, update, delete of bucket
         return createAuthStorage(bucket);
     }
     /** create new auth from bucket */
-    public DistStatusMap createAuthStorage(DistConfigBucket bucket) {
-        DistStatusMap status = DistStatusMap.create(this);
+    public AdvancedMap createAuthStorage(DistConfigBucket bucket) {
+        AdvancedMap status = AdvancedMap.create(this);
         String readerClass = DistConfig.AGENT_AUTH_STORAGE_CLASS_MAP.get(bucket.getKey().getConfigType());
         log.info("Create new Auth storage for type: " + bucket.getKey().getConfigType() + ", class: " + readerClass);
         createEvent("createAuthStorage");
@@ -74,8 +75,7 @@ public class AgentAuthImpl extends ServiceBase implements AgentAuth {
                     .getConstructor(ServiceObjectParams.class)
                     .newInstance(params);
             auths.put(bucket.getKey().toString(), authObj);
-
-            return status;
+            return status.join(authObj.toStatusMap());
         } catch (Exception ex) {
             log.info("Cannot initialize auth storage for agent: "  + parentAgent.getAgentGuid() + ", class: " + readerClass + ", reason: " + ex.getMessage(), ex);
             addIssueToAgent("createAuthStorage", ex);

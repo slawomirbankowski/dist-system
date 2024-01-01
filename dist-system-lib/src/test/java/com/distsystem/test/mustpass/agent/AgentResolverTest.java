@@ -1,9 +1,10 @@
-package com.distsystem.test.custom.agent;
+package com.distsystem.test.mustpass.agent;
 
 import com.distsystem.utils.ResolverManager;
 import com.distsystem.utils.resolvers.EnvironmentResolver;
 import com.distsystem.utils.resolvers.MapResolver;
 import com.distsystem.utils.resolvers.MethodResolver;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class AgentResolverTest {
     private static final Logger log = LoggerFactory.getLogger(AgentResolverTest.class);
 
     @Test
+    @Tag("custom")
     public void agentResolverTest() {
         log.info("START ------ agent resolver test");
 

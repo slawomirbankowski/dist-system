@@ -6,6 +6,7 @@ import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentRegistrationInfo;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Registration;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.CacheHitRatio;
 import com.distsystem.utils.DistUtils;
 import org.slf4j.Logger;
@@ -75,8 +76,9 @@ public abstract class RegistrationBase extends ServiceObjectBase implements Agen
         }
         return connected;
     }
-    public DistStatusMap statusMap() {
-        return DistStatusMap.create(this).notImplemented();
+    /** get status map */
+    public AdvancedMap statusMap() {
+        return AdvancedMap.createFromObject(this).append("registrationGuid", getGuid());
     }
     /** last status of connection */
     public boolean isLastConnected() {

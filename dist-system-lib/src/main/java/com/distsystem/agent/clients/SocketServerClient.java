@@ -105,7 +105,7 @@ public class SocketServerClient extends AgentClientBase implements AgentClient, 
             receivingThread = new Thread(this);
             receivingThread.start();
             parentAgent.getThreads().registerThread(this, receivingThread, "socket-client-" + port);
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
@@ -179,7 +179,7 @@ public class SocketServerClient extends AgentClientBase implements AgentClient, 
     private void parseWelcomeMessage(DistMessage msg) {
         try {
             AgentWelcomeMessage welcome = (AgentWelcomeMessage)msg.getMessage();
-            log.info("Socked client got WELCOME message, client: " + clientGuid + ", from agent: " + welcome.getAgentInfo().getAgentGuid() + ", from client: " + welcome.getClientInfo().getClientGuid());
+            log.info("Socked client got WELCOME message, client: " + clientGuid + ", from agent: " + welcome.getAgentSimpleInfo().getAgentGuid() + ", from client: " + welcome.getClientInfo().getClientGuid());
             // TODO: welcome message to SocketClient - set Agent name and initial information from Welcome message
         } catch (Exception ex) {
             addIssueToAgent("parseWelcomeMessage", ex);

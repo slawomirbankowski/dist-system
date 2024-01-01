@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /** Configuration for distributed system - this is keeping parameters in Properties format and Value resolver to resolve values of properties.
  * Configuration has also value change listeners - so each module can subscribe to changes of values for given properties.
@@ -68,7 +69,9 @@ public class DistConfig {
     public long countObjects() {
         return 4L + props.size()*2L + configGroups.size()*2L;
     }
-    /** register new config group and parse configuration values into buckets */
+    /** register new config group and parse configuration values into buckets
+     * groupName - name of the group for this configuration group:
+     * */
     public DistConfigGroup registerConfigGroup(String groupName, DistService parentService) {
         synchronized (configGroups) {
             DistConfigGroup gr = configGroups.get(groupName);
@@ -123,14 +126,31 @@ public class DistConfig {
         return p;
     }
     /** get HashMap with properties for cache */
-    public HashMap<String, String> getHashMap(boolean includePassword) {
+    public HashMap<String, String> getHashMap(boolean includePassword, boolean allProperties) {
         HashMap<String, String> hm = new HashMap<>();
         for (Map.Entry<Object, Object> e: props.entrySet()) {
-            if (includePassword || !e.getKey().toString().contains("PASS")) {
-                hm.put(e.getKey().toString(), e.getValue().toString());
+            if (allProperties || e.getKey().toString().startsWith("AGENT_")) {
+                if (includePassword || !e.getKey().toString().contains("PASS")) {
+                    hm.put(e.getKey().toString(), e.getValue().toString());
+                }
             }
         }
         return hm;
+    }
+    /** */
+    public String getAsScript(boolean includePassword, boolean allProperties) {
+        var m = getHashMap(includePassword, allProperties);
+        StringBuilder b = new StringBuilder();
+        m.entrySet().stream().forEach(e -> {
+            b.append(e.getKey());
+            b.append("=");
+            b.append(e.getValue());
+            b.append("\n");
+        });
+        return b.toString();
+    }
+    public HashMap<String, String> getHashMap(boolean includePassword) {
+        return getHashMap(includePassword, false);
     }
     /** get unique ID of this config for cache */
     public String getConfigGuid() {
@@ -163,13 +183,61 @@ public class DistConfig {
 
     /** commit properties after read */
     public void mergeWithConfig(DistConfig newCfg) {
+        newCfg.props.remove(AGENT_CONFIG_GUID);
         // TODO: implement merge new configuration with current configuration
-
-
-
-
+        HashMap<String, String> newValues = new HashMap<>();
+        HashMap<String, String> changedValues = new HashMap<>();
+        HashMap<String, String> removedValues = new HashMap<>();
+        HashMap<String, String> theSameValues = new HashMap<>();
+        newCfg.props.entrySet().forEach(e -> {
+            if (!props.containsKey(e.getKey())) {
+                // new element in new map
+                newValues.put(e.getKey().toString(), e.getValue().toString());
+            } else {
+                if (props.getOrDefault(e.getKey(), "").equals(e.getValue())) {
+                    // the same values
+                    theSameValues.put(e.getKey().toString(), e.getValue().toString());
+                } else {
+                    // different value
+                    changedValues.put(e.getKey().toString(), e.getValue().toString());
+                }
+            }
+        });
+        newCfg.props.entrySet().forEach(ee -> {
+            if (ee.getValue().toString().equals("") && props.containsKey(ee.getKey())) {
+                removedValues.put(ee.getKey().toString(), ee.getValue().toString());
+            }
+        });
+        int beforeCount = props.size();
+        newCfg.props.entrySet().forEach(e -> {
+            if (e.getValue().equals("")) {
+                props.remove(e.getKey());
+            } else {
+                props.put(e.getKey(), e.getValue());
+            }
+        });
+        //configGroups.values().forEach(cg -> {
+        //    cg.addConfigValues("", "", "", Map.of());
+        //});
+        log.info("Merged configuration with new config values, before: " + beforeCount + ", to merge: " + newCfg.props.size() + ", after: " + props.size()
+                + ", newValues: " + newValues.size() + " (" + newValues.keySet() + ")"
+                + ", changedValues: " + changedValues.size()  + " (" + changedValues.keySet() + ")"
+                + ", removedValues: " + removedValues.size()  + " (" + removedValues.keySet() + ")"
+                + ", theSameValues: " + theSameValues.size() + " (" + theSameValues.keySet() + ")");
     }
-
+    /** commit properties after read */
+    public void mergeWithEntries(List<DistConfigEntry> entries) {
+        int beforeCount = props.size();
+        entries.forEach(e -> {
+            if (e.getConfigValue().equals("")) {
+                props.remove(e.getConfigValue());
+            } else {
+                props.put(e.getFullConfig(), e.getConfigValue());
+            }
+        });
+        var entryKeys = entries.stream().map(DistConfigEntry::getFullConfig).collect(Collectors.toSet());
+        log.info("Merge configuration with new entries, before: " + beforeCount + ", entries: " + entries.size() + " " + entryKeys + ", after: " + props.size());
+    }
     /** get value of given configuration property as long value */
     public long getPropertyAsLong(String name, long defaultValue) {
         return DistUtils.parseLong(getProperty(name), defaultValue);
@@ -337,6 +405,11 @@ public class DistConfig {
             JDBC, "com.distsystem.agent.auth.AgentAuthStorageJdbc",
             KAFKA, "com.distsystem.agent.auth.AgentAuthStorageKafka"
     );
+
+    public static Map<String, String> AGENT_MONITOR_OBJECT_CLASS_MAP = Map.of(
+            JDBC, "com.distsystem.agent.auth.AgentAuthStorageJdbc",
+            KAFKA, "com.distsystem.agent.auth.AgentAuthStorageKafka"
+    );
     public static String AGENT_AUTH_STORAGE_JDBC_URL = "AGENT_AUTH_STORAGE_JDBC_URL";
     public static String AGENT_AUTH_STORAGE_JDBC_DRIVER = "AGENT_AUTH_STORAGE_JDBC_DRIVER";
     public static String AGENT_AUTH_STORAGE_JDBC_USER = "AGENT_AUTH_STORAGE_JDBC_USER";
@@ -358,19 +431,19 @@ public class DistConfig {
     /**port of SockerServer to exchange messages between Agents */
     public static String AGENT_CONNECTORS_SERVER_SOCKET_PORT = "AGENT_CONNECTORS_SERVER_SOCKET_PORT";
     /** */
-    public static int AGENT_CONNECTORS_SERVER_SOCKET_PORT_DEFAULT_VALUE = 9901;
+    public static int AGENT_CONNECTORS_SERVER_SOCKET_PORT_DEFAULT_VALUE = 9991;
     /** sequencer for default agent port */
-    public static final AtomicInteger AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ = new AtomicInteger(9901);
+    public static final AtomicInteger AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ = new AtomicInteger(9991);
     /** timeout value for Socket reading in milliseconds, this is used for Socket.setSoTimeout(...) */
     public static String AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT = "AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT";
     public static int AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT_DEFAULT_VALUE = 2000;
 
     /** port of HTTP Server to exchange messages between Agents */
     public static String AGENT_CONNECTORS_SERVER_HTTP_PORT = "AGENT_CONNECTORS_SERVER_HTTP_PORT";
-    public static int AGENT_CONNECTORS_SERVER_HTTP_PORT_DEFAULT_VALUE = 9912;
+    public static int AGENT_CONNECTORS_SERVER_HTTP_PORT_DEFAULT_VALUE = 9992;
 
     public static String AGENT_CONNECTORS_SERVER_DATAGRAM_PORT = "AGENT_CONNECTORS_SERVER_DATAGRAM_PORT";
-    public static int AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE = 9933;
+    public static int AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE = 9993;
     public static String AGENT_CONNECTORS_SERVER_DATAGRAM_TIMEOUT = "AGENT_CONNECTORS_SERVER_DATAGRAM_TIMEOUT";
 
     /** Server for agent communication based on Kafka */
@@ -530,6 +603,7 @@ public class DistConfig {
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_TABLE = "AGENT_CONFIGREADER_OBJECT_JDBC_TABLE";
     public static String AGENT_CONFIGREADER_OBJECT_JDBC_DIALECT = "AGENT_CONFIGREADER_OBJECT_JDBC_DIALECT";
 
+    /** all configuration group names */
     public static String AGENT_AUTH_OBJECT = "AGENT_AUTH_OBJECT";
     public static String AGENT_AUTH_STORAGE = "AGENT_AUTH_STORAGE";
     public static String AGENT_AUTH_TOKEN = "AGENT_AUTH_TOKEN";

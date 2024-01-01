@@ -6,6 +6,7 @@ import com.distsystem.api.DistCallbacks;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +17,17 @@ public class AgentRegisterJdbcTest {
     private static final Logger log = LoggerFactory.getLogger(AgentRegisterJdbcTest.class);
 
     @Test
+    @Tag("custom")
     public void agentRegisterJdbcTest() {
         log.info("START ------ agent register JDBC test");
-
+        // 9991 API, 9992 Socket, 9993 HTTP, 9994 UDP, 9995 TCP?, 9996, 9997, 9998, 9999
+        // 9981, 9982, 9983, 9984, 9985
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withWebApiDefaultPort()
+                .withSerializerDefault()
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerSocketPort(9901)
+                .withServerDatagramPort(9971)
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)
@@ -33,7 +37,8 @@ public class AgentRegisterJdbcTest {
                 .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerSocketPort(9902)
+                .withServerDatagramPort(9972)
+                .withSerializerDefault()
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)

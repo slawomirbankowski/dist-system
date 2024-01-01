@@ -3,6 +3,7 @@ package com.distsystem.dao;
 import com.distsystem.api.*;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.*;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.HttpConnectionHelper;
 import com.distsystem.utils.JsonUtils;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** base class for any JDBC based DAO */
+/** base class for any Elasticsearch based DAO */
 public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
 
     /** local logger for this class*/
@@ -57,12 +58,16 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
 
     /** returns true if DAO is connected */
     public boolean isConnected() {
-        return getClusterInfo().size() == 1;
+        try {
+            return getClusterInfo().size() == 1;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     /** test DAO and returns items */
-    public DistStatusMap testDao() {
-        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
+    public AdvancedMap testDao() {
+        return AdvancedMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
 
     /** get URL of this DAO */
@@ -117,6 +122,23 @@ public class DaoElasticsearchBase extends DaoBase implements AgentComponent {
         indxs.removeAll(existingIndices);
         return indxs.stream().flatMap(name -> createIndex(name).stream()).collect(Collectors.toList());
     }
+
+    /** create new structure for this DAO */
+    public AdvancedMap createStructure(DaoModel model) {
+        AdvancedMap status = AdvancedMap.create(this);
+        try {
+            createIndex(model.getTableName());
+            return status.append("", "").withStatus("OK");
+        } catch (Exception ex) {
+            return status.exception(ex);
+        }
+    }
+    /** insert full objects to given structure */
+    public <X extends BaseRow> int executeInsertRowsForModel(DaoModel<X> model, List<X> objs) {
+        // TODO: implement inserting object into model structure
+        return 0;
+    }
+
     /** create new default index by name */
     public Optional<ElasticIndexCreateInfo> createIndex(String indexName) {
         String createBody = JsonUtils.serialize(Map.of());

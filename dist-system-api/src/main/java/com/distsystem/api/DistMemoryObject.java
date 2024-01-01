@@ -32,6 +32,12 @@ public class DistMemoryObject {
         updatesCount.incrementAndGet();
         this.value = newValue;
     }
+    /** */
+    public void appendValue(String newValue) {
+        lastUpdated = LocalDateTime.now();
+        updatesCount.incrementAndGet();
+        this.value = newValue;
+    }
     public void use() {
         useCount.incrementAndGet();
     }

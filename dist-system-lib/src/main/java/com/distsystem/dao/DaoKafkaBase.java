@@ -1,11 +1,13 @@
 package com.distsystem.dao;
 
+import com.distsystem.api.BaseRow;
+import com.distsystem.api.DaoModel;
 import com.distsystem.api.DaoParams;
-import com.distsystem.api.DistStatusMap;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.KafkaReceiver;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -66,18 +68,23 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
     }
     /** returns true if DAO is connected */
     public boolean isConnected() {
-        return true;
+        try {
+            var x = adminClient.listTopics().listings();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     /** test DAO and returns items */
-    public DistStatusMap testDao() {
-        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
+    public AdvancedMap testDao() {
+        return AdvancedMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
     /** get URL of this DAO */
     public String getUrl() {
         return brokers;
     }
-    /** */
+    /** onInitialize */
     public void onInitialize() {
         try {
             log.info("Connecting to Kafka, BROKERS=" + resolve(brokers));
@@ -93,6 +100,8 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
     /** read configuration and re-initialize this component */
     public boolean componentReinitialize() {
         // TODO: implement reinitialization
+        // adminClient.close();
+        // producer.close();
         return true;
     }
 
@@ -101,6 +110,21 @@ public class DaoKafkaBase extends DaoBase implements AgentComponent {
         return getTopics();
     }
 
+    /** create new structure for this DAO */
+    public AdvancedMap createStructure(DaoModel model) {
+        AdvancedMap status = AdvancedMap.create(this);
+        try {
+            boolean ok = createTopic(model.getTableName());
+            return status.append("type", "topic").append("result", ""+ok).withStatus("OK");
+        } catch (Exception ex) {
+            return status.exception(ex);
+        }
+    }
+    /** insert full objects to given structure */
+    public <X extends BaseRow> int executeInsertRowsForModel(DaoModel<X> model, List<X> objs) {
+        // TODO: implement inserting object into model structure
+        return 0;
+    }
     /** */
     private Properties commonKafkaProperties() {
         Properties props = new Properties();

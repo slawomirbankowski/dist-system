@@ -1,5 +1,6 @@
 package com.distsystem.api;
 
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.JsonUtils;
 
 import java.net.URI;
@@ -116,8 +117,17 @@ public class AgentWebApiRequest {
     public byte[] getContent() {
         return content;
     }
+    /** get byte context as String */
     public String getContentAsString() {
         return new String(content);
+    }
+    /** */
+    public Map<String, Object> getContentAsJsonMap() {
+        return JsonUtils.deserializeToMapOfObjects(getContentAsString());
+    }
+    /** parse byte content to String and then to JSON map */
+    public AdvancedMap getContentAsJsonAdvancedMap() {
+        return AdvancedMap.fromMap(getContentAsJsonMap());
     }
     public String getServiceName() {
         return serviceName;

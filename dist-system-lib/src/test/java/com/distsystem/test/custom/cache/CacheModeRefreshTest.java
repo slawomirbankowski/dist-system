@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.api.CacheMode;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class CacheModeRefreshTest {
 
     AtomicLong seq = new AtomicLong();
     @Test
+    @Tag("custom")
     public void modeRefreshTest() {
         log.info("START ------ clean test");
         Cache cache = DistFactory.buildDefaultFactory()

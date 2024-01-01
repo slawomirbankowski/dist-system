@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.api.CacheMode;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class CachePriorityClearTest {
     private static final Logger log = LoggerFactory.getLogger(CachePriorityClearTest.class);
 
     @Test
+    @Tag("custom")
     public void performanceTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()

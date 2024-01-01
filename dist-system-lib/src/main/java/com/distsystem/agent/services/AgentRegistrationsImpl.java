@@ -14,6 +14,7 @@ import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentRegistrations;
 import com.distsystem.interfaces.Registration;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 import org.slf4j.Logger;
@@ -83,13 +84,11 @@ public class AgentRegistrationsImpl extends ServiceBase implements AgentRegistra
         return true;
     }
     /** change values in configuration bucket - to override this method */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
-        DistStatusMap status = DistStatusMap.create(this);
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
+        AdvancedMap status = AdvancedMap.create(this);
         // TODO: insert, update, delete of bucket
         log.info("Initializing new registration with bucket for agent: " + parentAgent.getAgentGuid() + ", bucket key: " + bucket.getKey() + ", current servers: " + registeredServers.size());
         Optional<RegistrationBase> reg = createRegistration(bucket);
-        // Map.of("status", "OK", "guid", r.getRegisterGuid(), "url", r.getUrl())
-        //DistStatusMap.
         return reg.stream().map(r -> r.statusMap()).findFirst().orElse(status.withStatus("NOT_CREATED"));
     }
     /** run after initialization */

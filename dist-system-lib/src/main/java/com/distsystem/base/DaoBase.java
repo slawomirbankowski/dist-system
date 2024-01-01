@@ -1,7 +1,7 @@
 package com.distsystem.base;
 
+import com.distsystem.api.DaoModel;
 import com.distsystem.api.DaoParams;
-import com.distsystem.api.DistStatusMap;
 import com.distsystem.api.dtos.DistAgentDaoRow;
 import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.info.AgentDaoInfo;
@@ -9,6 +9,7 @@ import com.distsystem.api.info.AgentDaoSimpleInfo;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Dao;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,13 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
 
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(DaoBase.class);
-
+    /** start time of DAO initialization */
+    private final long startTime = System.currentTimeMillis();
     /** parameters for this DAO */
     protected final DaoParams params;
-
     /** all components that are using this DAO */
     protected Map<String, AgentComponent> components = new HashMap<>();
+
 
     /** creates new DAO to JDBC database */
     public DaoBase(DaoParams params, Agent agent) {
@@ -34,7 +36,7 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
         this.params = params;
     }
     /** reinitialize this DAO and test it */
-    public DistStatusMap reinitializeDao() {
+    public AdvancedMap reinitializeDao() {
         componentReinitialize();
         return testDao();
     }
@@ -59,12 +61,15 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
         components.put(component.getGuid(), component);
         log.info("Added component that is using DAO, DAO GUID: " + getGuid() + ", URL: " + getUrl() + ", component: " + component.getComponentType() + ", component GUID: " + component.getGuid() + ", current components: " + components.size());
     }
-    /** */
+    /** remove component from usage of this DAO */
     public void notUsedByComponent(AgentComponent component) {
         components.remove(component.getGuid());
     }
     /** get all structures from DAO: tables, indices, topics, Document databases, ... */
     public abstract Collection<String> getDaoStructures();
+
+    /** create new structure for this DAO */
+    public abstract AdvancedMap createStructure(DaoModel model);
     /** check if given DAO structure is in underlying storage */
     public boolean checkDaoStructure(String structureName) {
         return getDaoStructures().contains(structureName);
@@ -74,7 +79,10 @@ public abstract class DaoBase extends AgentableBase implements Dao, AgentCompone
     public abstract String getUrl();
     /** get info about DAO */
     public AgentDaoInfo getInfo() {
-        return new AgentDaoInfo(createDate, params.getKey(), params.getDaoType(), getUrl(), isConnected(), getDaoStructures());
+        long workingMinutes = (System.currentTimeMillis()-startTime)/60000L;
+        return new AgentDaoInfo(createDate, workingMinutes, params.getKey(),
+                params.getDaoType(), getUrl(), isConnected(),
+                getDaoStructures(), components.keySet());
     }
     /** create row for DAO */
     public DistAgentDaoRow toRow() {

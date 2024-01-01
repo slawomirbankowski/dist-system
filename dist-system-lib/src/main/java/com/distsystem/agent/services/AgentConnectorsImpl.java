@@ -81,7 +81,7 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
         touch("updateConfig");
     }
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         // TODO: insert, update, delete of bucket
         return addNewServer(bucket);
     }
@@ -119,7 +119,7 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
         return true;
     }
     /** create new server */
-    public Map<String, String> createNewServer(String serverJson) {
+    public AdvancedMap createNewServer(String serverJson) {
         Map<String, String> serverMap =  JsonUtils.deserializeToMap(serverJson);
         String serverType = serverMap.getOrDefault("serverType", "NONE");
         String configInstance = serverMap.getOrDefault("configInstance", DistUtils.generateShortGuid());
@@ -127,9 +127,9 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
         return createNewServer(serverType, configInstance, serverMap);
     }
     /** create new server */
-    public Map<String, String> createNewServer(String configType, String configInstance, Map<String, String> configValues) {
-        configGroup.addConfigValues("SERVER", configType, configInstance, configValues);
-        return Map.of();
+    public AdvancedMap createNewServer(String configType, String configInstance, Map<String, String> configValues) {
+        log.info("Create new server in Connectors for configType: " + configType + ", configInstance: " + configInstance + "values: " + configValues.size() + " " + configValues.keySet());
+        return configGroup.addConfigValues("SERVER", configType, configInstance, configValues);
     }
 
     /** get full information about connectors - servers, clients */
@@ -140,9 +140,10 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
         return new AgentConnectorsInfo(createdServers, agents, clientInfos);
     }
     /** add new server - put in map of servers and register server to registration services */
-    private DistStatusMap addNewServer(DistConfigBucket bucket) {
-        DistStatusMap status = DistStatusMap.create(this);
+    private AdvancedMap addNewServer(DistConfigBucket bucket) {
+        AdvancedMap status = AdvancedMap.create(this);
         String readerClass = DistConfig.AGENT_CONNECTORS_CLASS_MAP.get(bucket.getKey().getConfigType());
+        log.info("Add new server in connectors, current: " + servers.size() +", ConfigType: " + bucket.getKey().getConfigType() + ", entries: " + bucket.getEntries().size());
         status.append("readerClass", readerClass);
         createEvent("addNewServer");
         try {
@@ -203,6 +204,15 @@ public class AgentConnectorsImpl extends ServiceBase implements AgentConnectors 
     /** get all UIDs of servers */
     public List<String> getServerKeys() {
         return servers.values().stream().map(v -> v.getServerGuid()).collect(Collectors.toList());
+    }
+    /** get AgentServer by key */
+    public Optional<AgentServer> getServerByKey(String serverKey) {
+        AgentServer server = servers.get(serverKey);
+        if (server==null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(server);
+        }
     }
     /** get number of clients */
     public int getClientsCount() {

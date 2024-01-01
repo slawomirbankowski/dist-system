@@ -35,6 +35,18 @@ public class DaoParams {
     public String getUrl() {
         return params.getString(URL, "");
     }
+    public String getDatabase() {
+        return params.getString(DATABASE, "default");
+    }
+    public String getHost() {
+        return params.getString(HOST, "localhost");
+    }
+    public int getPort() {
+        return params.getInt(PORT, 0);
+    }
+    public String getPortStr() {
+        return params.getString(PORT, "0");
+    }
     public String getUser() {
         return params.getString(USER, "");
     }
@@ -110,14 +122,37 @@ public class DaoParams {
 
     /** create DAO parameters for Redis */
     public static DaoParams redisParams(String host, String port) {
-        String key = DistDaoType.redis.name() + "" + DistUtils.fingerprint( host + ":" + port);
+        String key = DistDaoType.redis.name() + "_" + DistUtils.fingerprint( host + ":" + port);
         return new DaoParams(DistDaoType.redis, key, Map.of(
                 HOST, host,
                 PORT, port
         ));
     }
-
+    /** create DAO parameters for MongoDB */
+    public static DaoParams mongoParams(String host, String port) {
+        String key = DistDaoType.mongodb.name() + "_" + DistUtils.fingerprint( host + ":" + port);
+        return new DaoParams(DistDaoType.mongodb, key, Map.of(
+                HOST, host,
+                PORT, port
+        ));
+    }
+    /** create DAO parameters for MongoDB */
+    public static DaoParams cassandraParams(String host, String port) {
+        String key = DistDaoType.mongodb.name() + "_" + DistUtils.fingerprint( host + ":" + port);
+        return new DaoParams(DistDaoType.mongodb, key, Map.of(
+                HOST, host,
+                PORT, port
+        ));
+    }
+    /** create DAO parameters for MongoDB */
+    public static DaoParams activeMqParams(String url) {
+        String key = DistDaoType.mongodb.name() + "_" + DistUtils.fingerprint( url);
+        return new DaoParams(DistDaoType.mongodb, key, Map.of(
+                URL, url
+        ));
+    }
     public static final String URL = "URL";
+    public static final String DATABASE = "DATABASE";
     public static final String USER = "USER";
     public static final String PASS = "PASS";
     public static final String INIT_CONN = "INIT_CONN";

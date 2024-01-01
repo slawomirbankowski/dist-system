@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.api.*;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class CacheSimpleTest {
     private static final Logger log = LoggerFactory.getLogger(CacheSimpleTest.class);
 
     @Test
+    @Tag("custom")
     public void simpleTest() {
         log.info("START------ cache simple test");
 

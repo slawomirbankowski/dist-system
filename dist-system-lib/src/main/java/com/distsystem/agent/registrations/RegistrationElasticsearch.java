@@ -69,8 +69,9 @@ public class RegistrationElasticsearch extends RegistrationBase {
     /** */
     @Override
     protected AgentConfirmation onAgentRegister(AgentRegister register) {
-        log.info("Registering Agent at Elasticsearch, URL: " + elasticUrl + ", index: " + registerIndexName);
-        elasticDao.addOrUpdateDocument(registerIndexName, register.getAgentGuid(), register.toAgentRegisterRow().toMap());
+        log.info("Registering Agent at Elasticsearch, URL: " + elasticUrl + ", index: " + registerIndexName +", agent: " + register.getAgentGuid());
+        var regResult = elasticDao.addOrUpdateDocument(registerIndexName, register.getAgentGuid(), register.toAgentRegisterRow().toMap());
+        log.info("Registering result: " + regResult);
         return new AgentConfirmation(register.getAgentGuid(), true, false, 0, List.of());
     }
     /** */
@@ -142,7 +143,7 @@ public class RegistrationElasticsearch extends RegistrationBase {
     }
     /** register service */
     public void registerService(DistAgentServiceRow service) {
-        log.info("Registering service in Elasticsearch, GUID: " + service.getServiceGuid() + ", type: " + service.getServiceType());
+        log.info("Registering service in Elasticsearch, GUID: " + service.getServiceGuid() + ", type: " + service.getServiceType() + ", index: " + serviceIndexName);
         elasticDao.addOrUpdateDocument(serviceIndexName, service.getServiceGuid(), service.toMap());
     }
     /** get agents from registration services */

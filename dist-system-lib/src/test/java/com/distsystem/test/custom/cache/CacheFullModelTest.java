@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.test.custom.dao.DatabaseCacheDao;
 import com.distsystem.test.custom.dao.DatabaseDao;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ public class CacheFullModelTest {
     private static final Logger log = LoggerFactory.getLogger(CacheFullModelTest.class);
 
     @Test
+    @Tag("custom")
     public void fullDaoModelTest() {
         log.info("START------");
         Cache cache = DistFactory.buildDefaultFactory()

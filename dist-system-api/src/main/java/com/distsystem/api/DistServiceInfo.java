@@ -4,6 +4,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentMessageProcessorInfo;
 import com.distsystem.api.info.DistWebApiInfo;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
  * There could be many services in Dist System connected through Agents:
  * report, storage, space, remove, ...
  * */
-public class DistServiceInfo {
+public class DistServiceInfo implements Serializable {
     private final DistServiceType serviceType;
     private final String serviceClass;
     private final String serviceGuid;

@@ -105,7 +105,7 @@ public class AgentHttpServer extends ServerBase implements AgentServer {
     private void parseWelcomeMessage(DistMessage msg) {
         try {
             AgentWelcomeMessage welcome = (AgentWelcomeMessage)msg.getMessage();
-            log.info("Got WELCOME message, server: " + getServerGuid() + ", from agent: " + welcome.getAgentInfo().getAgentGuid() + ", from client: " + welcome.getClientInfo().getClientGuid());
+            log.info("Got WELCOME message, server: " + getServerGuid() + ", from agent: " + welcome.getAgentSimpleInfo().getAgentGuid() + ", from client: " + welcome.getClientInfo().getClientGuid());
             // TODO: welcome message to SocketClient - set Agent name and initial information from Welcome message
         } catch (Exception ex) {
             parentAgent.getIssues().addIssue("parseWelcomeMessage", ex);

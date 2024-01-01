@@ -51,7 +51,7 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
             address = new InetSocketAddress(srv.getServerHost(), srv.getServerPort());
             datagramSocket = new DatagramSocket();
             log.info("Created new DATAGRAM client for server: " + srv.simpleInfo());
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
@@ -86,7 +86,7 @@ public class DatagramClient extends AgentClientBase implements AgentClient {
     protected void onClose() {
         log.info("Closing Datagram client for GUID: " + clientGuid);
         try {
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage closeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "close",  welcome);
             send(closeMsg);
             datagramSocket.close();

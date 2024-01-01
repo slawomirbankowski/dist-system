@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.api.CacheMode;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class AgentRegisterMongoTest {
     private static final Logger log = LoggerFactory.getLogger(AgentRegisterMongoTest.class);
 
     @Test
+    @Tag("custom")
     public void agentRegisterMongoTest() {
         log.info("START ------ agent register MongoDB test");
         Agent agent1 = DistFactory.buildEmptyFactory()
@@ -31,7 +33,7 @@ public class AgentRegisterMongoTest {
                 .withWebApiPort(9998)
                 .withRegistrationMongodb("${MONGODB_HOST}", "${MONGODB_PORT}")
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
-                .withServerDatagramPort(9912)
+                .withServerDatagramPort(9992)
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                 .withTimerRegistrationPeriod(60000)
                 .withTimerServerPeriod(60000)

@@ -57,6 +57,8 @@ public class AgentIssuesImpl extends ServiceBase implements AgentIssues {
     protected DistWebApiProcessor additionalWebApiProcessor() {
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("issues", (m, req) -> req.responseOkJsonSerialize(getIssueRowsLast()))
+                .addHandlerGet("issues-count", (m, req) -> req.responseOkText(""+issues.size()))
+                .addHandlerGet("issues-added", (m, req) -> req.responseOkText(""+addedIssuesCount.get()))
                 .addHandlerPost("clear", (m, req) -> req.responseOkJsonSerialize(clearIssues()))
                 .addHandlerGet("info", (m, req) -> req.responseOkJsonSerialize(getInfo()));
     }

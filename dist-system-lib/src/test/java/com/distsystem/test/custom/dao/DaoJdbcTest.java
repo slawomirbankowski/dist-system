@@ -3,6 +3,7 @@ package com.distsystem.test.custom.dao;
 import com.distsystem.DistFactory;
 import com.distsystem.dao.DaoJdbcBase;
 import com.distsystem.interfaces.Agent;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ public class DaoJdbcTest {
     private static final Logger log = LoggerFactory.getLogger(DaoJdbcTest.class);
 
     @Test
+    @Tag("custom")
     public void daoJdbcTest() {
         log.info("START ------ clean test");
 
@@ -22,9 +24,13 @@ public class DaoJdbcTest {
                 "cache_user",
                 "${JDBC_PASS}", 2, 5, agent);
 
-        //boolean isConn = dao.isConnected();
-        //dao.getIdleConnections();
-        //dao.getActiveConnections();
+        boolean isConn = dao.isConnected();
+        log.info("isConn: " + isConn);
+        log.info("testDao: " + dao.testDao());
+        log.info("getIdleConnections: " + dao.getIdleConnections());
+        log.info("getActiveConnections: " + dao.getActiveConnections());
+        log.info("getDaoStructures: " + dao.getDaoStructures());
+
         //dao.executeAnyQuery("create table distcacheitem_tmp(cachekey varchar(4000), cachevalue text, inserteddate timestamp default (now()) )");
         //dao.executeAnyQuery("create index idx_distcacheitem_tmp_cachekey on cacheitems_tmp(cachekey)");
         //dao.executeInsert(new CacheRowJdbc("key222", "value222"), "cacheitems_tmp");
@@ -36,6 +42,7 @@ public class DaoJdbcTest {
         //log.debug("Connected:" + isConn);
         //assertTrue(, "Connected");
         dao.close();
+        agent.close();
         log.info("END-----");
     }
 
