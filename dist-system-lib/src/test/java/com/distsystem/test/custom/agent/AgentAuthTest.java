@@ -3,6 +3,7 @@ package com.distsystem.test.custom.agent;
 import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class AgentAuthTest {
     private static final Logger log = LoggerFactory.getLogger(AgentAuthTest.class);
 
     @Test
+    @Tag("custom")
     public void agentRegisterJdbcTest() {
         log.info("START ------ agent register JDBC test");
 
@@ -24,7 +26,7 @@ public class AgentAuthTest {
                 .withCommonProperties()
                 .withCacheStoragePriorityQueue()
                 .withCacheStorageWeakHashMap()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9991)
                 .withMaxEvents(10000)
                 .withMaxIssues(10000)
                 .withTimerStorageClean(30000)

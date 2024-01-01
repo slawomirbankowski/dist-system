@@ -21,7 +21,9 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(AgentServicesImpl.class);
     /** all registered services for this agent */
-    private final HashMap<String, DistService> services = new HashMap<>();
+    private final HashMap<String, DistService> servicesByType = new HashMap<>();
+    /** all registered services for this agent */
+    private final HashMap<String, DistService> servicesByGuid = new HashMap<>();
     /** endpoint processor for empty service */
     private DistWebApiProcessor emptyServiceWebApiProcessor = new DistWebApiProcessor("")
             .addHandlerGet("ping", (m, req) -> req.responseOkText("pong"))
@@ -42,7 +44,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     /** count objects in this agentable object including this object */
     public long countObjectsService() {
         // TODO: calculate counts of objects
-        return 2L + services.size()*2L;
+        return 2L + servicesByType.size()*2L;
     }
     /** update configuration of this Service */
     public void updateConfig(DistConfig newCfg) {
@@ -51,9 +53,9 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
 
     /** reinitialize all registered services */
     public List<Boolean> reinitializeAllServices() {
-        log.info("Reinitialization of all services for agent: " + parentAgent.getAgentGuid() + ", services: " + services.size());
+        log.info("Reinitialization of all services for agent: " + parentAgent.getAgentGuid() + ", services: " + servicesByType.size());
         long startTime = System.currentTimeMillis();
-        List<DistService> servicesToReinitialize = services.values().stream().toList();
+        List<DistService> servicesToReinitialize = servicesByType.values().stream().toList();
         List<Boolean> res = servicesToReinitialize.stream().map(DistService::reinitialize).toList();
         long totalTime = System.currentTimeMillis() - startTime;
         log.info("Reinitialization of all services for agent: " + parentAgent.getAgentGuid() + " FINISHED, time: " + totalTime);
@@ -71,9 +73,9 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
         return new DistWebApiProcessor(getServiceType())
                 .addHandlerGet("service-keys", (m, req) -> req.responseOkJsonSerialize(getServiceKeys()))
                 .addHandlerGet("service-types", (m, req) -> req.responseOkJsonSerialize(getServiceTypes()))
-                .addHandlerGet("services", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceInfo).toList()))
-                .addHandlerGet("services-row", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getServiceRow).toList()))
-                .addHandlerGet("services-guid", (m, req) -> req.responseOkJsonSerialize(services.values().stream().map(DistService::getGuid).toList()))
+                .addHandlerGet("services", (m, req) -> req.responseOkJsonSerialize(servicesByType.values().stream().map(DistService::getServiceInfo).toList()))
+                .addHandlerGet("services-row", (m, req) -> req.responseOkJsonSerialize(servicesByType.values().stream().map(DistService::getServiceRow).toList()))
+                .addHandlerGet("services-guid", (m, req) -> req.responseOkJsonSerialize(servicesByType.values().stream().map(DistService::getGuid).toList()))
                 .addHandlerGet("service", (m, req) -> req.responseOkJsonSerializeOrNotFound(getServiceInfoOrEmpty(req.getParamOne())))
                 .addHandlerPost("reinitialize-all", (m, req) -> req.responseOkJsonSerialize(reinitializeAllServices()))
                 .addHandlerPost("reinitialize-service", (m, req) -> req.responseOkJsonSerializeOrNotFound(reinitializeServiceWithInfo(req.getParamOne())))
@@ -81,28 +83,28 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
 
     public AgentServiceInfo getInfo() {
-        return new AgentServiceInfo(services.keySet().stream().toList(), services.values().stream().map(DistService::getServiceSimpleInfo).collect(Collectors.toList()));
+        return new AgentServiceInfo(servicesByType.keySet().stream().toList(), servicesByType.values().stream().map(DistService::getServiceSimpleInfo).collect(Collectors.toList()));
     }
     /** return all services assigned to this agent */
-    public List<DistService> getServices() {
-        return services.values().stream().collect(Collectors.toList());
+    public List<DistService> getServicesByType() {
+        return servicesByType.values().stream().collect(Collectors.toList());
     }
 
     /** get number of services */
     public int getServicesCount() {
-        return services.size();
+        return servicesByType.size();
     }
     /** get keys of registered services */
     public List<String> getServiceKeys() {
-        return services.values().stream().map(DistService::getGuid).collect(Collectors.toList());
+        return servicesByType.values().stream().map(DistService::getGuid).collect(Collectors.toList());
     }
     /** get types of registered services */
     public List<String> getServiceTypes() {
-        return services.keySet().stream().sorted().toList();
+        return servicesByType.keySet().stream().sorted().toList();
     }
     /** get description of all registered services */
     public String getServiceDescriptions() {
-        return services.values().stream().map(s -> s.getServiceType().name() + " - " + s.getServiceDescription()).collect(Collectors.joining("\n"));
+        return servicesByType.values().stream().map(s -> s.getServiceType().name() + " - " + s.getServiceDescription()).collect(Collectors.joining("\n"));
     }
     /** initialize all known services */
     public List<String> initializeAllPossible() {
@@ -111,7 +113,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** get basic information about service for given type of UID */
     public DistServiceInfo getServiceInfo(String serviceUid) {
-        DistService srv = services.get(serviceUid);
+        DistService srv = servicesByGuid.get(serviceUid);
         if (srv != null) {
             return srv.getServiceInfo();
         } else {
@@ -119,7 +121,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
         }
     }
     public Optional<DistServiceInfo> getServiceInfoOrEmpty(String serviceUid) {
-        DistService srv = services.get(serviceUid);
+        DistService srv = servicesByGuid.get(serviceUid);
         if (srv != null) {
             return Optional.of(srv.getServiceInfo());
         } else {
@@ -129,7 +131,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     /** */
     public Optional<DistServiceInfo> reinitializeServiceWithInfo(String serviceUid) {
         createEvent("reinitializeServiceWithInfo");
-        DistService srv = services.get(serviceUid);
+        DistService srv = servicesByGuid.get(serviceUid);
         if (srv != null) {
             srv.reinitialize();
             return Optional.of(srv.getServiceInfo());
@@ -141,7 +143,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     public Optional<DistServiceInfo> runAfterInitializationWithInfo(String serviceUid) {
         touch("runAfterInitializationWithInfo");
         createEvent("runAfterInitializationWithInfo");
-        DistService srv = services.get(serviceUid);
+        DistService srv = servicesByGuid.get(serviceUid);
         if (srv != null) {
             srv.afterInitialization();
             return Optional.of(srv.getServiceInfo());
@@ -151,19 +153,20 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** get basic information about all services */
     public List<DistServiceInfo> getServiceInfos() {
-        return services.values().stream().map(DistService::getServiceInfo).sorted(Comparator.comparing(DistServiceInfo::getServiceTypeName)).collect(Collectors.toList());
+        return servicesByType.values().stream().map(DistService::getServiceInfo).sorted(Comparator.comparing(DistServiceInfo::getServiceTypeName)).collect(Collectors.toList());
     }
     /** get all rows of services to registrations */
     public List<DistAgentServiceRow> getServiceRows() {
-        return services.values().stream().map(DistService::getServiceRow).collect(Collectors.toList());
+        return servicesByType.values().stream().map(DistService::getServiceRow).collect(Collectors.toList());
     }
     /** register service to this agent */
     public void registerService(DistService service) {
         touch("registerService");
         // TODO: register new service like cache, report, measure, ...
-        synchronized (services) {
+        synchronized (servicesByType) {
             createdCount.incrementAndGet();
-            services.put(service.getServiceType().name(), service);
+            servicesByType.put(service.getServiceType().name(), service);
+            servicesByGuid.put(service.getGuid(), service);
         }
     }
     /** receive message from connector or server, need to find service and process that message on service */
@@ -188,7 +191,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     public DistMessage dispatchMessage(DistMessage msg) {
         createEvent("dispatchMessage");
         touch("dispatchMessage");
-        DistService serviceToProcessMessage = services.get(msg.getToService().name());
+        DistService serviceToProcessMessage = servicesByType.get(msg.getToService().name());
         if (serviceToProcessMessage != null) {
             return serviceToProcessMessage.processMessage(msg);
         } else {
@@ -199,7 +202,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     public AgentWebApiResponse dispatchRequest(AgentWebApiRequest request) {
         createEvent("dispatchRequest");
         touch("dispatchRequest");
-        DistService service = services.get(request.getServiceName());
+        DistService service = servicesByType.get(request.getServiceName());
         if (service != null) {
             return service.handleRequest(request);
         } else {
@@ -213,7 +216,7 @@ public class AgentServicesImpl extends ServiceBase implements AgentServices {
     }
     /** close */
     protected void onClose() {
-        log.info("Closing all registered services with agent, services: " + services.size());
+        log.info("Closing all registered services with agent, services: " + servicesByType.size());
     }
     @Override
     public DistServiceType getServiceType() {

@@ -7,13 +7,12 @@ import com.distsystem.api.info.AgentDaoInfo;
 import com.distsystem.api.info.AgentDaoSimpleInfo;
 import com.distsystem.api.info.AgentDaosInfo;
 import com.distsystem.base.ServiceBase;
+import com.distsystem.dao.*;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Dao;
-import com.distsystem.dao.DaoElasticsearchBase;
-import com.distsystem.dao.DaoJdbcBase;
-import com.distsystem.dao.DaoKafkaBase;
 import com.distsystem.interfaces.AgentDao;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
 import org.slf4j.Logger;
@@ -35,7 +34,11 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     private final Map<String, Function<DaoParams, Dao>> daoProducers = new HashMap<>(Map.of(
             DaoKafkaBase.class.getName(), this::createKafkaDao,
             DaoJdbcBase.class.getName(), this::createJdbcDao,
-            DaoElasticsearchBase.class.getName(), this::createElasticsearchDao
+            DaoElasticsearchBase.class.getName(), this::createElasticsearchDao,
+            DaoMongodbBase.class.getName(), this::createMongodbDao,
+            DaoRedisBase.class.getName(), this::createRedisDao,
+            DaoCassandraBase.class.getName(), this::createCassandraDao,
+            DaoActiveMqBase.class.getName(), this::createActivemqDao
     ));
 
     /** create new DAO manager */
@@ -63,9 +66,12 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
     public void updateConfig(DistConfig newCfg) {
     }
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
+
+        bucket.getKeyValues();
+
         // INITIALIZE DAOs
-        return DistStatusMap.create(this).notImplemented();
+        return AdvancedMap.create(this).notImplemented();
     }
     /** run after initialization */
     public void afterInitialization() {
@@ -120,25 +126,29 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
         return getDaoOrEmpty(daoGuid).stream().map(d -> d.getSimpleInfo()).toList();
     }
     /** re-initialize DAO, reconnect */
-    public Map<String, Object> daoCreateFromJson(String bodyJson) {
-        DistStatusMap status = DistStatusMap.create(this);
+    public AdvancedMap daoCreateFromJson(String bodyJson) {
+        Map<String, Object> props = JsonUtils.deserializeToMapOfObjects(bodyJson);
+        return daoCreateFromMap(props);
+    }
+    /** re-initialize DAO, reconnect */
+    public AdvancedMap daoCreateFromMap(Map<String, Object> props) {
+        AdvancedMap status = AdvancedMap.create(this);
         try {
             touch("daoCreateFromJson");
             createEvent("daoCreateFromJson");
             log.info("Try to create DAO with parameters for agent: " + parentAgent.getAgentGuid() + ", current DAOs: " + daos.size());
-            Map<String, Object> props = JsonUtils.deserializeToMapOfObjects(bodyJson);
             DaoParams params = DaoParams.fromMap(props);
             Optional<Dao> dao = createDao(params.getKey(), params);
             return dao.stream().map(x -> status.appendMap(x.testDao())).findFirst().orElse(status.withStatus("NOT_TESTED"));
         } catch (Exception ex) {
             log.warn("Cannot create DAO for parameters, agent: " + parentAgent.getAgentGuid() + ", reason: " + ex.getMessage(), ex);
             addIssueToAgent("daoCreateFromJson", ex);
-            return Map.of("status", "Exception", "reason", ex.getMessage());
+            return status.exception(ex);
         }
     }
     /** re-initialize DAO, reconnect */
-    public DistStatusMap daoReconnect(String daoGuid) {
-        DistStatusMap status = DistStatusMap.create(this);
+    public AdvancedMap daoReconnect(String daoGuid) {
+        AdvancedMap status = AdvancedMap.create(this);
         //return getDaoOrEmpty(daoGuid).stream().map(d -> d.re()).toList();
         createEvent("daoReconnect", "", daoGuid);
         touch("daoReconnect");
@@ -279,6 +289,29 @@ public class AgentDaoImpl extends ServiceBase implements AgentDao {
         // get elastic DAO
         return new DaoElasticsearchBase(params, parentAgent);
     }
+    /** get or create DAO for MongoDB */
+    private Dao createMongodbDao(DaoParams params) {
+        touch("createMongodbDao");
+        return new DaoMongodbBase(params, parentAgent);
+    }
+    /** get or create DAO for Redis */
+    private Dao createRedisDao(DaoParams params) {
+        touch("createRedisDao");
+        return new DaoRedisBase(params, parentAgent);
+    }
+    /** get or create DAO for Cassandra */
+    private Dao createCassandraDao(DaoParams params) {
+        touch("createCassandraDao");
+        return new DaoCassandraBase(params, parentAgent);
+    }
+    /** get or create DAO for ActiveMQ */
+    private Dao createActivemqDao(DaoParams params) {
+        touch("createActivemqDao");
+        return new DaoActiveMqBase(params, parentAgent);
+    }
+
+
+
     /** create all DAOs for given names with parameters */
     public void createDaos(Map<String, DaoParams> daos) {
         touch("createDaos");

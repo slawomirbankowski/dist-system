@@ -5,6 +5,7 @@ import com.distsystem.api.DaoParams;
 import com.distsystem.dao.DaoKafkaBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class DaoKafkaTest {
     private static final Logger log = LoggerFactory.getLogger(DaoKafkaTest.class);
 
     @Test
+    @Tag("custom")
     public void kafkaDaoTest() {
         log.info("START ------ Kafka DAO test");
 

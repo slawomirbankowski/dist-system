@@ -5,6 +5,7 @@ import com.distsystem.api.CacheObject;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.api.CacheMode;
 import com.distsystem.test.custom.model.BasicTestObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class CacheStorageJdbcTest {
     private static final Logger log = LoggerFactory.getLogger(CacheStorageJdbcTest.class);
 
     @Test
+    @Tag("custom")
     public void simpleStorageJdbcTest() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()

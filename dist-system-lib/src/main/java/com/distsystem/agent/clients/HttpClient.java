@@ -47,7 +47,7 @@ public class HttpClient extends AgentClientBase implements AgentClient {
             httpConnectionHelper = HttpConnectionHelper.createHttpClient(url);
             log.info("Creates new HTTP client for server: " + serverRow.simpleInfo());
             log.info("Initializing HTTP client for agent: " + parentAgent.getAgentGuid() + ", URL: " + url + ", client UID: " + clientGuid);
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage welcomeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "welcome",  welcome);
             send(welcomeMsg);
             return true;
@@ -80,7 +80,7 @@ public class HttpClient extends AgentClientBase implements AgentClient {
     protected void onClose() {
         log.info("Closing HTTP client for GUID: " + clientGuid);
         try {
-            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentInfo(), getClientInfo());
+            AgentWelcomeMessage welcome = new AgentWelcomeMessage(parentAgent.getAgentSimpleInfo(), getClientInfo());
             DistMessage closeMsg = DistMessage.createMessage(DistMessageType.system, parentAgent.getAgentGuid(), DistServiceType.agent, connectedAgentGuid, DistServiceType.agent, "close",  welcome);
             send(closeMsg);
             working = false;

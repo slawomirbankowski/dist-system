@@ -11,6 +11,7 @@ import com.distsystem.api.dtos.DistAgentAuthIdentityRow;
 import com.distsystem.api.dtos.DistAgentAuthTokenParserRow;
 import com.distsystem.interfaces.AgentComponent;
 import com.distsystem.interfaces.Agentable;
+import com.distsystem.utils.AdvancedMap;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -53,8 +54,10 @@ public abstract class AuthStorageBase extends ServiceObjectBase implements Agent
         //
         return new LinkedList<DistAgentAuthTokenParserRow>();
     }
-
-
+    /** create status map from this auth storage */
+    public AdvancedMap toStatusMap() {
+        return AdvancedMap.create(this).append("authStorageClass", this.getClass().getName());
+    }
 
     /** get set of priviliges for selected account */
     public AuthPriviligesSet getPrivileges(String accountName) {

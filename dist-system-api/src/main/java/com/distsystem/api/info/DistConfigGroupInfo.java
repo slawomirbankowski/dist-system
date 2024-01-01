@@ -1,8 +1,9 @@
 package com.distsystem.api.info;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class DistConfigGroupInfo {
+public class DistConfigGroupInfo implements Serializable {
 
     private final String groupName;
     private final List<String> bucketKeys;

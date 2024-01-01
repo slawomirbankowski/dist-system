@@ -6,6 +6,7 @@ import com.distsystem.api.DistMessageFull;
 import com.distsystem.api.dtos.DistAgentServerRow;
 
 import java.util.List;
+import java.util.Optional;
 
 /** interface for agent connectors manager
  * this is to keep connections to other agents */
@@ -23,6 +24,8 @@ public interface AgentConnectors extends DistService {
     AgentConnectorsInfo serversCheckWithInfo();
     /** get all UIDs of servers */
     List<String> getServerKeys();
+    /** get AgentServer by key */
+    Optional<AgentServer> getServerByKey(String serverKey);
     /** get number of clients */
     int getClientsCount();
     /** get client keys */

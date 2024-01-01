@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.api.CacheMode;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class CacheModeKeepTest {
     private static final Logger log = LoggerFactory.getLogger(CacheModeKeepTest.class);
 
     @Test
+    @Tag("mustpass")
     public void modeKeepTest() {
         log.info("START ------ cache mode keep test");
         Cache cache = DistFactory.buildEmptyFactory()

@@ -9,6 +9,7 @@ import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.JsonUtils;
 import org.json4s.JsonUtil;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +22,13 @@ public class AgentRegisterSimpleJdbcTest {
     private static final Logger log = LoggerFactory.getLogger(AgentRegisterSimpleJdbcTest.class);
 
     @Test
+    @Tag("custom")
     public void agentRegisterJdbcSimpleTest() {
         log.info("START ------ agent register simple JDBC test");
 
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
+                .withEnvironmentVariables()
                 .withAgentNameGenerated()
                 .withAgentParentApplication("Some Application")
                 .withWebApiDefaultPort()

@@ -5,6 +5,7 @@ import com.distsystem.api.CacheObject;
 import com.distsystem.api.CachePolicy;
 import com.distsystem.api.CachePolicyBuilder;
 import com.distsystem.utils.CacheStats;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class CachePolicyBuildTest {
     private static final Logger log = LoggerFactory.getLogger(CachePolicyBuildTest.class);
 
     @Test
+    @Tag("custom")
     public void cachePolicyBuilderSimpleTest() {
         log.info("START ------ agent register test test");
 

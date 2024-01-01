@@ -3,7 +3,6 @@ package com.distsystem.dao;
 import com.distsystem.api.BaseRow;
 import com.distsystem.api.DaoModel;
 import com.distsystem.api.DaoParams;
-import com.distsystem.api.DistStatusMap;
 import com.distsystem.base.DaoBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentComponent;
@@ -32,7 +31,6 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     private final String jdbcPass;
     private final int initConnections;
     private final int maxActiveConnections;
-
     /** DBCP - connection pool to the JDBC compliant database */
     private org.apache.commons.dbcp.BasicDataSource connPool;
 
@@ -476,10 +474,17 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
     }
 
 
-
-
-
-
+    /** create new structure for this DAO */
+    public AdvancedMap createStructure(DaoModel model) {
+        AdvancedMap status = AdvancedMap.create(this);
+        try {
+            executeAnyQuery(model.getCreateTableQuery());
+            //createIndex(model.getTableName());
+            return status.append("type", "table").withStatus("OK");
+        } catch (Exception ex) {
+            return status.exception(ex);
+        }
+    }
     /** returns true if DB is connected */
     public boolean isConnected() {
         try {
@@ -489,14 +494,14 @@ public class DaoJdbcBase extends DaoBase implements AgentComponent {
             conn.close();
             return !closed;
         } catch (SQLException ex) {
-            log.info("Cannot check if connection is connected");
+            log.info("Cannot check if JDBC is connected");
             return false;
         }
     }
     /** test DAO and returns items */
-    public DistStatusMap testDao() {
+    public AdvancedMap testDao() {
         //DistStatusMap.fromMap();
-        return DistStatusMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
+        return AdvancedMap.create(this).appendMap(Map.of("isConnected", isConnected(), "url", getUrl(), "className", this.getClass().getName()));
     }
     public boolean closeDao() {
         try {

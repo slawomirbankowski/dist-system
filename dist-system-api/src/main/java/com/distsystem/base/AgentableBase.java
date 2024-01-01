@@ -121,6 +121,10 @@ public abstract class AgentableBase implements Agentable {
     public String resolve(String value) {
         return parentAgent.getConfig().getResolverManager().resolve(value);
     }
+    /** */
+    public int resolveToInt(String value, int defaultValue) {
+        return DistUtils.parseInt(resolve(value), defaultValue);
+    }
     /** get GUID of parent agent */
     @Override
     public String getParentAgentGuid() {
@@ -184,7 +188,12 @@ public abstract class AgentableBase implements Agentable {
             touch("close");
             closed = true;
             log.debug("Closing Agentable object for GUID: " + guid);
-            onClose();
+            try {
+                onClose();
+                log.debug("Closed Agentable object for GUID: " + guid);
+            } catch (Exception ex) {
+                log.warn("Exception while closing object for GUID: " + guid + ", agent: " + parentAgent.getAgentGuid());
+            }
         }
     }
     /** receive message from connector or server and process by parent Agent,

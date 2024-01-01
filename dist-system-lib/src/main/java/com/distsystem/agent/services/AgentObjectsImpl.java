@@ -5,6 +5,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentObjects;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
 
@@ -113,9 +114,9 @@ public class AgentObjectsImpl extends ServiceBase implements AgentObjects {
     }
 
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         // INITIALIZE DAOs
-        return DistStatusMap.create(this);
+        return AdvancedMap.create(this);
     }
     /** run after initialization */
     public void afterInitialization() {

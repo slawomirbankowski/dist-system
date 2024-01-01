@@ -1,6 +1,7 @@
 package com.distsystem.test.custom.cache;
 
 import com.distsystem.jdbc.JdbcDialect;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ public class CacheDialectTest {
     private static final Logger log = LoggerFactory.getLogger(CacheDialectTest.class);
 
     @Test
+    @Tag("custom")
     public void dialectTest() {
         log.info("START ------ agent register test test");
         try {

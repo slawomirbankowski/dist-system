@@ -7,6 +7,7 @@ import com.distsystem.base.ConfigReaderBase;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.AgentConfigReader;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.DistWebApiProcessor;
 import com.distsystem.utils.JsonUtils;
@@ -62,7 +63,10 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
                 .addHandlerGet("property", (m, req) -> req.responseOkText(getProperty(req.getParamOne())))
                 .addHandlerPost("property", (m, req) -> req.responseOkText(setProperty(req.getParamOne(), req.getParamTwo())))
                 .addHandlerPost("properties", (m, req) -> req.responseOkJsonSerialize(setProperties(req.getContentAsString())))
-                .addHandlerGet("properties", (m, req) -> req.responseOkJsonSerialize(getConfig().getHashMap(false)))
+                .addHandlerGet("properties", (m, req) -> req.responseOkJsonSerialize(getConfig().getHashMap(false, true)))
+                .addHandlerGet("properties-agent", (m, req) -> req.responseOkJsonSerialize(getConfig().getHashMap(false, false)))
+                .addHandlerGet("properties-script", (m, req) -> req.responseOkText(getConfig().getAsScript(false, true)))
+                .addHandlerGet("properties-agent-script", (m, req) -> req.responseOkText(getConfig().getAsScript(false, false)))
                 .addHandlerPost("read-config", (m, req) -> req.responseOkJsonSerialize(readConfigWithInfo()))
                 .addHandlerDelete("reader", (m, req) -> req.responseOkJsonSerialize(removeConfigReader(req.getParamOne())))
                 .addHandlerGet("reader", (m, req) -> req.responseOkJsonSerialize(infoConfigReader(req.getParamOne())))
@@ -129,7 +133,7 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return getConfig().getProperty(key, "");
     }
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         touch("initializeConfigBucket");
         // TODO: initialize or deinitialize
         createEvent("initializeConfigBucket");
@@ -181,8 +185,8 @@ public class AgentConfigImpl extends ServiceBase implements AgentConfigReader {
         return getInfo();
     }
     /** initialize new config reader for configuration bucket with values */
-    private DistStatusMap initializeReader(DistConfigBucket bucket) {
-        DistStatusMap status = DistStatusMap.create(this);
+    private AdvancedMap initializeReader(DistConfigBucket bucket) {
+        AdvancedMap status = AdvancedMap.create(this);
         String className = DistConfig.AGENT_CONFIGREADER_MAP.get(bucket.getKey().getConfigType());
         status.append("className", className);
         try {

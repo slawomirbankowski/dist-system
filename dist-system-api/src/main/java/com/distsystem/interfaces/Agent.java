@@ -4,6 +4,7 @@ import com.distsystem.api.*;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentInfo;
+import com.distsystem.api.info.AgentSimpleInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,6 +45,8 @@ public interface Agent extends DistService, IssueHandler {
     DistConfig getConfig();
     /** get high-level information about this agent */
     AgentInfo getAgentInfo();
+    /** get simple info about agent */
+    AgentSimpleInfo getAgentSimpleInfo();
     /** returns unmodificable set of Agent tags */
     Set<String> getAgentTags();
     /** get serializer/deserializer helper to serialize/deserialize objects when sending through connectors or saving to external storages */

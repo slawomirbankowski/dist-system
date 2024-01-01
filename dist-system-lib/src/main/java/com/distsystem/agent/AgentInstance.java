@@ -7,7 +7,7 @@ import com.distsystem.api.enums.DistComponentType;
 import com.distsystem.api.enums.DistMessageType;
 import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentInfo;
-import com.distsystem.api.info.AgentServiceInfo;
+import com.distsystem.api.info.AgentSimpleInfo;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.api.dtos.DistAgentServiceRow;
 import com.distsystem.interfaces.*;
@@ -132,6 +132,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
         // create default DAOs
         agentDao.createDaos(daos);
         log.info("CREATING NEW AGENT with guid: " + getAgentGuid() + " FINISHED");
+        log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         touch("AgentInstance");
         createEvent("AgentInstance");
     }
@@ -142,7 +143,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     }
     /** count all objects in agent - all services objects */
     public long countAgentObjects() {
-        return services.getServices().stream().mapToLong(x -> x.countObjects()).sum();
+        return services.getServicesByType().stream().mapToLong(x -> x.countObjects()).sum();
     }
     /** read configuration and re-initialize this component */
     protected boolean onReinitialize() {
@@ -245,7 +246,7 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
     /** list all endpoints for all services */
     public List<String> listAllEndpoints() {
         return getCache().withCache("AgentInstance.listAllEndpoints", x ->
-            services.getServices().stream().flatMap(s -> s.getWebApiProcessor().getAllHandlers().stream()).sorted().toList()
+            services.getServicesByType().stream().flatMap(s -> s.getWebApiProcessor().getAllHandlers().stream()).sorted().toList()
         );
     }
     /** get total initialization agent time in milliseconds */
@@ -373,7 +374,13 @@ public class AgentInstance extends ServiceBase implements Agent, DistService, Re
                 services.getServiceInfos(),
                 config.getConfigGroupInfos());
     }
-
+    /** get simple info about agent */
+    public AgentSimpleInfo getAgentSimpleInfo() {
+        return new AgentSimpleInfo(guid,
+                getEnvironmentType(), getEnvironmentName(),
+                getDistName(), getAgentName(), createDate, closed,
+                getAgentTags());
+    }
     /** kill this agent - close it and mark is killed */
     public AgentKillStatus kill() {
         close();

@@ -168,10 +168,12 @@ public class AgentCacheImpl extends CacheBase {
     protected void initializeTimer() {
         createEvent("initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMERS);
         // initialization for clean
+        getAgent().getTimers().cancelTimer("TIMER_CLEAN_STORAGE");
         log.info("Scheduling clean timer task for cache: " + getCacheGuid());
         getAgent().getTimers().setUpTimer("TIMER_CLEAN_STORAGE", DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD, DistConfig.AGENT_CACHE_TIMER_CLEAN_STORAGE_PERIOD_DELAY_VALUE, x -> onTimeClean());
         createEvent("initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMER_CLEAN);
         log.info("Scheduling statistics refresh timer task for cache: " + getCacheGuid());
+        getAgent().getTimers().cancelTimer("TIMER_STAT_REFRESH");
         getAgent().getTimers().setUpTimer("TIMER_STAT_REFRESH", DistConfig.AGENT_CACHE_TIMER_STAT_REFRESH_PERIOD, DistConfig.AGENT_CACHE_TIMER_STAT_REFRESH_PERIOD_DELAY_VALUE, x -> onTimeStatsRefresh());
         createEvent("initializeTimer", AgentEvent.EVENT_INITIALIZE_TIMER_RATIO);
     }

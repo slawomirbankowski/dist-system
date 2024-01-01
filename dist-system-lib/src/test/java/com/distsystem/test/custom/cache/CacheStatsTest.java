@@ -5,6 +5,7 @@ import com.distsystem.api.CacheMode;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.CacheStats;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class CacheStatsTest {
     private static final Logger log = LoggerFactory.getLogger(CacheStatsTest.class);
 
     @Test
+    @Tag("custom")
     public void cleanTest() {
         log.info("START ------ clean test");
         Cache cache = DistFactory.buildDefaultFactory()

@@ -2,6 +2,7 @@ package com.distsystem.test.custom.agent;
 
 import com.distsystem.DistFactory;
 import com.distsystem.api.DistConfig;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ public class AgentConfigParserTest {
     private static final Logger log = LoggerFactory.getLogger(AgentConfigParserTest.class);
 
     @Test
+    @Tag("custom")
     public void agentConfigReaderTest() {
         log.info("START ------ config parser");
         String configName = "AGENT_REGISTRATION_ELASTICSEARCH_URL";

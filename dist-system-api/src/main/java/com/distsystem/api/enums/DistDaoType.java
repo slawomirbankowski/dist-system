@@ -5,8 +5,10 @@ public enum DistDaoType {
     jdbc("com.distsystem.dao.DaoJdbcBase"),
     kafka("com.distsystem.dao.DaoKafkaBase"),
     elasticsearch("com.distsystem.dao.DaoElasticsearchBase"),
-    redis("com.distsystem.dao."),
-    mongodb("com.distsystem.dao.");
+    redis("com.distsystem.dao.DaoRedisBase"),
+    mongodb("com.distsystem.dao.DaoMongodbBase"),
+    activemq("com.distsystem.dao.DaoActiveMqBase"),
+    cassandra("com.distsystem.dao.DaoCassandraBase");
 
     /** */
     private final String className;

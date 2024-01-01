@@ -39,6 +39,7 @@ public class RegistrationMongodb extends RegistrationBase {
         String mongodbUrl = getConfigProperty(DistConfig.URL, "http://localhost:9200");
         String mongodbUser = getConfigProperty(DistConfig.USER, "");
         String mongodbPass = getConfigProperty(DistConfig.PASS, "");
+        //
     }
     /** read configuration and re-initialize this component */
     public boolean componentReinitialize() {

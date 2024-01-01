@@ -5,6 +5,7 @@ import com.distsystem.api.enums.DistEnvironmentType;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.resolvers.MapResolver;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class AgentUniversalTest {
     private static final Logger log = LoggerFactory.getLogger(AgentUniversalTest.class);
 
     @Test
+    @Tag("custom")
     public void agentUniversalJdbcTest() {
         log.info("START ------ agent register JDBC test");
 
@@ -56,9 +58,9 @@ public class AgentUniversalTest {
                 // .withRegisterCleanAfter(86000000, 86000000)
                 .withAuthStorageJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9991)
                 .withServerHttpPort(9998)
-                // .withServerDatagramPort(9933)
+                // .withServerDatagramPort(9993)
                 .withServerDatagramPortDefaultValue()
                 .withServerKafka("localhost:9092", "dist-agent-7-server")
                 .withCacheStorageHashMap()

@@ -6,6 +6,7 @@ import com.distsystem.dao.DaoElasticsearchBase;
 import com.distsystem.dao.DaoJdbcBase;
 import com.distsystem.dao.DaoKafkaBase;
 import com.distsystem.interfaces.Agent;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class DaoTest {
     private static final Logger log = LoggerFactory.getLogger(DaoTest.class);
 
     @Test
+    @Tag("custom")
     public void daoTest() {
         log.info("START ------ DAO test");
 

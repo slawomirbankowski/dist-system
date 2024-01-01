@@ -1,9 +1,10 @@
-package com.distsystem.test.custom.cache;
+package com.distsystem.test.mustpass.cache;
 
 import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.api.CacheMode;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class CacheMultiThreadTest {
     private static final Logger log = LoggerFactory.getLogger(CacheMultiThreadTest.class);
 
     @Test
+    @Tag("mustpass")
     public void testMultiThread() {
         log.info("START------");
         Cache cache = DistFactory.buildEmptyFactory()

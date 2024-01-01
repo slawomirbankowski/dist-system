@@ -1,6 +1,7 @@
 package com.distsystem.api;
 
 import com.distsystem.api.info.AgentInfo;
+import com.distsystem.api.info.AgentSimpleInfo;
 import com.distsystem.api.info.ClientInfo;
 
 import java.io.Serializable;
@@ -9,16 +10,16 @@ import java.io.Serializable;
 public class AgentWelcomeMessage implements Serializable {
 
     /** information about Agent */
-    private AgentInfo agentInfo;
+    private AgentSimpleInfo agentSimpleInfo;
     /** information about Client */
     private ClientInfo clientInfo;
 
-    public AgentWelcomeMessage(AgentInfo agentInfo, ClientInfo clientInfo) {
-        this.agentInfo = agentInfo;
+    public AgentWelcomeMessage(AgentSimpleInfo agentSimpleInfo, ClientInfo clientInfo) {
+        this.agentSimpleInfo = agentSimpleInfo;
         this.clientInfo = clientInfo;
     }
-    public AgentInfo getAgentInfo() {
-        return agentInfo;
+    public AgentSimpleInfo getAgentSimpleInfo() {
+        return agentSimpleInfo;
     }
 
     public ClientInfo getClientInfo() {

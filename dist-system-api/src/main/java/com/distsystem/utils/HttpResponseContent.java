@@ -62,6 +62,17 @@ public class HttpResponseContent {
             return Optional.empty();
         }
     }
+    /** */
+    public Optional<String> parseOutputToString() {
+
+        return Optional.empty();
+    }
+    /** */
+    public Optional<Long> parseOutputToLong() {
+
+
+        return Optional.empty();
+    }
     public <T> Optional<T> parseOutputTo(TypeReference<T> type) {
         try {
             T obj = JsonUtils.deserialize("" + getOutObject(), type);

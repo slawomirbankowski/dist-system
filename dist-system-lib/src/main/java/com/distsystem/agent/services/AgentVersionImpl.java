@@ -31,7 +31,7 @@ public class AgentVersionImpl extends ServiceBase implements AgentVersion {
     }
     /** get description of this service */
     public String getServiceDescription() {
-        return "";
+        return "Version service ";
     }
 
     /** additional web API endpoints */

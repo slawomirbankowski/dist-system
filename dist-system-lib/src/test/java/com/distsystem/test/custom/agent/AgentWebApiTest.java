@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class AgentWebApiTest {
     private static final Logger log = LoggerFactory.getLogger(AgentWebApiTest.class);
 
     @Test
+    @Tag("custom")
     public void agentWebApiTest() {
         log.info("START ------ agent Web API test");
         Cache cache1 = DistFactory.buildEmptyFactory()

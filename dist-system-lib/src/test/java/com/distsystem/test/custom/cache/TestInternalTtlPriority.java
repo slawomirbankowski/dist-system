@@ -6,6 +6,7 @@ import com.distsystem.base.CacheStorageBase;
 import com.distsystem.storage.InternalWithTtlAndPriorityCacheStorage;
 import com.distsystem.agent.util.measure.Stopwatch;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -20,6 +21,7 @@ import static org.hamcrest.Matchers.*;
 public class TestInternalTtlPriority {
 
   @Test
+  @Tag("custom")
   public void testLimitsRespected() throws Exception {
     int maxObjects = 1_000, maxItems = 10_000;
     var storage = makeStorage(maxObjects, maxItems);

@@ -6,6 +6,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.base.ServiceBase;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.interfaces.Storages;
+import com.distsystem.utils.AdvancedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +52,9 @@ public class AgentStoragesImpl extends ServiceBase implements Storages {
     }
 
     /** change values in configuration bucket */
-    public DistStatusMap initializeConfigBucket(DistConfigBucket bucket) {
+    public AdvancedMap initializeConfigBucket(DistConfigBucket bucket) {
         // TODO: insert, update, delete of bucket
-        return DistStatusMap.create(this).notImplemented();
+        return AdvancedMap.create(this).notImplemented();
     }
 
     /** update configuration of this Service */

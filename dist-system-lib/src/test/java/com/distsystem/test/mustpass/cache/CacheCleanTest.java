@@ -5,6 +5,7 @@ import com.distsystem.api.*;
 import com.distsystem.api.info.CacheObjectInfo;
 import com.distsystem.interfaces.Cache;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ public class CacheCleanTest {
     private static final Logger log = LoggerFactory.getLogger(CacheCleanTest.class);
 
     @Test
+    @Tag("mustpass")
     public void cleanTest() {
         log.info("START ------ clean test");
         Cache cache = DistFactory.buildEmptyFactory()

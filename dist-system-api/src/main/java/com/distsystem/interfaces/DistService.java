@@ -5,6 +5,7 @@ import com.distsystem.api.enums.DistServiceType;
 import com.distsystem.api.info.AgentServiceSimpleInfo;
 import com.distsystem.api.info.DistConfigGroupInfo;
 import com.distsystem.api.dtos.DistAgentServiceRow;
+import com.distsystem.utils.AdvancedMap;
 import com.distsystem.utils.DistWebApiProcessor;
 
 import java.time.LocalDateTime;
@@ -65,7 +66,7 @@ public interface DistService {
     /** update configuration of this Service to add registrations, services, servers, ... */
     void updateConfig(DistConfig newCfg);
     /** change values in configuration bucket */
-    DistStatusMap initializeConfigBucket(DistConfigBucket bucket);
+    AdvancedMap initializeConfigBucket(DistConfigBucket bucket);
     /** run after initialization */
     void afterInitialization();
     /** close and deinitialize service */

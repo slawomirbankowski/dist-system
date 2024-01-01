@@ -4,6 +4,7 @@ import com.distsystem.DistFactory;
 import com.distsystem.api.CacheMode;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class AgentRegisterKafkaTest {
     private static final Logger log = LoggerFactory.getLogger(AgentRegisterKafkaTest.class);
 
         @Test
+        @Tag("custom")
         public void agentRegisterKafkaTest() {
             log.info("START ------ agent register Kafka test");
             Agent agent1 = DistFactory.buildEmptyFactory()
@@ -31,7 +33,7 @@ public class AgentRegisterKafkaTest {
                     .withWebApiPort(9998)
                     .withRegistrationKafka("localhost:9092", "dist-agent-6-", 1, (short)1)
                     .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
-                    .withServerDatagramPort(9912)
+                    .withServerDatagramPort(9992)
                     .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                     .withTimerRegistrationPeriod(60000)
                     .withTimerServerPeriod(60000)

@@ -3,6 +3,7 @@ package com.distsystem.test.mustpass.agent;
 import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,16 +14,18 @@ public class AgentRegisterJdbcSingleTest {
     private static final Logger log = LoggerFactory.getLogger(AgentRegisterJdbcSingleTest.class);
 
     @Test
+    @Tag("mustpass")
     public void agentRegisterJdbcTest() {
         log.info("START ------ agent register JDBC test");
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
+                .withEnvironmentVariables()
                 .withWebApiPort(9999)
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withCommonProperties()
                 .withCacheStoragePriorityQueue()
                 .withCacheStorageWeakHashMap()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9991)
                 .withServerDatagramPort(9002)
                 .withTimerStorageClean(1000)
                 .withTimerRegistrationPeriod(1000)
@@ -30,7 +33,7 @@ public class AgentRegisterJdbcSingleTest {
                 .createAgentInstance();
         assertNotNull(agent1, "Created agent1 should not be null");
 
-        DistUtils.sleep(3000);
+        DistUtils.sleep(1000);
         log.info("========-----> Agent1: " + agent1.getAgentInfo());
         int maxTime = 5;
         for (int t=0; t<maxTime; t++) {

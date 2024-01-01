@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface AgentServices extends DistService {
 
     /** return all services assigned to this agent */
-    List<DistService> getServices();
+    List<DistService> getServicesByType();
     /** reinitialize all registered services */
     List<Boolean> reinitializeAllServices();
     /** get number of services */

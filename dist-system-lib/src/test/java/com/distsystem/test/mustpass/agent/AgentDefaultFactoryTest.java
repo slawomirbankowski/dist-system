@@ -3,6 +3,7 @@ package com.distsystem.test.mustpass.agent;
 import com.distsystem.DistFactory;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ public class AgentDefaultFactoryTest {
     private static final Logger log = LoggerFactory.getLogger(AgentDefaultFactoryTest.class);
 
     @Test
+    @Tag("mustpass")
     public void agentDefaultFactoryTest() {
         log.info("START ------ agent default factory test");
         Agent agent1 = DistFactory.buildDefaultFactory()
