@@ -56,9 +56,9 @@ public class AgentUniversalTest {
                 // .withRegisterCleanAfter(86000000, 86000000)
                 .withAuthStorageJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withServerHttpPort(9998)
-                // .withServerDatagramPort(9933)
+                // .withServerDatagramPort(9996)
                 .withServerDatagramPortDefaultValue()
                 .withServerKafka("localhost:9092", "dist-agent-7-server")
                 .withCacheStorageHashMap()

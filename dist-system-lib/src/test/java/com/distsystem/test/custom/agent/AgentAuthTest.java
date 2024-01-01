@@ -24,7 +24,7 @@ public class AgentAuthTest {
                 .withCommonProperties()
                 .withCacheStoragePriorityQueue()
                 .withCacheStorageWeakHashMap()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withMaxEvents(10000)
                 .withMaxIssues(10000)
                 .withTimerStorageClean(30000)

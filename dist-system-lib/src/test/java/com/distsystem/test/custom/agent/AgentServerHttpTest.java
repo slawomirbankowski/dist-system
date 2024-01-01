@@ -32,7 +32,7 @@ public class AgentServerHttpTest {
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerHttpPort(9912)
+                .withServerHttpPort(9988)
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
                 .withTimerRegistrationPeriod(1000)

@@ -282,6 +282,28 @@ public class DistConfig {
 
     /** port for HTTP REST Web API to contact directly to Agent */
     public static String AGENT_API_PORT = "AGENT_API_PORT";
+    /** agent ports:
+     * 9999 - web api
+     * 9998 - http
+     * 9997 - socket
+     * 9996 - datagram
+     * 9995 - tcp
+     * 9994 - stream
+     * if secondary agent would be created, ports would be as follows:
+     * 9989 - web api
+     * 9988 - http
+     * 9987 - socket
+     * 9986 - datagram
+     * 9985 - tcp
+     * 9984 - stream
+     * if tetriary agent would be created, ports would be as follows:
+     * 9979 - web api
+     * 9978 - http
+     * 9977 - socket
+     * 9976 - datagram
+     * 9975 - tcp
+     * 9974 - stream
+     * */
     public static int AGENT_API_PORT_DEFAULT_VALUE = 9999;
 
     /** tags used to identify agent */
@@ -358,19 +380,19 @@ public class DistConfig {
     /**port of SockerServer to exchange messages between Agents */
     public static String AGENT_CONNECTORS_SERVER_SOCKET_PORT = "AGENT_CONNECTORS_SERVER_SOCKET_PORT";
     /** */
-    public static int AGENT_CONNECTORS_SERVER_SOCKET_PORT_DEFAULT_VALUE = 9901;
+    public static int AGENT_CONNECTORS_SERVER_SOCKET_PORT_DEFAULT_VALUE = 9997;
     /** sequencer for default agent port */
-    public static final AtomicInteger AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ = new AtomicInteger(9901);
+    public static final AtomicInteger AGENT_CONNECTORS_SOCKET_PORT_VALUE_SEQ = new AtomicInteger(9997);
     /** timeout value for Socket reading in milliseconds, this is used for Socket.setSoTimeout(...) */
     public static String AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT = "AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT";
     public static int AGENT_CONNECTORS_SERVER_SOCKET_CLIENT_TIMEOUT_DEFAULT_VALUE = 2000;
 
     /** port of HTTP Server to exchange messages between Agents */
     public static String AGENT_CONNECTORS_SERVER_HTTP_PORT = "AGENT_CONNECTORS_SERVER_HTTP_PORT";
-    public static int AGENT_CONNECTORS_SERVER_HTTP_PORT_DEFAULT_VALUE = 9912;
+    public static int AGENT_CONNECTORS_SERVER_HTTP_PORT_DEFAULT_VALUE = 9998;
 
     public static String AGENT_CONNECTORS_SERVER_DATAGRAM_PORT = "AGENT_CONNECTORS_SERVER_DATAGRAM_PORT";
-    public static int AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE = 9933;
+    public static int AGENT_SERVER_DATAGRAM_PORT_DEFAULT_VALUE = 9996;
     public static String AGENT_CONNECTORS_SERVER_DATAGRAM_TIMEOUT = "AGENT_CONNECTORS_SERVER_DATAGRAM_TIMEOUT";
 
     /** Server for agent communication based on Kafka */

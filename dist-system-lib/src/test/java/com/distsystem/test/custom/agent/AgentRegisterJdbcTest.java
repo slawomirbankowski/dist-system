@@ -23,7 +23,7 @@ public class AgentRegisterJdbcTest {
                 .withUniverseName("GlobalAgent")
                 .withWebApiDefaultPort()
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)

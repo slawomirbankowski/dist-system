@@ -22,7 +22,7 @@ public class AgentRegisterJdbcSingleTest {
                 .withCommonProperties()
                 .withCacheStoragePriorityQueue()
                 .withCacheStorageWeakHashMap()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withServerDatagramPort(9002)
                 .withTimerStorageClean(1000)
                 .withTimerRegistrationPeriod(1000)

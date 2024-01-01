@@ -19,7 +19,7 @@ public class AgentRegisterSimpleTest {
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
                 .withTimerRegistrationPeriod(1000)
                 .withTimerServerPeriod(1000)

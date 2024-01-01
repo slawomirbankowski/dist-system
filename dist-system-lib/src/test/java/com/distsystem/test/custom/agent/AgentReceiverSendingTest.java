@@ -23,7 +23,7 @@ public class AgentReceiverSendingTest {
                 .withEnvironmentVariables()
                 .withWebApiPort(9999)
                 .withRegistrationJdbcFromEnv()
-                .withServerSocketPort(9901)
+                .withServerSocketPort(9997)
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)
