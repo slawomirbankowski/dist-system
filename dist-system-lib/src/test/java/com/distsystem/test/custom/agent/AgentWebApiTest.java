@@ -35,7 +35,7 @@ public class AgentWebApiTest {
 
         Cache cache2 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
-                .withWebApiPort(9998)
+                .withWebApiPort(9989)
                 .withTimerStorageClean(10000)
                 .withTimerServerPeriod(10000)
                 .withTimerRegistrationPeriod(10000)

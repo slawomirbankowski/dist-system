@@ -28,10 +28,10 @@ public class AgentRegisterMultipleJdbcTest {
         for (int i=0; i<10; i++) {
             Agent agent = DistFactory.buildEmptyFactory()
                     .withUniverseName("GlobalAgent")
-                    .withWebApiPort(9999-i)
+                    .withWebApiPort(9999-i*10)
                     .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                    .withServerSocketPort(9989-i)
-                    .withServerDatagramPort(9979-i)
+                    .withServerSocketPort(9997-i*10)
+                    .withServerDatagramPort(9996-i*10)
                     .withEnvironmentVariables()
                     .withSerializerDefault()
                     .withAgentName("Agent_" + i)

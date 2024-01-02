@@ -23,7 +23,7 @@ public class AgentServerHttpTest {
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerHttpPort(9911)
+                .withServerHttpPort(9998)
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
                 .withTimerRegistrationPeriod(1000)
@@ -34,7 +34,7 @@ public class AgentServerHttpTest {
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerHttpPort(9992)
+                .withServerHttpPort(9988)
                 .withSerializer("java.lang.String=StringSerializer,default=ObjectStreamSerializer")
                 .withRegisterCleanAfter(CacheMode.TIME_FIVE_MINUTES, CacheMode.TIME_ONE_DAY)
                 .withTimerRegistrationPeriod(1000)

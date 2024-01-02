@@ -8,7 +8,6 @@ import com.distsystem.api.info.AgentInfo;
 import com.distsystem.interfaces.Agent;
 import com.distsystem.utils.DistUtils;
 import com.distsystem.utils.JsonUtils;
-import org.json4s.JsonUtil;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

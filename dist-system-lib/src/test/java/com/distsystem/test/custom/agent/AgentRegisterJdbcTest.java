@@ -20,14 +20,14 @@ public class AgentRegisterJdbcTest {
     @Tag("custom")
     public void agentRegisterJdbcTest() {
         log.info("START ------ agent register JDBC test");
-        // 9991 API, 9992 Socket, 9993 HTTP, 9994 UDP, 9995 TCP?, 9996, 9997, 9998, 9999
-        // 9981, 9982, 9983, 9984, 9985
+        // 9999 API, 9998 HTTP, 9997 Socket, 9996 UDP,
+        // 9989, 9988, 9987, 9984, 9986
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withWebApiDefaultPort()
                 .withSerializerDefault()
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerDatagramPort(9971)
+                .withServerDatagramPort(9997)
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)
                 .withTimerServerPeriod(30000)
@@ -37,7 +37,7 @@ public class AgentRegisterJdbcTest {
                 .withUniverseName("GlobalAgent")
                 .withWebApiPort(9998)
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerDatagramPort(9972)
+                .withServerDatagramPort(9987)
                 .withSerializerDefault()
                 .withTimerStorageClean(30000)
                 .withTimerRegistrationPeriod(30000)

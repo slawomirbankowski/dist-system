@@ -24,7 +24,7 @@ public class AgentRegisterTest {
         Agent agent1 = DistFactory.buildEmptyFactory()
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
-                .withServerSocketPort(9991)
+                .withServerSocketPort(9998)
                 .withTimerStorageClean(1000)
                 .withTimerRegistrationPeriod(1000)
                 .withRegisterCleanAfter(60000, 86000000)
@@ -35,7 +35,7 @@ public class AgentRegisterTest {
                 .withUniverseName("GlobalAgent")
                 .withRegistrationJdbc("jdbc:postgresql://localhost:5432/cache01", "org.postgresql.Driver",
                         "cache_user", "${JDBC_PASS}")
-                .withServerSocketPort(9902)
+                .withServerSocketPort(9988)
                 .withTimerStorageClean(1000)
                 .withTimerRegistrationPeriod(1000)
                 .withTimerServerPeriod(1000)
