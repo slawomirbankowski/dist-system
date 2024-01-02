@@ -26,7 +26,6 @@ public class CacheDistributeClearTest {
                 .withUniverseName("GlobalCacheTest")
                 .withRegistrationJdbc("${JDBC_URL}", "${JDBC_DRIVER}", "${JDBC_USER}", "${JDBC_PASS}")
                 .withCacheStorageHashMap()
-                .withServerSocketPort(9991)
                 .withWebApiPort(9999)
                 .withCacheObjectTimeToLive(CacheMode.TIME_TEN_MINUTES)
                 .withTimerStorageClean(1000)

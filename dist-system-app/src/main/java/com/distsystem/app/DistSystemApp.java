@@ -7,6 +7,8 @@ import com.distsystem.utils.DistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 public class DistSystemApp {
 
     /** local logger for this class*/
@@ -23,16 +25,26 @@ public class DistSystemApp {
         log.info("STARTING DistSystem REST application on host: " + DistUtils.getCurrentHostName() + "/" + DistUtils.getCurrentHostAddress() + ", GUID: " + DistUtils.getGuid());
         Agent agent = DistFactory.buildEmptyFactory()
                 .withCommonProperties()
-                .withEnvironment(DistEnvironmentType.production, "production")
+                .withEnvironment(DistEnvironmentType.production)
                 .withUniverseNameDefault()
                 .withAgentNameGenerated()
+                .withAgentTags(Set.of("dist", "system", "agent"))
                 .withPropertiesFile("./agent.properties")
                 .withSerializerDefault()
-                .withWebApiDefaultPort()
-                .withServerSocketDefaultPort()
-                .withServerDatagramPortDefaultValue()
-                .withServerHttpPortDefault()
+                .withWebApiDefaultPort() // port: 9999
+                .withServerHttpPortDefault() // port: 9998
+                .withServerSocketDefaultPort() // port: 9997
+                .withServerDatagramPortDefaultValue() // port: 9996
                 .withRegisterCleanAfterDefault()
+                .withCacheStorageHashMap()
+                .withCacheStoragePriorityQueue()
+                .withCacheObjectTimeToLive(60000)
+                .withCacheMaxObjectsAndItems(10000, 100000)
+                .withMaxEvents(100000)
+                .withMaxIssues(10000)
+                .withTimerStorageClean(60000)
+                .withTimerRegistrationPeriod(60000)
+                .withTimerServerPeriod(60000)
                 .withEnvironmentVariables()
                 .withCommandLineArguments(args)
                 .createAgentInstance();
