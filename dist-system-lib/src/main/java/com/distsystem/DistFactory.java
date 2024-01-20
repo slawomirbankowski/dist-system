@@ -506,8 +506,8 @@ public class DistFactory {
                 DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION_DEFAULT_VALUE);
     }
 
-    public DistFactory withRegistrationKafkaFromEnvironment(String brokers, String topicName) {
-        return withRegistrationKafka(brokers, topicName,
+    public DistFactory withRegistrationKafkaFromEnvironment() {
+        return withRegistrationKafka("${KAFKA_BROKERS}", "${KAFKA_TOPIC}",
                 DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_PARTITIONS_DEFAULT_VALUE,
                 DistConfig.AGENT_REGISTRATION_OBJECT_KAFKA_REPLICATION_DEFAULT_VALUE);
     }
@@ -520,12 +520,24 @@ public class DistFactory {
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PORT, ""+port);
         return this;
     }
+    public DistFactory withRegistrationMongodb(String host, String port, String user, String pass) {
+        log.debug("Set MongoDB Registration to DistFactory, guid: " + distFactoryGuid + ", host: " + host);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_HOST, host);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PORT, port);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_USER, user);
+        props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PASS, pass);
+        return this;
+    }
     public DistFactory withRegistrationMongodb(String host, String port) {
         log.debug("Set MongoDB Registration to DistFactory, guid: " + distFactoryGuid + ", host: " + host);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_HOST, host);
         props.setProperty(DistConfig.AGENT_REGISTRATION_OBJECT_MONGODB_PORT, port);
         return this;
     }
+    public DistFactory withRegistrationMongodbFromEnvironment() {
+        return withRegistrationMongodb("${MONGODB_HOST}", "${MONGODB_PORT}");
+    }
+
     /** add times to inactivate other agents that have no ping for more than time declared,
      * remove all agents without ping for more than time declared
      * */

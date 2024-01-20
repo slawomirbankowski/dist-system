@@ -84,10 +84,6 @@ Cache could be used as:
 
 <h2>TODO list</h2>
 <ul>
-    <li>Review DTO objects to be saved in DB</li>
-    <li>Memory stats save and store</li>
-    <li>DistFactory </li>
-    <li>saving DAO to DB too many times</li>
     <li></li>
     <li></li>
     <li></li>

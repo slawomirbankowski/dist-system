@@ -21,7 +21,9 @@ public class RegistrationJdbc extends RegistrationBase {
     /** local logger for this class*/
     protected static final Logger log = LoggerFactory.getLogger(RegistrationJdbc.class);
 
+    /** DAO object to access registration postgres database*/
     private DaoJdbcBase dao;
+    /** used dialect */
     private JdbcDialect dialect;
     private String jdbcUrl;
 
