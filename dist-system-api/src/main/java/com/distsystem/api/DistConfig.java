@@ -415,6 +415,8 @@ public class DistConfig {
 
     public static String AGENT_REGISTRATION_OBJECT_MONGODB_HOST = "AGENT_REGISTRATION_OBJECT_MONGODB_HOST";
     public static String AGENT_REGISTRATION_OBJECT_MONGODB_PORT = "AGENT_REGISTRATION_OBJECT_MONGODB_PORT";
+    public static String AGENT_REGISTRATION_OBJECT_MONGODB_USER = "AGENT_REGISTRATION_OBJECT_MONGODB_USER";
+    public static String AGENT_REGISTRATION_OBJECT_MONGODB_PASS = "AGENT_REGISTRATION_OBJECT_MONGODB_PASS";
 
     public static Map<String, String> AGENT_AUTH_CLASS_MAP = Map.of(
             JDBC, "com.distsystem.agent.auth.AgentAuthJdbc",
@@ -635,6 +637,9 @@ public class DistConfig {
     public static String AGENT_CACHE_STORAGE = "AGENT_CACHE_STORAGE";
     public static String AGENT_SEMAPHORE_OBJECT = "AGENT_SEMAPHORE_OBJECT";
     public static String AGENT_STORAGE_OBJECT = "AGENT_STORAGE_OBJECT";
+
+    public static String KAFKA_BROKERS = "KAFKA_BROKERS";
+    public static String KAFKA_TOPIC = "KAFKA_TOPIC";
 
     public static Map<String, String> AGENT_SEMAPHORE_CLASS_MAP = Map.of(
             JDBC, "com.distsystem.agent.impl.semaphores.SemaphoreJdbc"
